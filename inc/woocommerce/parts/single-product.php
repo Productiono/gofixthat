@@ -86,6 +86,34 @@ function mbf_wc_single_product_summary_end() {
 add_action( 'woocommerce_after_single_product_summary', 'mbf_wc_single_product_summary_end', 999 );
 
 /**
+ * Enqueue Convai widget on single product pages.
+ */
+function mbf_wc_enqueue_convai_widget() {
+	if ( ! is_product() ) {
+		return;
+	}
+
+	wp_enqueue_script( 'mbf-elevenlabs-convai', 'https://unpkg.com/@elevenlabs/convai-widget-embed', array(), null, true );
+	wp_script_add_data( 'mbf-elevenlabs-convai', 'async', true );
+}
+add_action( 'wp_enqueue_scripts', 'mbf_wc_enqueue_convai_widget' );
+
+/**
+ * Render Convai widget on single product pages.
+ */
+function mbf_wc_render_convai_widget() {
+	if ( ! is_product() ) {
+		return;
+	}
+	?>
+	<div class="mbf-convai-widget">
+		<elevenlabs-convai agent-id="agent_5101kd03cw4kfmvv6eq5qhdkgb05"></elevenlabs-convai>
+	</div>
+	<?php
+}
+add_action( 'woocommerce_after_single_product_summary', 'mbf_wc_render_convai_widget', 50 );
+
+/**
  * Output related products subheading
  */
 function mbf_wc_product_related_products_subheading() {
