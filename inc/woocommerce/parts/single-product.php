@@ -110,6 +110,30 @@ function mbf_wc_social_proof_get_viewing_seed() {
 }
 
 /**
+ * Safely retrieve the current product object.
+ *
+ * @return WC_Product|null
+ */
+function mbf_wc_social_proof_get_current_product() {
+	global $product;
+
+	if ( $product instanceof WC_Product ) {
+		return $product;
+	}
+
+	if ( is_numeric( $product ) ) {
+		$product_object = wc_get_product( absint( $product ) );
+
+		if ( $product_object instanceof WC_Product ) {
+			$product = $product_object;
+			return $product_object;
+		}
+	}
+
+	return null;
+}
+
+/**
  * Render social proof widget next to the gallery.
  */
 function mbf_wc_social_proof_widget() {
@@ -117,7 +141,7 @@ function mbf_wc_social_proof_widget() {
 		return;
 	}
 
-	global $product;
+	$product = mbf_wc_social_proof_get_current_product();
 
 	if ( ! $product ) {
 		return;
@@ -193,7 +217,7 @@ function mbf_wc_social_proof_inline_scripts() {
 		return;
 	}
 
-	global $product;
+	$product = mbf_wc_social_proof_get_current_product();
 
 	if ( ! $product ) {
 		return;
