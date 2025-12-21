@@ -1,0 +1,50 @@
+@charset "UTF-8";
+.mbf-product-sections-admin {
+	margin: 1rem 0;
+	display: grid;
+	gap: 1.25rem;
+}
+
+.mbf-repeatable-group {
+	border: 1px solid #d8d8d8;
+	border-radius: 8px;
+	padding: 1rem;
+	background: #fff;
+}
+
+.mbf-repeatable-label {
+	display: block;
+	font-weight: 600;
+	margin-bottom: 0.5rem;
+}
+
+.mbf-repeatable {
+	display: grid;
+	gap: 0.75rem;
+	margin-bottom: 0.75rem;
+}
+
+.mbf-repeatable-row {
+	display: grid;
+	gap: 0.5rem;
+	grid-template-columns: 1fr auto;
+	align-items: start;
+}
+
+.mbf-repeatable-row textarea {
+	grid-column: 1 / -1;
+	min-height: 80px;
+}
+
+.mbf-repeatable .mbf-remove-row {
+	color: #c92a2a;
+}
+
+.mbf-repeatable .mbf-remove-row:hover,
+.mbf-repeatable .mbf-remove-row:focus {
+	color: #971818;
+}
+
+.mbf-repeatable-group .button {
+	margin-top: 0.25rem;
+}
