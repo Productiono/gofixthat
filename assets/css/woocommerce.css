@@ -7821,6 +7821,48 @@
 /*--------------------------------------------------------------
 ## Checkout
 --------------------------------------------------------------*/
+.mbf-checkout {
+	width: 100%;
+}
+.mbf-checkout__form {
+	width: 100%;
+}
+.mbf-checkout__grid {
+	display: grid;
+	gap: 2rem;
+}
+@media (min-width: 992px) {
+	.mbf-checkout__grid {
+		grid-template-columns: minmax(0, 1.25fr) minmax(320px, 0.85fr);
+		align-items: start;
+	}
+}
+.mbf-checkout__details {
+	display: grid;
+	gap: 1.5rem;
+}
+.mbf-checkout__billing,
+.mbf-checkout__shipping {
+	display: grid;
+	gap: 1.5rem;
+}
+.mbf-checkout__summary {
+	position: relative;
+}
+@media (min-width: 992px) {
+	.mbf-checkout__summary {
+		position: sticky;
+		top: 2rem;
+	}
+}
+.mbf-checkout__heading {
+	margin: 0 0 1rem;
+}
+.mbf-checkout__order-review {
+	padding: 1.5rem;
+	background: var(--mbf-layout-background);
+	border-radius: var(--mbf-layout-elements-border-radius);
+}
 .woocommerce-checkout .wp-block-woocommerce-checkout .wp-block-woocommerce-checkout-fields-block .wc-block-components-checkout-step__content .wc-block-components-country-input,
 .woocommerce-checkout .wc-block-checkout .wp-block-woocommerce-checkout-fields-block .wc-block-components-checkout-step__content .wc-block-components-country-input {
 	flex: 1 0 calc(50% - 12px);
