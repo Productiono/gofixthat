@@ -25,18 +25,86 @@ function mbf_wc_get_product_array_meta( $product_id, $key ) {
 			array_map(
 				static function ( $value ) {
 					if ( is_array( $value ) ) {
+						$question = isset( $value['question'] ) ? sanitize_text_field( $value['question'] ) : '';
+						$answer   = isset( $value['answer'] ) ? wp_kses_post( $value['answer'] ) : '';
+
+						if ( '' === $question && '' === $answer ) {
+							return null;
+						}
+
 						return array(
-							'question' => isset( $value['question'] ) ? sanitize_text_field( $value['question'] ) : '',
-							'answer'   => isset( $value['answer'] ) ? wp_kses_post( $value['answer'] ) : '',
+							'question' => $question,
+							'answer'   => $answer,
 						);
 					}
 
 					return sanitize_text_field( $value );
 				},
 				$values
-			)
+			),
+			static function ( $value ) {
+				return '' !== $value && ! is_null( $value );
+			}
 		)
 	);
+}
+
+/**
+ * Sanitize a simple repeatable text field list.
+ *
+ * @param array $values Raw values from $_POST.
+ *
+ * @return array
+ */
+function mbf_wc_sanitize_repeatable_text_values( $values ) {
+	if ( empty( $values ) || ! is_array( $values ) ) {
+		return array();
+	}
+
+	return array_values(
+		array_filter(
+			array_map(
+				static function ( $value ) {
+					$value = is_string( $value ) ? sanitize_text_field( wp_unslash( $value ) ) : '';
+
+					return '' !== $value ? $value : null;
+				},
+				$values
+			),
+			static function ( $value ) {
+				return '' !== $value && ! is_null( $value );
+			}
+		)
+	);
+}
+
+/**
+ * Check whether the product sections save routine should run.
+ *
+ * @param int $product_id Product ID.
+ *
+ * @return bool
+ */
+function mbf_wc_should_save_product_sections( $product_id ) {
+	if ( ! isset( $_POST['mbf_product_sections_nonce'] ) ) {
+		return false;
+	}
+
+	$nonce = sanitize_text_field( wp_unslash( $_POST['mbf_product_sections_nonce'] ) );
+
+	if ( ! wp_verify_nonce( $nonce, 'mbf_save_product_sections' ) ) {
+		return false;
+	}
+
+	if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
+		return false;
+	}
+
+	if ( wp_is_post_revision( $product_id ) ) {
+		return false;
+	}
+
+	return current_user_can( 'edit_product', $product_id );
 }
 
 /**
@@ -76,6 +144,7 @@ function mbf_wc_render_product_sections_panel() {
 	$faqs         = mbf_wc_get_product_array_meta( $product_id, '_mbf_product_faqs' );
 	?>
 	<div id="mbf_product_sections_data" class="panel woocommerce_options_panel">
+		<?php wp_nonce_field( 'mbf_save_product_sections', 'mbf_product_sections_nonce' ); ?>
 		<div class="mbf-product-sections-admin">
 			<p class="form-field">
 				<strong><?php esc_html_e( 'Guide your buyers with concise details.', 'apparel' ); ?></strong>
@@ -176,26 +245,25 @@ add_action( 'woocommerce_product_data_panels', 'mbf_wc_render_product_sections_p
  * @param WC_Product $product Product object.
  */
 function mbf_wc_save_product_sections( $product ) {
-	$what_we_fix = isset( $_POST['mbf_product_what_we_fix'] ) ? wp_unslash( (array) $_POST['mbf_product_what_we_fix'] ) : array();
-	$what_we_fix = array_values(
-		array_filter(
-			array_map( 'sanitize_text_field', $what_we_fix )
-		)
-	);
+	$product_id = $product->get_id();
 
-	$what_you_get = isset( $_POST['mbf_product_what_you_get'] ) ? wp_unslash( (array) $_POST['mbf_product_what_you_get'] ) : array();
-	$what_you_get = array_values(
-		array_filter(
-			array_map( 'sanitize_text_field', $what_you_get )
-		)
-	);
+	if ( ! mbf_wc_should_save_product_sections( $product_id ) ) {
+		return;
+	}
+
+	$what_we_fix = isset( $_POST['mbf_product_what_we_fix'] ) ? mbf_wc_sanitize_repeatable_text_values( $_POST['mbf_product_what_we_fix'] ) : array();
+	$what_you_get = isset( $_POST['mbf_product_what_you_get'] ) ? mbf_wc_sanitize_repeatable_text_values( $_POST['mbf_product_what_you_get'] ) : array();
 
 	$faqs = array();
 
 	if ( isset( $_POST['mbf_product_faqs'] ) && is_array( $_POST['mbf_product_faqs'] ) ) {
-		foreach ( wp_unslash( $_POST['mbf_product_faqs'] ) as $faq ) {
-			$question = isset( $faq['question'] ) ? sanitize_text_field( $faq['question'] ) : '';
-			$answer   = isset( $faq['answer'] ) ? wp_kses_post( $faq['answer'] ) : '';
+		foreach ( $_POST['mbf_product_faqs'] as $faq ) {
+			if ( ! is_array( $faq ) ) {
+				continue;
+			}
+
+			$question = isset( $faq['question'] ) ? sanitize_text_field( wp_unslash( $faq['question'] ) ) : '';
+			$answer   = isset( $faq['answer'] ) ? wp_kses_post( wp_unslash( $faq['answer'] ) ) : '';
 
 			if ( '' === $question && '' === $answer ) {
 				continue;
@@ -327,33 +395,15 @@ function mbf_wc_enqueue_product_sections_script() {
 		return;
 	}
 
-	wp_enqueue_script( 'mbf-scripts' );
+	$theme   = wp_get_theme();
+	$version = $theme->get( 'Version' );
 
-	$accordion_script = <<<'JS'
-(function($){
-	$(function(){
-		$('.mbf-product-faqs').on('click', '.mbf-faq-toggle', function(event){
-			event.preventDefault();
-			var $button = $(this);
-			var expanded = $button.attr('aria-expanded') === 'true';
-			var targetId = $button.attr('aria-controls');
-			var $answer = $('#' + targetId);
-
-			$button.attr('aria-expanded', !expanded);
-			$button.closest('.mbf-product-faq').toggleClass('is-open', !expanded);
-
-			if ($answer.length) {
-				if (expanded) {
-					$answer.attr('hidden', true);
-				} else {
-					$answer.removeAttr('hidden');
-				}
-			}
-		});
-	});
-})(jQuery);
-JS;
-
-	wp_add_inline_script( 'mbf-scripts', $accordion_script );
+	wp_enqueue_script(
+		'mbf-product-sections',
+		get_template_directory_uri() . '/assets/js/product-sections.js',
+		array( 'jquery' ),
+		$version,
+		true
+	);
 }
 add_action( 'wp_enqueue_scripts', 'mbf_wc_enqueue_product_sections_script', 30 );
