@@ -178,6 +178,7 @@ if ( ! class_exists( 'Apparel' ) ) {
 
 			require_once get_theme_file_path( '/inc/woocommerce/setup.php' );
 			require_once get_theme_file_path( '/inc/woocommerce/assets.php' );
+			require_once get_theme_file_path( '/inc/woocommerce/minicart.php' );
 			require_once get_theme_file_path( '/inc/woocommerce/filters.php' );
 			require_once get_theme_file_path( '/inc/woocommerce/theme-mods.php' );
 
