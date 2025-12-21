@@ -7944,7 +7944,7 @@
 	width: 100%;
 	padding-top: var(--mbf-input-padding-y, 1.5rem);
 	padding-right: var(--mbf-input-padding-x, 1.25rem);
-	padding-bottom: var(--mbf-input-padding-y, 0.75rem);
+	/* padding-bottom: var(--mbf-input-padding-y, 0.75rem); */
 	padding-left: var(--mbf-input-padding-x, 1.25rem);
 	background-color: var(--mbf-input-background-color, var(--mbf-layout-background));
 	color: var(--mbf-color-primary);
