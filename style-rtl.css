@@ -4400,7 +4400,8 @@ body.admin-bar {
 }
 
 .mbf-header {
-	position: relative;
+	position: sticky;
+	top: var(--mbf-wpadminbar-height);
 	width: 100%;
 	background: var(--mbf-color-header-background, var(--mbf-site-background));
 	border-bottom: var(--mbf-header-border-width) solid var(--mbf-color-border);
