@@ -1,0 +1,88 @@
+/**
+ * Product FAQs admin styles.
+ */
+.mbf-product-faqs-description {
+	margin-bottom: 0;
+}
+
+.mbf-product-faqs-list {
+	border: 1px solid #ccd0d4;
+	border-radius: 4px;
+	padding: 16px;
+	background: #fff;
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+.mbf-product-faqs-list.is-empty::after {
+	content: attr(data-empty-label);
+	display: block;
+	color: #6c7781;
+	font-style: italic;
+}
+
+.mbf-product-faq-row {
+	display: grid;
+	grid-template-columns: auto 1fr auto;
+	gap: 12px;
+	align-items: start;
+	padding: 12px;
+	border: 1px solid #e2e4e7;
+	border-radius: 4px;
+	background: #f8f9f9;
+}
+
+.mbf-product-faq-row-placeholder {
+	border: 1px dashed #b5bcc2;
+	background: #f1f2f3;
+	height: 120px;
+}
+
+.mbf-product-faq-row-handle {
+	border: 1px solid #ccd0d4;
+	background: #fff;
+	color: #50575e;
+	width: 34px;
+	height: 34px;
+	border-radius: 3px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	cursor: move;
+}
+
+.mbf-product-faq-row-handle:focus {
+	outline: 2px solid #2271b1;
+	outline-offset: 1px;
+}
+
+.mbf-product-faq-row-fields {
+	display: grid;
+	grid-template-columns: 1fr;
+	gap: 8px;
+}
+
+.mbf-product-faq-row .form-field label {
+	min-width: auto;
+}
+
+.mbf-product-faq-row textarea.short {
+	height: auto;
+}
+
+.mbf-product-faqs-list .toolbar {
+	margin: 0;
+	padding-top: 4px;
+}
+
+@media (max-width: 782px) {
+	.mbf-product-faq-row {
+		grid-template-columns: 1fr;
+	}
+
+	.mbf-product-faq-row-handle {
+		width: 100%;
+		justify-content: flex-start;
+	}
+}

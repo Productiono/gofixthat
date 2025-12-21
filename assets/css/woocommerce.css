@@ -2430,6 +2430,99 @@
 		margin-top: 3.25rem;
 	}
 }
+.mbf-product-faqs {
+	margin-top: 2.5rem;
+	border-top: 1px solid var(--mbf-color-border);
+	padding-top: 2rem;
+}
+
+.mbf-product-faqs__header {
+	display: flex;
+	flex-direction: column;
+	gap: 0.35rem;
+	margin-bottom: 1rem;
+}
+
+.mbf-product-faqs__title {
+	font-size: 1.25rem;
+	margin: 0;
+}
+
+.mbf-product-faqs__subtitle {
+	color: var(--mbf-color-text-muted);
+	margin: 0;
+}
+
+.mbf-product-faqs__items {
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+}
+
+.mbf-product-faqs__item {
+	border: 1px solid var(--mbf-color-border);
+	border-radius: var(--mbf-layout-elements-border-radius);
+	padding: 0.75rem 1rem;
+	background: var(--mbf-color-surface, #fff);
+	transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.mbf-product-faqs__item[open] {
+	border-color: var(--mbf-color-primary);
+	box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+}
+
+.mbf-product-faqs__question {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	cursor: pointer;
+	gap: 12px;
+	font-weight: 600;
+	list-style: none;
+}
+
+.mbf-product-faqs__question::-webkit-details-marker {
+	display: none;
+}
+
+.mbf-product-faqs__question-text {
+	font-size: 1rem;
+}
+
+.mbf-product-faqs__toggle {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	color: var(--mbf-color-primary);
+	transition: transform 0.25s ease;
+}
+
+.mbf-product-faqs__item[open] .mbf-product-faqs__toggle {
+	transform: rotate(45deg);
+}
+
+.mbf-product-faqs__answer {
+	margin-top: 0.75rem;
+	color: var(--mbf-color-text-muted);
+	font-size: 0.95rem;
+	line-height: 1.6;
+}
+
+.mbf-product-faqs__answer p {
+	margin: 0.25rem 0;
+}
+
+@media (min-width: 768px) {
+	.mbf-product-faqs {
+		margin-top: 3rem;
+		padding-top: 2.5rem;
+	}
+
+	.mbf-product-faqs__title {
+		font-size: 1.5rem;
+	}
+}
 .woocommerce .mbf-single-product div.product .woocommerce-tabs.wc-tabs-wrapper > ul.tabs {
 	border-left: 1px solid var(--mbf-color-border);
 	background: var(--mbf-layout-background);

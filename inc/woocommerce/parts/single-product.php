@@ -348,6 +348,7 @@ function mbf_wc_single_product_summary_end() {
 	</div>
 	<?php
 	woocommerce_output_product_data_tabs();
+	mbf_wc_render_product_faqs();
 	woocommerce_upsell_display();
 
 	get_template_part( 'woocommerce/single-promo-block' );
