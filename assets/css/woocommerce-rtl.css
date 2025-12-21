@@ -8074,9 +8074,10 @@
 	font-size: var(--mbf-font-input-size);
 	font-weight: var(--mbf-font-input-weight);
 	font-style: var(--mbf-font-input-style);
-	line-height: var(--mbf-font-input-line-height);
+	line-height: 1.5;
 	letter-spacing: var(--mbf-font-input-letter-spacing);
 	text-transform: var(--mbf-font-input-text-transform);
+	min-height: 3.25rem;
 }
 .woocommerce-checkout .woocommerce .checkout .woocommerce-billing-fields__field-wrapper .form-row input:focus,
 .woocommerce-checkout .woocommerce .checkout .woocommerce-billing-fields__field-wrapper .form-row .input-text:focus,
@@ -8122,11 +8123,12 @@
 }
 .woocommerce-checkout .woocommerce .checkout .woocommerce-billing-fields__field-wrapper .form-row .select2-container,
 .woocommerce-checkout .woocommerce .checkout .woocommerce-shipping-fields__field-wrapper .form-row .select2-container {
-	display: block;
+	display: flex;
+	align-items: center;
 	width: 100%;
-	padding-top: var(--mbf-input-padding-y, 0.875rem);
+	padding-top: 0.625rem;
 	padding-left: var(--mbf-input-padding-x, 1.25rem);
-	padding-bottom: var(--mbf-input-padding-y, 0.875rem);
+	padding-bottom: 0.625rem;
 	padding-right: var(--mbf-input-padding-x, 1.25rem);
 	background-color: var(--mbf-input-background-color, var(--mbf-layout-background));
 	color: var(--mbf-color-primary);
@@ -8170,17 +8172,29 @@
 .woocommerce-checkout .woocommerce .checkout .woocommerce-shipping-fields__field-wrapper .form-row .select2-container .selection .select2-selection {
 	background: transparent;
 	border: none;
+	width: 100%;
+	min-height: 2.5rem;
+	display: flex;
+	align-items: center;
 }
 .woocommerce-checkout .woocommerce .checkout .woocommerce-billing-fields__field-wrapper .form-row .select2-container .selection .select2-selection__rendered,
 .woocommerce-checkout .woocommerce .checkout .woocommerce-shipping-fields__field-wrapper .form-row .select2-container .selection .select2-selection__rendered {
 	padding: 0;
+	display: flex;
+	align-items: center;
 	font-family: var(--mbf-font-input-family), sans-serif;
 	font-size: var(--mbf-font-input-size);
 	font-weight: var(--mbf-font-input-weight);
 	font-style: var(--mbf-font-input-style);
-	line-height: var(--mbf-font-input-line-height);
+	line-height: 1.5;
 	letter-spacing: var(--mbf-font-input-letter-spacing);
 	text-transform: var(--mbf-font-input-text-transform);
+}
+.woocommerce-checkout .woocommerce .checkout .woocommerce-billing-fields__field-wrapper .form-row .select2-container .select2-selection__arrow,
+.woocommerce-checkout .woocommerce .checkout .woocommerce-shipping-fields__field-wrapper .form-row .select2-container .select2-selection__arrow {
+	height: 100%;
+	display: flex;
+	align-items: center;
 }
 .woocommerce-checkout .woocommerce .checkout .woocommerce-additional-fields textarea {
 	display: block;
@@ -8271,6 +8285,34 @@
 }
 .woocommerce-checkout .checkout #customer_details .col-2 #order_comments {
 	min-height: 156px;
+}
+.woocommerce-checkout .checkout #customer_details .woocommerce-billing-fields__field-wrapper,
+.woocommerce-checkout .checkout #customer_details .woocommerce-shipping-fields__field-wrapper {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 1rem;
+}
+.woocommerce-checkout .checkout #customer_details .woocommerce-billing-fields__field-wrapper .form-row,
+.woocommerce-checkout .checkout #customer_details .woocommerce-shipping-fields__field-wrapper .form-row {
+	padding: 0;
+	margin: 0;
+	grid-column: span 2;
+}
+.woocommerce-checkout .checkout #customer_details .woocommerce-billing-fields__field-wrapper .form-row-first,
+.woocommerce-checkout .checkout #customer_details .woocommerce-shipping-fields__field-wrapper .form-row-first,
+.woocommerce-checkout .checkout #customer_details .woocommerce-billing-fields__field-wrapper .form-row-last,
+.woocommerce-checkout .checkout #customer_details .woocommerce-shipping-fields__field-wrapper .form-row-last {
+	grid-column: span 1;
+}
+.woocommerce-checkout .checkout #customer_details .woocommerce-billing-fields__field-wrapper .form-row-wide,
+.woocommerce-checkout .checkout #customer_details .woocommerce-shipping-fields__field-wrapper .form-row-wide,
+.woocommerce-checkout .checkout #customer_details .woocommerce-billing-fields__field-wrapper .address-field,
+.woocommerce-checkout .checkout #customer_details .woocommerce-shipping-fields__field-wrapper .address-field,
+.woocommerce-checkout .checkout #customer_details .woocommerce-billing-fields__field-wrapper #billing_country_field,
+.woocommerce-checkout .checkout #customer_details .woocommerce-billing-fields__field-wrapper #shipping_country_field,
+.woocommerce-checkout .checkout #customer_details .woocommerce-shipping-fields__field-wrapper #billing_country_field,
+.woocommerce-checkout .checkout #customer_details .woocommerce-shipping-fields__field-wrapper #shipping_country_field {
+	grid-column: 1/-1;
 }
 .woocommerce-checkout .checkout #customer_details .woocommerce-billing-fields__field-wrapper:before {
 	display: block;
