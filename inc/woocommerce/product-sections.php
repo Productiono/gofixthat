@@ -50,14 +50,14 @@ function mbf_wc_get_product_array_meta( $product_id, $key ) {
 }
 
 /**
- * Sanitize a simple repeatable text field list.
+ * Retrieve and sanitize repeatable bullets from the product form post data.
  *
- * @param array $values Raw values from $_POST.
+ * @param string $field_name Input field name.
  *
  * @return array
  */
-function mbf_wc_sanitize_repeatable_text_values( $values ) {
-	if ( empty( $values ) || ! is_array( $values ) ) {
+function mbf_wc_get_posted_repeatable_bullets( $field_name ) {
+	if ( empty( $_POST[ $field_name ] ) || ! is_array( $_POST[ $field_name ] ) ) {
 		return array();
 	}
 
@@ -69,13 +69,46 @@ function mbf_wc_sanitize_repeatable_text_values( $values ) {
 
 					return '' !== $value ? $value : null;
 				},
-				$values
+				$_POST[ $field_name ]
 			),
 			static function ( $value ) {
 				return '' !== $value && ! is_null( $value );
 			}
 		)
 	);
+}
+
+/**
+ * Retrieve and sanitize FAQ values from the product form post data.
+ *
+ * @return array
+ */
+function mbf_wc_get_posted_faqs() {
+	if ( empty( $_POST['mbf_product_faqs'] ) || ! is_array( $_POST['mbf_product_faqs'] ) ) {
+		return array();
+	}
+
+	$faqs = array();
+
+	foreach ( $_POST['mbf_product_faqs'] as $faq ) {
+		if ( ! is_array( $faq ) ) {
+			continue;
+		}
+
+		$question = isset( $faq['question'] ) ? sanitize_text_field( wp_unslash( $faq['question'] ) ) : '';
+		$answer   = isset( $faq['answer'] ) ? wp_kses_post( wp_unslash( $faq['answer'] ) ) : '';
+
+		if ( '' === $question && '' === $answer ) {
+			continue;
+		}
+
+		$faqs[] = array(
+			'question' => $question,
+			'answer'   => $answer,
+		);
+	}
+
+	return $faqs;
 }
 
 /**
@@ -242,45 +275,67 @@ add_action( 'woocommerce_product_data_panels', 'mbf_wc_render_product_sections_p
 /**
  * Save product section data.
  *
- * @param WC_Product $product Product object.
+ * @param int $product_id Product ID.
  */
-function mbf_wc_save_product_sections( $product ) {
-	$product_id = $product->get_id();
-
+function mbf_wc_save_product_sections_meta( $product_id ) {
 	if ( ! mbf_wc_should_save_product_sections( $product_id ) ) {
 		return;
 	}
 
-	$what_we_fix = isset( $_POST['mbf_product_what_we_fix'] ) ? mbf_wc_sanitize_repeatable_text_values( $_POST['mbf_product_what_we_fix'] ) : array();
-	$what_you_get = isset( $_POST['mbf_product_what_you_get'] ) ? mbf_wc_sanitize_repeatable_text_values( $_POST['mbf_product_what_you_get'] ) : array();
+	static $processed_products = array();
 
-	$faqs = array();
-
-	if ( isset( $_POST['mbf_product_faqs'] ) && is_array( $_POST['mbf_product_faqs'] ) ) {
-		foreach ( $_POST['mbf_product_faqs'] as $faq ) {
-			if ( ! is_array( $faq ) ) {
-				continue;
-			}
-
-			$question = isset( $faq['question'] ) ? sanitize_text_field( wp_unslash( $faq['question'] ) ) : '';
-			$answer   = isset( $faq['answer'] ) ? wp_kses_post( wp_unslash( $faq['answer'] ) ) : '';
-
-			if ( '' === $question && '' === $answer ) {
-				continue;
-			}
-
-			$faqs[] = array(
-				'question' => $question,
-				'answer'   => $answer,
-			);
-		}
+	if ( isset( $processed_products[ $product_id ] ) ) {
+		return;
 	}
 
-	$product->update_meta_data( '_mbf_product_what_we_fix', $what_we_fix );
-	$product->update_meta_data( '_mbf_product_what_you_get', $what_you_get );
-	$product->update_meta_data( '_mbf_product_faqs', $faqs );
+	$processed_products[ $product_id ] = true;
+
+	$what_we_fix  = mbf_wc_get_posted_repeatable_bullets( 'mbf_product_what_we_fix' );
+	$what_you_get = mbf_wc_get_posted_repeatable_bullets( 'mbf_product_what_you_get' );
+	$faqs         = mbf_wc_get_posted_faqs();
+
+	if ( empty( $what_we_fix ) ) {
+		delete_post_meta( $product_id, '_mbf_product_what_we_fix' );
+	} else {
+		update_post_meta( $product_id, '_mbf_product_what_we_fix', $what_we_fix );
+	}
+
+	if ( empty( $what_you_get ) ) {
+		delete_post_meta( $product_id, '_mbf_product_what_you_get' );
+	} else {
+		update_post_meta( $product_id, '_mbf_product_what_you_get', $what_you_get );
+	}
+
+	if ( empty( $faqs ) ) {
+		delete_post_meta( $product_id, '_mbf_product_faqs' );
+	} else {
+		update_post_meta( $product_id, '_mbf_product_faqs', $faqs );
+	}
+}
+
+/**
+ * Save product section data using the product object hook.
+ *
+ * @param WC_Product $product Product object.
+ */
+function mbf_wc_save_product_sections( $product ) {
+	if ( ! $product instanceof WC_Product ) {
+		return;
+	}
+
+	mbf_wc_save_product_sections_meta( $product->get_id() );
 }
 add_action( 'woocommerce_admin_process_product_object', 'mbf_wc_save_product_sections' );
+
+/**
+ * Ensure product section data is saved when the legacy product meta action is triggered.
+ *
+ * @param int $product_id Product ID.
+ */
+function mbf_wc_legacy_save_product_sections( $product_id ) {
+	mbf_wc_save_product_sections_meta( $product_id );
+}
+add_action( 'woocommerce_process_product_meta', 'mbf_wc_legacy_save_product_sections', 10, 1 );
 
 /**
  * Enqueue admin assets for product sections.
