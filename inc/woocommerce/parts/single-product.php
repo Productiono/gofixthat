@@ -14,6 +14,15 @@ remove_action( 'woocommerce_single_product_summary', 'woocommerce_template_singl
 remove_action( 'woocommerce_review_before', 'woocommerce_review_display_gravatar', 10 );
 remove_action( 'woocommerce_review_meta', 'woocommerce_review_display_meta', 10 );
 
+add_action(
+	'wp',
+	function () {
+		if ( is_product() ) {
+			remove_action( 'woocommerce_before_single_product_summary', 'woocommerce_show_product_sale_flash', 10 );
+		}
+	}
+);
+
 add_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_excerpt', 10 );
 add_action( 'woocommerce_review_after_comment_text', 'woocommerce_review_display_meta', 70 );
 
