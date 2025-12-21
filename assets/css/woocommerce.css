@@ -2070,6 +2070,7 @@
 }
 .mbf-single-product .mbf-single-product-summary-wrap .mbf-single-product-summary .entry-summary .variations {
 	display: block;
+	width: 100%;
 	margin-bottom: 2rem;
 }
 .mbf-single-product .mbf-single-product-summary-wrap .mbf-single-product-summary .entry-summary .variations tr {
@@ -2101,6 +2102,7 @@
 }
 .mbf-single-product .mbf-single-product-summary-wrap .mbf-single-product-summary .entry-summary .variations .value {
 	display: block;
+	width: 100%;
 	margin: 0;
 	padding: 0;
 }
@@ -2109,12 +2111,12 @@
 	width: 100%;
 	max-width: 100%;
 	box-sizing: border-box;
-	border: 1px solid #111;
-	background: #fff;
-	color: var(--mbf-color-secondary);
-	padding: 0.75rem 0.9rem;
-	line-height: 1.5;
-	border-radius: 0;
+	border: 2px solid var(--mbf-color-button-border);
+	background: var(--mbf-site-background, #fff);
+	color: var(--mbf-color-primary);
+	padding: 1rem 1.1rem;
+	line-height: 1.4;
+	border-radius: var(--mbf-button-border-radius);
 	box-shadow: none;
 }
 .mbf-single-product .mbf-single-product-summary-wrap .mbf-single-product-summary .entry-summary .variations .color-variable-items-wrapper .variable-item {
