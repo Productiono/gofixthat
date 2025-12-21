@@ -27,8 +27,9 @@
 		$('.mbf-repeatable-group .mbf-add-row').on('click', function (event) {
 			event.preventDefault();
 
-			var templateId = $(this).data('template');
-			var $group = $(this).prev('.mbf-repeatable');
+			var $button = $(this);
+			var templateId = $button.data('template');
+			var $group = $button.closest('.mbf-repeatable-group').find('.mbf-repeatable').first();
 
 			if ($group.length && templateId) {
 				addRow($group);
