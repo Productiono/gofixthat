@@ -1682,6 +1682,21 @@
 	display: grid;
 	grid-template-columns: 1fr;
 	grid-gap: 1.5rem;
+	align-items: start;
+}
+.mbf-single-product .mbf-single-product-summary-wrap .mbf-single-product-summary .mbf-single-product-media {
+	order: 1;
+}
+.mbf-single-product .mbf-single-product-summary-wrap .mbf-single-product-summary .mbf-single-product-title-block {
+	order: 2;
+	grid-column: 1 / -1;
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+	padding: 0 0.125rem;
+}
+.mbf-single-product .mbf-single-product-summary-wrap .mbf-single-product-summary .entry-summary-inner {
+	order: 3;
 }
 .mbf-single-product .mbf-single-product-summary-wrap .mbf-single-product-summary .mbf-single-product-media {
 	position: relative;
@@ -1763,6 +1778,19 @@
 @media (min-width: 768px) {
 	.mbf-single-product .mbf-single-product-summary-wrap .mbf-single-product-summary {
 		grid-template-columns: 1fr 1fr;
+		grid-gap: 1.75rem 2rem;
+	}
+	.mbf-single-product .mbf-single-product-summary-wrap .mbf-single-product-summary .mbf-single-product-title-block {
+		order: 0;
+		grid-column: 1 / -1;
+		padding-left: 0;
+		padding-right: 0;
+	}
+	.mbf-single-product .mbf-single-product-summary-wrap .mbf-single-product-summary .mbf-single-product-media {
+		order: 1;
+	}
+	.mbf-single-product .mbf-single-product-summary-wrap .mbf-single-product-summary .entry-summary-inner {
+		order: 2;
 	}
 }
 @media (min-width: 992px) {
@@ -2045,13 +2073,19 @@
 	float: initial !important;
 	width: 100% !important;
 	margin-bottom: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 1.25rem;
+	background: transparent;
+	border: none;
+	padding: 0;
 }
 .mbf-single-product .mbf-single-product-summary-wrap .mbf-single-product-summary .entry-summary .product_title_wrap {
 	display: flex;
-	flex-direction: row;
-	justify-content: space-between;
-	margin-top: 1rem;
-	margin-bottom: 0;
+	flex-direction: column;
+	justify-content: flex-start;
+	margin: 0;
+	gap: 0.5rem;
 }
 .mbf-single-product .mbf-single-product-summary-wrap .mbf-single-product-summary .entry-summary .product_title {
 	font-family: var(--mbf-font-primary-family), sans-serif;
@@ -2060,7 +2094,7 @@
 	font-style: var(--mbf-font-primary-style);
 	letter-spacing: var(--mbf-font-primary-letter-spacing);
 	text-transform: var(--mbf-font-primary-text-transform);
-	font-size: 1.125rem;
+	font-size: 1.35rem;
 	margin-top: 0;
 	margin-bottom: 0;
 }
@@ -2082,7 +2116,7 @@
 	display: inline-flex;
 	margin-top: 0;
 	margin-bottom: 0;
-	padding-left: 0.5rem;
+	padding-left: 0;
 	color: var(--mbf-color-primary);
 }
 .mbf-single-product .mbf-single-product-summary-wrap .mbf-single-product-summary .entry-summary .price del {
@@ -2096,6 +2130,42 @@
 	font-weight: inherit;
 	order: 1;
 	color: var(--mbf-wc-accent-color);
+}
+.mbf-single-product .mbf-single-product-summary-wrap .mbf-single-product-summary .mbf-single-product-purchase-card {
+	background: #ffffff;
+	border: 1px solid #e5e7eb;
+	border-radius: 14px;
+	box-shadow: none;
+	padding: 1.25rem 1.5rem;
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+}
+.mbf-single-product .mbf-single-product-summary-wrap .mbf-single-product-summary .mbf-single-product-purchase-card .price {
+	font-size: 1.5rem;
+	font-weight: 700;
+	line-height: 1.2;
+	color: #0f172a;
+}
+.mbf-single-product .mbf-single-product-summary-wrap .mbf-single-product-summary .mbf-single-product-purchase-card__note .woocommerce-product-details__short-description {
+	margin: 0;
+	font-size: 0.95rem;
+	line-height: 1.6;
+	color: #475569;
+}
+.mbf-single-product .mbf-single-product-summary-wrap .mbf-single-product-summary .mbf-single-product-purchase-card__note .woocommerce-product-details__short-description p:not(:last-child) {
+	margin-bottom: 0.75rem;
+}
+.mbf-single-product .mbf-single-product-summary-wrap .mbf-single-product-summary .mbf-single-product-purchase-card__cta .cart {
+	margin: 0;
+}
+.mbf-single-product .mbf-single-product-summary-wrap .mbf-single-product-summary .mbf-single-product-purchase-card__cta .single_add_to_cart_button {
+	width: 100%;
+	justify-content: center;
+}
+.mbf-single-product .mbf-single-product-summary-wrap .mbf-single-product-summary .entry-summary .product_meta {
+	padding: 0 0.25rem;
+	margin-top: 0;
 }
 .mbf-single-product .mbf-single-product-summary-wrap .mbf-single-product-summary .entry-summary .woocommerce-product-details__short-description {
 	font-family: var(--mbf-font-headings-family), sans-serif;

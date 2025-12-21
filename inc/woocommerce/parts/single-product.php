@@ -10,7 +10,9 @@ remove_action( 'woocommerce_after_single_product_summary', 'woocommerce_output_p
 remove_action( 'woocommerce_after_single_product_summary', 'woocommerce_upsell_display', 15 );
 remove_action( 'woocommerce_after_single_product_summary', 'woocommerce_output_related_products', 20 );
 remove_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_price', 10 );
-remove_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_excerpt', 20 );
+remove_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_title', 5 );
+remove_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_add_to_cart', 30 );
+remove_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_meta', 40 );
 remove_action( 'woocommerce_review_before', 'woocommerce_review_display_gravatar', 10 );
 remove_action( 'woocommerce_review_meta', 'woocommerce_review_display_meta', 10 );
 
@@ -23,8 +25,9 @@ add_action(
 	}
 );
 
-add_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_excerpt', 10 );
 add_action( 'woocommerce_review_after_comment_text', 'woocommerce_review_display_meta', 70 );
+add_action( 'woocommerce_before_single_product_summary', 'mbf_wc_render_product_title_block', 8 );
+add_action( 'woocommerce_single_product_summary', 'mbf_wc_render_purchase_card', 10 );
 
 /**
  * Single Wrapper Start
@@ -89,6 +92,42 @@ function mbf_wc_single_product_media_start() {
 	<?php
 }
 add_action( 'woocommerce_before_single_product_summary', 'mbf_wc_single_product_media_start', 9 );
+
+/**
+ * Render product title above the gallery.
+ */
+function mbf_wc_render_product_title_block() {
+	if ( ! is_product() ) {
+		return;
+	}
+	?>
+	<div class="mbf-single-product-title-block">
+		<?php wc_get_template( 'single-product/title.php' ); ?>
+	</div>
+	<?php
+}
+
+/**
+ * Render purchase card.
+ */
+function mbf_wc_render_purchase_card() {
+	if ( ! is_product() ) {
+		return;
+	}
+	?>
+	<div class="mbf-single-product-purchase-card" aria-label="<?php esc_attr_e( 'Purchase options', 'apparel' ); ?>">
+		<div class="mbf-single-product-purchase-card__price">
+			<?php woocommerce_template_single_price(); ?>
+		</div>
+		<div class="mbf-single-product-purchase-card__note">
+			<?php woocommerce_template_single_excerpt(); ?>
+		</div>
+		<div class="mbf-single-product-purchase-card__cta">
+			<?php woocommerce_template_single_add_to_cart(); ?>
+		</div>
+	</div>
+	<?php
+}
 
 /**
  * Get persisted cart add count for social proof widget.
