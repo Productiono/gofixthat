@@ -1681,14 +1681,16 @@
 	position: relative;
 	display: grid;
 	grid-template-columns: 1fr;
-	grid-gap: 1.5rem;
+	grid-template-areas:
+		"media"
+		"title"
+		"summary";
+	row-gap: 1rem;
+	column-gap: 1.25rem;
 	align-items: start;
 }
-.mbf-single-product .mbf-single-product-summary-wrap .mbf-single-product-summary .mbf-single-product-media {
-	order: 1;
-}
 .mbf-single-product .mbf-single-product-summary-wrap .mbf-single-product-summary .mbf-single-product-title-block {
-	order: 2;
+	grid-area: title;
 	grid-column: 1 / -1;
 	display: flex;
 	flex-direction: column;
@@ -1696,10 +1698,11 @@
 	padding: 0 0.125rem;
 }
 .mbf-single-product .mbf-single-product-summary-wrap .mbf-single-product-summary .entry-summary-inner {
-	order: 3;
+	grid-area: summary;
 }
 .mbf-single-product .mbf-single-product-summary-wrap .mbf-single-product-summary .mbf-single-product-media {
 	position: relative;
+	grid-area: media;
 }
 .mbf-single-product .mbf-single-product-summary-wrap .mbf-single-product-media .mbf-social-proof {
 	position: absolute;
@@ -1778,31 +1781,29 @@
 @media (min-width: 768px) {
 	.mbf-single-product .mbf-single-product-summary-wrap .mbf-single-product-summary {
 		grid-template-columns: 1fr 1fr;
-		grid-gap: 1.75rem 2rem;
+		grid-template-areas:
+			"title summary"
+			"media summary";
+		row-gap: 1.25rem;
+		column-gap: 2rem;
 	}
 	.mbf-single-product .mbf-single-product-summary-wrap .mbf-single-product-summary .mbf-single-product-title-block {
-		order: 0;
 		grid-column: 1 / -1;
 		padding-left: 0;
 		padding-right: 0;
-	}
-	.mbf-single-product .mbf-single-product-summary-wrap .mbf-single-product-summary .mbf-single-product-media {
-		order: 1;
-	}
-	.mbf-single-product .mbf-single-product-summary-wrap .mbf-single-product-summary .entry-summary-inner {
-		order: 2;
 	}
 }
 @media (min-width: 992px) {
 	.mbf-single-product .mbf-single-product-summary-wrap .mbf-single-product-summary {
 		grid-template-columns: 600px calc(100% - 640px);
-		grid-gap: 40px;
+		column-gap: 40px;
+		row-gap: 1.5rem;
 	}
 }
 @media (min-width: 1200px) {
 	.mbf-single-product .mbf-single-product-summary-wrap .mbf-single-product-summary {
 		grid-template-columns: 860px calc(100% - 910px);
-		grid-gap: 50px;
+		column-gap: 50px;
 	}
 }
 .mbf-single-product .mbf-single-product-summary-wrap .mbf-single-product-summary .onsale {
