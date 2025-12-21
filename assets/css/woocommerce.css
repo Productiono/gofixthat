@@ -1686,64 +1686,68 @@
 .mbf-single-product .mbf-single-product-summary-wrap .mbf-single-product-summary .mbf-single-product-media {
 	position: relative;
 }
-.mbf-single-product .mbf-single-product-summary-wrap .mbf-single-product-summary .mbf-social-proof {
+.mbf-single-product .mbf-single-product-summary-wrap .mbf-single-product-media .mbf-social-proof {
+	position: absolute;
+	top: 38px;
+	left: 10px;
 	display: flex;
 	flex-direction: column;
-	gap: 10px;
-	position: absolute;
-	top: 16px;
-	left: 0;
-	transform: translateX(-108%);
-	z-index: 2;
+	align-items: flex-start;
+	gap: 6px;
+	width: min(320px, calc(100% - 20px));
+	z-index: 3;
+	pointer-events: none;
 }
-.mbf-single-product .mbf-single-product-summary-wrap .mbf-single-product-summary .mbf-social-proof-badge {
-	display: inline-flex;
-	align-items: center;
-	gap: 8px;
-	padding: 8px 14px;
-	border-radius: 999px;
-	font-size: 0.875rem;
-	font-weight: 600;
-	line-height: 1.2;
-	min-width: 250px;
-	box-shadow: 0 0 0 2px var(--mbf-color-text);
-	color: var(--mbf-color-text);
-	background: #f1f0d8;
-	font-variant-numeric: tabular-nums;
-}
-.mbf-single-product .mbf-single-product-summary-wrap .mbf-single-product-summary .mbf-social-proof-badge--added {
-	background: #d40000;
-	color: #fff;
-	box-shadow: 0 0 0 2px #d40000;
-}
-.mbf-single-product .mbf-single-product-summary-wrap .mbf-single-product-summary .mbf-social-proof-icon {
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-}
-.mbf-single-product .mbf-single-product-summary-wrap .mbf-single-product-summary .mbf-social-proof-text {
+.mbf-single-product .mbf-single-product-summary-wrap .mbf-single-product-media .mbf-social-proof-badge {
 	display: inline-flex;
 	align-items: center;
 	gap: 6px;
-	white-space: nowrap;
+	padding: 6px 10px;
+	border-radius: var(--mbf-badge-border-radius);
+	font-size: 0.75rem;
+	font-weight: 600;
+	line-height: 1.25;
+	width: 100%;
+	max-width: 100%;
+	box-shadow: 0 10px 26px rgba(0, 0, 0, 0.08);
+	color: var(--mbf-color-text);
+	background: rgba(255, 255, 255, 0.88);
+	border: 1px solid rgba(0, 0, 0, 0.05);
+	font-variant-numeric: tabular-nums;
+	backdrop-filter: blur(2px);
 }
-.mbf-single-product .mbf-single-product-summary-wrap .mbf-single-product-summary .mbf-social-proof-count {
+.mbf-single-product .mbf-single-product-summary-wrap .mbf-single-product-media .mbf-social-proof-badge--added {
+	background: rgba(255, 84, 84, 0.12);
+	color: var(--mbf-color-primary);
+	border-color: rgba(255, 84, 84, 0.24);
+	box-shadow: 0 10px 26px rgba(0, 0, 0, 0.08);
+	background: color-mix(in srgb, var(--mbf-color-primary) 14%, #ffffff 86%);
+	border-color: color-mix(in srgb, var(--mbf-color-primary) 22%, #ffffff 78%);
+}
+.mbf-single-product .mbf-single-product-summary-wrap .mbf-single-product-media .mbf-social-proof-icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	color: currentColor;
+}
+.mbf-single-product .mbf-single-product-summary-wrap .mbf-single-product-media .mbf-social-proof-text {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	white-space: normal;
+	line-height: 1.25;
+}
+.mbf-single-product .mbf-single-product-summary-wrap .mbf-single-product-media .mbf-social-proof-count {
 	font-weight: 700;
 }
-@media (max-width: 1199px) {
-	.mbf-single-product .mbf-single-product-summary-wrap .mbf-single-product-summary .mbf-social-proof {
-		transform: translateX(-100%);
-	}
-}
 @media (max-width: 991px) {
-	.mbf-single-product .mbf-single-product-summary-wrap .mbf-single-product-summary .mbf-social-proof {
-		position: static;
-		transform: none;
-		margin-bottom: 12px;
+	.mbf-single-product .mbf-single-product-summary-wrap .mbf-single-product-media .mbf-social-proof {
+		top: 14px;
+		width: calc(100% - 20px);
+		gap: 5px;
 	}
-	.mbf-single-product .mbf-single-product-summary-wrap .mbf-single-product-summary .mbf-social-proof-badge {
-		min-width: auto;
-		width: max-content;
+	.mbf-single-product .mbf-single-product-summary-wrap .mbf-single-product-media .mbf-social-proof-badge {
+		padding: 6px 9px;
 	}
 }
 @media (min-width: 768px) {
