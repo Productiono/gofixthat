@@ -151,14 +151,14 @@ function mbf_wc_social_proof_widget() {
 	$viewing_seed      = mbf_wc_social_proof_get_viewing_seed();
 	$cart_adds_24h     = mbf_wc_social_proof_get_cart_count( $product_id );
 	$viewing_label     = esc_html__( 'people are viewing this item', 'apparel' );
-	$added_label       = esc_html__( 'people have added this item to cart (24H)', 'apparel' );
+	$added_label       = esc_html__( 'people have added this item to cart', 'apparel' );
 	$viewing_icon_path = 'M12 5a3 3 0 1 0 0 6 3 3 0 0 0 0-6Zm0-2c5.25 0 9.75 3.5 11 6-1.25 2.5-5.75 6-11 6S2.25 11.5 1 9c1.25-2.5 5.75-6 11-6Z';
 	$cart_icon_path    = 'M3 3h2l1 2h11.6a1 1 0 0 1 .97 1.242l-1.5 6A1 1 0 0 1 16.1 13H7.9l-.4 2H17v2H6a1 1 0 0 1-.97-1.242L5.6 11H4V9h1.2l1-5H3V3Zm4.4 4-1 5h9.3l1.1-5H7.4Z';
 	?>
 	<div class="mbf-social-proof" data-product-id="<?php echo esc_attr( $product_id ); ?>" aria-live="polite">
 		<div class="mbf-social-proof-badge mbf-social-proof-badge--viewing">
 			<span class="mbf-social-proof-icon" aria-hidden="true">
-				<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" role="presentation">
+				<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" role="presentation">
 					<path d="<?php echo esc_attr( $viewing_icon_path ); ?>" fill="currentColor" />
 				</svg>
 			</span>
@@ -169,7 +169,7 @@ function mbf_wc_social_proof_widget() {
 		</div>
 		<div class="mbf-social-proof-badge mbf-social-proof-badge--added">
 			<span class="mbf-social-proof-icon" aria-hidden="true">
-				<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" role="presentation">
+				<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" role="presentation">
 					<path d="<?php echo esc_attr( $cart_icon_path ); ?>" fill="currentColor" />
 				</svg>
 			</span>
