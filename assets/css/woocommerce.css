@@ -1683,6 +1683,69 @@
 	grid-template-columns: 1fr;
 	grid-gap: 1.5rem;
 }
+.mbf-single-product .mbf-single-product-summary-wrap .mbf-single-product-summary .mbf-single-product-media {
+	position: relative;
+}
+.mbf-single-product .mbf-single-product-summary-wrap .mbf-single-product-summary .mbf-social-proof {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	position: absolute;
+	top: 16px;
+	left: 0;
+	transform: translateX(-108%);
+	z-index: 2;
+}
+.mbf-single-product .mbf-single-product-summary-wrap .mbf-single-product-summary .mbf-social-proof-badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	padding: 8px 14px;
+	border-radius: 999px;
+	font-size: 0.875rem;
+	font-weight: 600;
+	line-height: 1.2;
+	min-width: 250px;
+	box-shadow: 0 0 0 2px var(--mbf-color-text);
+	color: var(--mbf-color-text);
+	background: #f1f0d8;
+	font-variant-numeric: tabular-nums;
+}
+.mbf-single-product .mbf-single-product-summary-wrap .mbf-single-product-summary .mbf-social-proof-badge--added {
+	background: #d40000;
+	color: #fff;
+	box-shadow: 0 0 0 2px #d40000;
+}
+.mbf-single-product .mbf-single-product-summary-wrap .mbf-single-product-summary .mbf-social-proof-icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+}
+.mbf-single-product .mbf-single-product-summary-wrap .mbf-single-product-summary .mbf-social-proof-text {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	white-space: nowrap;
+}
+.mbf-single-product .mbf-single-product-summary-wrap .mbf-single-product-summary .mbf-social-proof-count {
+	font-weight: 700;
+}
+@media (max-width: 1199px) {
+	.mbf-single-product .mbf-single-product-summary-wrap .mbf-single-product-summary .mbf-social-proof {
+		transform: translateX(-100%);
+	}
+}
+@media (max-width: 991px) {
+	.mbf-single-product .mbf-single-product-summary-wrap .mbf-single-product-summary .mbf-social-proof {
+		position: static;
+		transform: none;
+		margin-bottom: 12px;
+	}
+	.mbf-single-product .mbf-single-product-summary-wrap .mbf-single-product-summary .mbf-social-proof-badge {
+		min-width: auto;
+		width: max-content;
+	}
+}
 @media (min-width: 768px) {
 	.mbf-single-product .mbf-single-product-summary-wrap .mbf-single-product-summary {
 		grid-template-columns: 1fr 1fr;
