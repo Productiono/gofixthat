@@ -814,26 +814,14 @@ var cscoNavigation = {};
         (0, _utility.$)(window).scroll(function () {
           var scrolled = (0, _utility.$)(window).scrollTop();
           headerParams.headerSmartPosition = headerParams.headerSmart.length > 0 ? headerParams.headerSmart.offset().top : 0;
-          if (scrolled > headerParams.smartStart + headerParams.scrollPoint + 10 && scrolled > headerParams.scrollPrev) {
-            if (scrolled > headerParams.smartStart + headerParams.headerCompactHeight + 200) {
-              (0, _utility.$)(document).trigger('sticky-nav-hide', headerParams);
-            }
-          } else {
-            if (headerParams.scrollUpAmount >= headerParams.scrollPoint || scrolled === 0) {
-              (0, _utility.$)(document).trigger('sticky-nav-visible', headerParams);
-            }
-          }
           if (headerParams.headerSmart.length > 0) {
             if (scrolled > headerParams.smartStart + headerParams.headerCompactHeight) {
               (0, _utility.$)(document).trigger('nav-stick', headerParams);
+              (0, _utility.$)(document).trigger('sticky-nav-visible', headerParams);
             } else if (headerParams.headerSmartPosition <= headerParams.smartStart) {
               (0, _utility.$)(document).trigger('nav-unstick', headerParams);
+              (0, _utility.$)(document).trigger('sticky-nav-visible', headerParams);
             }
-          }
-          if (scrolled < headerParams.scrollPrev) {
-            headerParams.scrollUpAmount += headerParams.scrollPrev - scrolled;
-          } else {
-            headerParams.scrollUpAmount = 0;
           }
           if (headerParams.wpAdminBar.length > 0 && _utility.wndW <= 600 && scrolled >= headerParams.wpAdminBarHeight) {
             (0, _utility.$)(document).trigger('adminbar-mobile-scrolled', headerParams);
