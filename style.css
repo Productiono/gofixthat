@@ -53,6 +53,7 @@ WC tested up to:      10.0
 	--mbf-tag-border-radius: 3px;
 	--mbf-avatar-border-radius: 3px;
 	--mbf-adminmbar-offset: 0px;
+	--mbf-wpadminbar-height: 0px;
 	--mbf-wc-box-container: 856px;
 	--mbf-wc-box-sidebar: 420px;
 	--mbf-wc-accent-color: #D73429;
@@ -4402,8 +4403,9 @@ body.admin-bar {
 }
 
 .mbf-header {
+	position: -webkit-sticky;
 	position: sticky;
-	top: var(--mbf-wpadminbar-height);
+	top: var(--mbf-wpadminbar-height, 0px);
 	width: 100%;
 	background: var(--mbf-color-header-background, var(--mbf-site-background));
 	border-bottom: var(--mbf-header-border-width) solid var(--mbf-color-border);
@@ -4820,18 +4822,20 @@ body.admin-bar {
 	text-transform: var(--mbf-font-primary-text-transform);
 }
 .mbf-navbar-sticky-enabled .mbf-header {
+	position: -webkit-sticky;
 	position: sticky;
-	top: var(--mbf-wpadminbar-height);
+	top: var(--mbf-wpadminbar-height, 0px);
 }
 .mbf-navbar-sticky-enabled .mbf-header.mbf-scroll-sticky .mbf-header__inner {
 	min-height: calc(var(--mbf-header-height));
 }
 .mbf-navbar-smart-enabled .mbf-header {
+	position: -webkit-sticky;
 	position: sticky;
-	top: calc(var(--mbf-wpadminbar-height) - var(--mbf-header-initial-height) - 10px);
+	top: calc(var(--mbf-wpadminbar-height, 0px) - var(--mbf-header-initial-height) - 10px);
 }
 .mbf-navbar-smart-enabled .mbf-header.mbf-header-smart-visible {
-	top: var(--mbf-wpadminbar-height);
+	top: var(--mbf-wpadminbar-height, 0px);
 }
 .mbf-navbar-smart-enabled .mbf-header.mbf-scroll-sticky .mbf-header__inner {
 	min-height: calc(var(--mbf-header-height));
