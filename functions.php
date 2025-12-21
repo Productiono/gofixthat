@@ -189,6 +189,7 @@ if ( ! class_exists( 'Apparel' ) ) {
 			require_once get_theme_file_path( '/inc/woocommerce/parts/search.php' );
 			require_once get_theme_file_path( '/inc/woocommerce/parts/shop.php' );
 			require_once get_theme_file_path( '/inc/woocommerce/parts/single-product.php' );
+			require_once get_theme_file_path( '/inc/woocommerce/product-sections.php' );
 			require_once get_theme_file_path( '/inc/woocommerce/parts/cart.php' );
 			require_once get_theme_file_path( '/inc/woocommerce/parts/myaccount.php' );
 		}
