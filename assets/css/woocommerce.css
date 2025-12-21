@@ -45,7 +45,7 @@
 	overflow: hidden;
 	cursor: pointer;
 	font-family: var(--mbf-font-primary-family), sans-serif;
-	font-size: var(--mbf-font-primary-size);
+	font-size: 18px;
 	font-weight: var(--mbf-font-primary-weight);
 	font-style: var(--mbf-font-primary-style);
 	letter-spacing: var(--mbf-font-primary-letter-spacing);
