@@ -23,15 +23,19 @@ global $product;
 ?>
 
 <div class="product_title_wrap">
-	<?php the_title( '<h1 class="product_title entry-title">', '</h1>' ); ?>
+<?php the_title( '<h1 class="product_title entry-title">', '</h1>' ); ?>
 </div>
 
 <?php
-if ( wc_product_sku_enabled() && ( $product->get_sku() || $product->is_type( 'variable' ) ) ) {
-	$sku = $product->get_sku()
-	?>
+if ( wc_product_sku_enabled() ) {
+	$sku = $product->get_sku();
 
-	<span class="sku_wrapper"><?php esc_html_e( 'SKU:', 'apparel' ); ?> <span class="sku"><?php call_user_func( 'printf', '%s', $sku ? $sku : esc_html__( 'N/A', 'apparel' ) ); ?></span></span>
+	if ( $sku ) {
+		?>
+
+		<span class="sku_wrapper"><?php esc_html_e( 'SKU:', 'apparel' ); ?> <span class="sku"><?php call_user_func( 'printf', '%s', $sku ? $sku : esc_html__( 'N/A', 'apparel' ) ); ?></span></span>
+
+	<?php } ?>
 
 <?php } ?>
 

@@ -2041,6 +2041,8 @@
 	display: flex;
 	flex-direction: column;
 	width: 100%;
+	padding: 0 0.125rem;
+	align-self: flex-start;
 }
 .mbf-single-product .mbf-single-product-summary-wrap .mbf-single-product-summary .entry-summary {
 	float: initial !important;
@@ -2107,6 +2109,10 @@
 	margin-top: 1rem;
 	margin-bottom: 0;
 	font-size: 0.875rem;
+}
+.mbf-single-product .mbf-single-product-summary-wrap .mbf-single-product-summary .mbf-single-product-purchase-card__note .woocommerce-product-details__short-description {
+	overflow-wrap: anywhere;
+	word-break: break-word;
 }
 .mbf-single-product .mbf-single-product-summary-wrap .mbf-single-product-summary .entry-summary .woocommerce-product-rating {
 	margin-top: 2rem;
