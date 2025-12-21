@@ -81,29 +81,29 @@ WC tested up to:      10.0
 :root,
 [data-scheme=light] {
 	--mbf-site-background: var(--mbf-light-site-background, #FFFFFF);
-	--mbf-layout-background: var(--mbf-light-layout-background, #F7F7F7);
-	--mbf-color-primary: var(--mbf-light-primary-color, #202025);
+	--mbf-layout-background: var(--mbf-light-layout-background, #f8fafc);
+	--mbf-color-primary: var(--mbf-light-primary-color, #0f172a);
 	--mbf-color-primary-contrast: #FFFFFF;
-	--mbf-color-secondary: var(--mbf-light-secondary-color, #7E7E84);
+	--mbf-color-secondary: var(--mbf-light-secondary-color, #475569);
 	--mbf-color-secondary-contrast: #FFFFFF;
-	--mbf-color-border: var(--mbf-light-border-color, #D9D7DD);
+	--mbf-color-border: var(--mbf-light-border-color, #e2e8f0);
 	--mbf-color-button: var(--mbf-light-button-background, transparent);
-	--mbf-color-button-border: var(--mbf-light-button-border, #202025);
-	--mbf-color-button-contrast: var(--mbf-light-button-color, #202025);
-	--mbf-color-button-hover: var(--mbf-light-button-hover-background, #202025);
-	--mbf-color-button-hover-border: var(--mbf-light-button-hover-border, #202025);
+	--mbf-color-button-border: var(--mbf-light-button-border, #0f172a);
+	--mbf-color-button-contrast: var(--mbf-light-button-color, #0f172a);
+	--mbf-color-button-hover: var(--mbf-light-button-hover-background, #0f172a);
+	--mbf-color-button-hover-border: var(--mbf-light-button-hover-border, #0f172a);
 	--mbf-color-button-hover-contrast: var(--mbf-light-button-hover-color, #FFFFFF);
-	--mbf-color-overlay-background: var(--mbf-light-overlay-background, rgba(32, 32, 37, 0.2));
-	--mbf-color-contrast-50: #f8f9fa;
-	--mbf-color-contrast-100: #f8f9fa;
-	--mbf-color-contrast-200: #E0E0E0;
-	--mbf-color-contrast-300: #dee2e6;
-	--mbf-color-contrast-400: #ced4da;
-	--mbf-color-contrast-500: #adb5bd;
-	--mbf-color-contrast-600: #6c757d;
-	--mbf-color-contrast-700: #495057;
-	--mbf-color-contrast-800: #343a40;
-	--mbf-color-contrast-900: #212529;
+	--mbf-color-overlay-background: var(--mbf-light-overlay-background, rgba(15, 23, 42, 0.12));
+	--mbf-color-contrast-50: #f8fafc;
+	--mbf-color-contrast-100: #f1f5f9;
+	--mbf-color-contrast-200: #e2e8f0;
+	--mbf-color-contrast-300: #cbd5e1;
+	--mbf-color-contrast-400: #94a3b8;
+	--mbf-color-contrast-500: #64748b;
+	--mbf-color-contrast-600: #475569;
+	--mbf-color-contrast-700: #334155;
+	--mbf-color-contrast-800: #1e293b;
+	--mbf-color-contrast-900: #0f172a;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -112,26 +112,26 @@ WC tested up to:      10.0
 		--mbf-layout-background: var(--mbf-dark-layout-background, #232323);
 		--mbf-color-primary: var(--mbf-dark-primary-color, #FFFFFF);
 		--mbf-color-primary-contrast: #000000;
-		--mbf-color-secondary: var(--mbf-dark-secondary-color, #c4c4c4);
+		--mbf-color-secondary: var(--mbf-dark-secondary-color, #cbd5e1);
 		--mbf-color-secondary-contrast: #000000;
-		--mbf-color-border: var(--mbf-dark-border-color, #393939);
+		--mbf-color-border: var(--mbf-dark-border-color, #334155);
 		--mbf-color-button: var(--mbf-dark-button-background, transparent);
-		--mbf-color-button-border: var(--mbf-dark-button-border, #929292);
+		--mbf-color-button-border: var(--mbf-dark-button-border, #e2e8f0);
 		--mbf-color-button-contrast: var(--mbf-dark-button-color, #FFFFFF);
 		--mbf-color-button-hover: var(--mbf-dark-button-hover-background, #FFFFFF);
 		--mbf-color-button-hover-border: var(--mbf-dark-button-hover-border, #FFFFFF);
 		--mbf-color-button-hover-contrast:var(--mbf-dark-button-hover-color, #202025);
-		--mbf-color-overlay-background: var(--mbf-dark-overlay-background, rgba(0,0,0, 0.25));
-		--mbf-color-contrast-50: #000000;
-		--mbf-color-contrast-100: #333333;
-		--mbf-color-contrast-200: #494949;
-		--mbf-color-contrast-300: #606060;
-		--mbf-color-contrast-400: #777777;
-		--mbf-color-contrast-500: #8e8e8e;
-		--mbf-color-contrast-600: #a4a4a4;
-		--mbf-color-contrast-700: #bbbbbb;
-		--mbf-color-contrast-800: #d2d2d2;
-		--mbf-color-contrast-900: #e9e9e9;
+		--mbf-color-overlay-background: var(--mbf-dark-overlay-background, rgba(255,255,255, 0.12));
+		--mbf-color-contrast-50: #020617;
+		--mbf-color-contrast-100: #0b1224;
+		--mbf-color-contrast-200: #0f172a;
+		--mbf-color-contrast-300: #1e293b;
+		--mbf-color-contrast-400: #334155;
+		--mbf-color-contrast-500: #475569;
+		--mbf-color-contrast-600: #94a3b8;
+		--mbf-color-contrast-700: #cbd5e1;
+		--mbf-color-contrast-800: #e2e8f0;
+		--mbf-color-contrast-900: #f8fafc;
 	}
 }
 [data-scheme=dark] {
@@ -139,26 +139,26 @@ WC tested up to:      10.0
 	--mbf-layout-background: var(--mbf-dark-layout-background, #232323);
 	--mbf-color-primary: var(--mbf-dark-primary-color, #FFFFFF);
 	--mbf-color-primary-contrast: #000000;
-	--mbf-color-secondary: var(--mbf-dark-secondary-color, #c4c4c4);
+	--mbf-color-secondary: var(--mbf-dark-secondary-color, #cbd5e1);
 	--mbf-color-secondary-contrast: #000000;
-	--mbf-color-border: var(--mbf-dark-border-color, #393939);
+	--mbf-color-border: var(--mbf-dark-border-color, #334155);
 	--mbf-color-button: var(--mbf-dark-button-background, transparent);
-	--mbf-color-button-border: var(--mbf-dark-button-border, #929292);
+	--mbf-color-button-border: var(--mbf-dark-button-border, #e2e8f0);
 	--mbf-color-button-contrast: var(--mbf-dark-button-color, #FFFFFF);
 	--mbf-color-button-hover: var(--mbf-dark-button-hover-background, #FFFFFF);
 	--mbf-color-button-hover-border: var(--mbf-dark-button-hover-border, #FFFFFF);
 	--mbf-color-button-hover-contrast:var(--mbf-dark-button-hover-color, #202025);
-	--mbf-color-overlay-background: var(--mbf-dark-overlay-background, rgba(0,0,0, 0.25));
-	--mbf-color-contrast-50: #000000;
-	--mbf-color-contrast-100: #333333;
-	--mbf-color-contrast-200: #494949;
-	--mbf-color-contrast-300: #606060;
-	--mbf-color-contrast-400: #777777;
-	--mbf-color-contrast-500: #8e8e8e;
-	--mbf-color-contrast-600: #a4a4a4;
-	--mbf-color-contrast-700: #bbbbbb;
-	--mbf-color-contrast-800: #d2d2d2;
-	--mbf-color-contrast-900: #e9e9e9;
+	--mbf-color-overlay-background: var(--mbf-dark-overlay-background, rgba(255,255,255, 0.12));
+	--mbf-color-contrast-50: #020617;
+	--mbf-color-contrast-100: #0b1224;
+	--mbf-color-contrast-200: #0f172a;
+	--mbf-color-contrast-300: #1e293b;
+	--mbf-color-contrast-400: #334155;
+	--mbf-color-contrast-500: #475569;
+	--mbf-color-contrast-600: #94a3b8;
+	--mbf-color-contrast-700: #cbd5e1;
+	--mbf-color-contrast-800: #e2e8f0;
+	--mbf-color-contrast-900: #f8fafc;
 }
 
 [data-scheme=inverse] {
@@ -855,11 +855,19 @@ template {
 /*--------------------------------------------------------------
 ## Typography
 --------------------------------------------------------------*/
+:root {
+	--mbf-type-scale-h1: clamp(2.75rem, 2.15rem + 1.8vw, 3.5rem);
+	--mbf-type-scale-h2: clamp(2.25rem, 1.9rem + 1.2vw, 3rem);
+	--mbf-type-scale-h3: clamp(1.9rem, 1.6rem + 0.9vw, 2.4rem);
+	--mbf-type-scale-h4: clamp(1.65rem, 1.45rem + 0.6vw, 2rem);
+	--mbf-type-scale-h5: clamp(1.4rem, 1.25rem + 0.45vw, 1.7rem);
+	--mbf-type-scale-h6: clamp(1.2rem, 1.1rem + 0.3vw, 1.45rem);
+}
 html {
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
-	font-size: 16px;
-	font-family: var(--mbf-font-base-family);
+	font-size: clamp(15px, 0.65vw + 14px, 17px);
+	font-family: var(--mbf-font-base-family), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 body {
@@ -869,6 +877,18 @@ body {
 	font-style: var(--mbf-font-base-style);
 	line-height: var(--mbf-font-base-line-height);
 	letter-spacing: var(--mbf-font-base-letter-spacing);
+	color: var(--mbf-color-primary);
+	background-color: var(--mbf-site-background);
+}
+
+button,
+input,
+select,
+textarea,
+optgroup {
+	font-family: inherit;
+	font-weight: inherit;
+	letter-spacing: inherit;
 }
 
 h1, h2, h3, h4, h5, h6,
@@ -884,27 +904,27 @@ h1, h2, h3, h4, h5, h6,
 }
 
 h1, .h1 {
-	font-size: 2.1875rem;
+	font-size: var(--mbf-type-scale-h1);
 }
 
 h2, .h2 {
-	font-size: 1.875rem;
+	font-size: var(--mbf-type-scale-h2);
 }
 
 h3, .h3 {
-	font-size: 1.625rem;
+	font-size: var(--mbf-type-scale-h3);
 }
 
 h4, .h4 {
-	font-size: 1.5rem;
+	font-size: var(--mbf-type-scale-h4);
 }
 
 h5, .h5 {
-	font-size: 1.375rem;
+	font-size: var(--mbf-type-scale-h5);
 }
 
 h6, .h6 {
-	font-size: 1.25rem;
+	font-size: var(--mbf-type-scale-h6);
 }
 
 hr, .wp-block-separator {
