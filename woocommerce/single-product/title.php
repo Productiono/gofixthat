@@ -24,8 +24,6 @@ global $product;
 
 <div class="product_title_wrap">
 	<?php the_title( '<h1 class="product_title entry-title">', '</h1>' ); ?>
-
-	<?php woocommerce_template_single_price(); ?>
 </div>
 
 <?php
