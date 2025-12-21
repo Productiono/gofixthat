@@ -58,6 +58,13 @@ add_filter( 'woocommerce_sale_flash', 'mbf_woocommerce_sale_flash' );
  */
 function mbf_woocommerce_default_address_fields( $fields ) {
 
+	$paired_fields = array(
+		'first_name' => 'form-row-first',
+		'last_name'  => 'form-row-last',
+		'city'       => 'form-row-first',
+		'postcode'   => 'form-row-last',
+	);
+
 	foreach ( $fields as $key => $field ) {
 		if ( isset( $fields[ $key ]['label'] ) && $fields[ $key ]['label'] ) {
 
@@ -70,6 +77,17 @@ function mbf_woocommerce_default_address_fields( $fields ) {
 			if ( isset( $fields[ $key ]['required'] ) && $fields[ $key ]['required'] ) {
 				$fields[ $key ]['placeholder'] .= ' *';
 			}
+		}
+
+		if ( isset( $paired_fields[ $key ] ) ) {
+			$fields[ $key ]['class'] = array_unique(
+				array_merge(
+					array( $paired_fields[ $key ] ),
+					array_diff( $fields[ $key ]['class'] ?? array(), array( 'form-row-wide' ) )
+				)
+			);
+
+			$fields[ $key ]['clear'] = false;
 		}
 	}
 
