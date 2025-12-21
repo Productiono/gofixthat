@@ -2104,6 +2104,19 @@
 	margin: 0;
 	padding: 0;
 }
+.mbf-single-product .mbf-single-product-summary-wrap .mbf-single-product-summary .entry-summary .variations .value select {
+	display: block;
+	width: 100%;
+	max-width: 100%;
+	box-sizing: border-box;
+	border: 1px solid #111;
+	background: #fff;
+	color: var(--mbf-color-secondary);
+	padding: 0.75rem 0.9rem;
+	line-height: 1.5;
+	border-radius: 0;
+	box-shadow: none;
+}
 .mbf-single-product .mbf-single-product-summary-wrap .mbf-single-product-summary .entry-summary .variations .color-variable-items-wrapper .variable-item {
 	background: transparent;
 	border: 1px solid var(--mbf-color-border);
