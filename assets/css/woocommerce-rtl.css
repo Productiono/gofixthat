@@ -1704,36 +1704,38 @@
 	align-items: center;
 	gap: 4px;
 	padding: 4px 8px;
-	border-radius: var(--mbf-badge-border-radius);
+	border-radius: 999px;
 	font-size: 0.625rem;
-	font-weight: 600;
+	font-weight: 500;
 	line-height: 1.2;
 	width: 100%;
 	max-width: 100%;
-	color: var(--mbf-color-text);
-	background: rgba(255, 255, 255, 0.9);
-	border: 1px solid rgba(0, 0, 0, 0.08);
+	color: #1a1a1a;
+	background: #f6f4dc;
+	border: 1px solid #1a1a1a;
 	font-variant-numeric: tabular-nums;
-	backdrop-filter: blur(2px);
-	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 	justify-content: flex-end;
 }
 .mbf-single-product .mbf-single-product-summary-wrap .mbf-single-product-media .mbf-social-proof-badge--added {
-	background: color-mix(in srgb, var(--mbf-color-primary) 12%, #ffffff 88%);
-	color: var(--mbf-color-primary);
-	border-color: color-mix(in srgb, var(--mbf-color-primary) 18%, #ffffff 82%);
+	background: #cc0000;
+	color: #ffffff;
+	border-color: #990000;
+	font-weight: 700;
 }
 .mbf-single-product .mbf-single-product-summary-wrap .mbf-single-product-media .mbf-social-proof-icon {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	color: currentColor;
+	color: #1a1a1a;
 	width: 14px;
 	height: 14px;
 }
 .mbf-single-product .mbf-single-product-summary-wrap .mbf-single-product-media .mbf-social-proof-icon svg {
 	width: 100%;
 	height: 100%;
+}
+.mbf-single-product .mbf-single-product-summary-wrap .mbf-single-product-media .mbf-social-proof-badge--added .mbf-social-proof-icon {
+	color: #ffffff;
 }
 .mbf-single-product .mbf-single-product-summary-wrap .mbf-single-product-media .mbf-social-proof-text {
 	display: inline-flex;
