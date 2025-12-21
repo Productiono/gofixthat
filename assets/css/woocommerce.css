@@ -2107,12 +2107,12 @@
 	width: 100%;
 	max-width: 100%;
 	box-sizing: border-box;
-	border: 1px solid #111;
+	border: 2px solid #222;
 	background: #fff;
 	color: var(--mbf-color-secondary);
 	padding: 0.75rem 0.9rem;
 	line-height: 1.5;
-	border-radius: 0;
+	border-radius: 10px;
 	box-shadow: none;
 }
 .mbf-single-product .mbf-single-product-summary-wrap .mbf-single-product-summary .entry-summary .variations .color-variable-items-wrapper .variable-item {
