@@ -38,6 +38,7 @@ if ( ! function_exists( 'mbf_enqueue_scripts' ) ) {
 		wp_register_script( 'flickity', get_template_directory_uri() . '/assets/static/js/flickity.pkgd.min.js', array( 'jquery' ), $version, true );
 		wp_register_script( 'jarallax', get_template_directory_uri() . '/assets/static/js/jarallax.min.js', array( 'jquery' ), $version, true );
 		wp_register_script( 'mbf-scripts', get_template_directory_uri() . '/assets/js/scripts.js', array( 'jquery', 'imagesloaded', 'jarallax', 'flickity' ), $version, true );
+		wp_register_script( 'mbf-blog-toc', get_template_directory_uri() . '/assets/js/blog-toc.js', array(), $version, true );
 
 		// Localization array.
 		$localize = array(
@@ -50,6 +51,9 @@ if ( ! function_exists( 'mbf_enqueue_scripts' ) ) {
 
 		// Enqueue theme scripts.
 		wp_enqueue_script( 'mbf-scripts' );
+		if ( is_singular( 'post' ) ) {
+			wp_enqueue_script( 'mbf-blog-toc' );
+		}
 
 		// Enqueue comment reply script.
 		if ( is_singular() && comments_open() && get_option( 'thread_comments' ) ) {
