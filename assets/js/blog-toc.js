@@ -8,6 +8,9 @@
 		var tocToggle = document.querySelector( '.mbf-entry__toc-toggle' );
 		var tocInner = document.querySelector( '.mbf-entry__toc-inner' );
 		var mobileQuery = window.matchMedia( '(max-width: 991.98px)' );
+		var tocMobileAnchor = document.querySelector( '.mbf-entry__toc-mobile-anchor' );
+		var tocOriginalParent = toc ? toc.parentElement : null;
+		var tocNextSibling = toc ? toc.nextElementSibling : null;
 
 		if ( ! toc || ! tocList || ! contentArea ) {
 			return;
@@ -99,6 +102,29 @@
 		}
 
 		if ( tocToggle && tocInner ) {
+			var moveTocToMobile = function () {
+				if ( ! tocMobileAnchor ) {
+					return;
+				}
+
+				tocMobileAnchor.insertAdjacentElement( 'afterend', toc );
+				toc.classList.add( 'is-mobile' );
+			};
+
+			var moveTocToDesktop = function () {
+				if ( ! tocOriginalParent ) {
+					return;
+				}
+
+				if ( tocNextSibling && tocNextSibling.parentElement === tocOriginalParent ) {
+					tocOriginalParent.insertBefore( toc, tocNextSibling );
+				} else {
+					tocOriginalParent.insertBefore( toc, tocOriginalParent.firstChild );
+				}
+
+				toc.classList.remove( 'is-mobile' );
+			};
+
 			var setTocExpanded = function ( isExpanded ) {
 				tocToggle.setAttribute( 'aria-expanded', isExpanded ? 'true' : 'false' );
 				var label = tocToggle.querySelector( '.mbf-entry__toc-toggle-label' );
@@ -118,8 +144,10 @@
 
 			var handleBreakpointChange = function () {
 				if ( mobileQuery.matches ) {
+					moveTocToMobile();
 					setTocExpanded( false );
 				} else {
+					moveTocToDesktop();
 					setTocExpanded( true );
 				}
 			};

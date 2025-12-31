@@ -42,15 +42,31 @@
 
 		<?php if ( $is_blog_post ) : ?>
 			<div class="mbf-entry__content-layout">
-				<aside class="mbf-entry__lead-form" aria-label="<?php esc_attr_e( 'Start your online business form', 'apparel' ); ?>">
-					<div class="mbf-entry__lead-form-card">
-						<div class="mbf-entry__lead-form-heading">
-							<p><?php esc_html_e( 'Start your online business today.', 'apparel' ); ?></p>
-							<p><?php esc_html_e( 'For free.', 'apparel' ); ?></p>
+				<div class="mbf-entry__left-rail">
+					<nav class="mbf-entry__toc" aria-label="<?php esc_attr_e( 'Table of contents', 'apparel' ); ?>">
+						<div class="mbf-entry__toc-header">
+							<span class="mbf-entry__toc-title"><?php esc_html_e( 'Table of contents', 'apparel' ); ?></span>
+							<button class="mbf-entry__toc-toggle" type="button" aria-expanded="false">
+								<span class="mbf-entry__toc-toggle-label" data-label-collapsed="<?php esc_attr_e( 'Show', 'apparel' ); ?>" data-label-expanded="<?php esc_attr_e( 'Hide', 'apparel' ); ?>"><?php esc_html_e( 'Show', 'apparel' ); ?></span>
+								<span class="mbf-entry__toc-toggle-icon" aria-hidden="true"></span>
+							</button>
 						</div>
-						<?php echo do_shortcode( '[fluentform id="3"]' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-					</div>
-				</aside>
+						<div class="mbf-entry__toc-divider" aria-hidden="true"></div>
+						<div class="mbf-entry__toc-inner">
+							<ol class="mbf-entry__toc-list"></ol>
+						</div>
+					</nav>
+
+					<aside class="mbf-entry__lead-form" aria-label="<?php esc_attr_e( 'Start your online business form', 'apparel' ); ?>">
+						<div class="mbf-entry__lead-form-card">
+							<div class="mbf-entry__lead-form-heading">
+								<p><?php esc_html_e( 'Start your online business today.', 'apparel' ); ?></p>
+								<p><?php esc_html_e( 'For free.', 'apparel' ); ?></p>
+							</div>
+							<?php echo do_shortcode( '[fluentform id="3"]' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+						</div>
+					</aside>
+				</div>
 
 				<div class="mbf-entry__content-wrap">
 					<?php
@@ -86,6 +102,8 @@
 						<?php endif; ?>
 					</div>
 
+					<div class="mbf-entry__toc-mobile-anchor" aria-hidden="true"></div>
+
 					<div class="entry-content">
 						<?php the_content(); ?>
 					</div>
@@ -101,20 +119,6 @@
 				</div>
 
 				<div class="mbf-entry__sidebar">
-					<nav class="mbf-entry__toc" aria-label="<?php esc_attr_e( 'Table of contents', 'apparel' ); ?>">
-						<div class="mbf-entry__toc-header">
-							<span class="mbf-entry__toc-title"><?php esc_html_e( 'Table of contents', 'apparel' ); ?></span>
-							<button class="mbf-entry__toc-toggle" type="button" aria-expanded="false">
-								<span class="mbf-entry__toc-toggle-label" data-label-collapsed="<?php esc_attr_e( 'Show', 'apparel' ); ?>" data-label-expanded="<?php esc_attr_e( 'Hide', 'apparel' ); ?>"><?php esc_html_e( 'Show', 'apparel' ); ?></span>
-								<span class="mbf-entry__toc-toggle-icon" aria-hidden="true"></span>
-							</button>
-						</div>
-						<div class="mbf-entry__toc-divider" aria-hidden="true"></div>
-						<div class="mbf-entry__toc-inner">
-							<ol class="mbf-entry__toc-list"></ol>
-						</div>
-					</nav>
-
 					<aside class="mbf-entry__ad" aria-label="<?php esc_attr_e( 'Advertisement', 'apparel' ); ?>">
 						<div class="mbf-entry__sidebar-cta">
 							<figure class="mbf-entry__sidebar-cta-media">
