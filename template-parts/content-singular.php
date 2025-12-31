@@ -43,16 +43,6 @@
 		<?php if ( $is_blog_post ) : ?>
 			<div class="mbf-entry__content-layout">
 				<div class="mbf-entry__left-rail">
-					<nav class="mbf-entry__toc" aria-label="<?php esc_attr_e( 'Table of contents', 'apparel' ); ?>">
-						<div class="mbf-entry__toc-header">
-							<span class="mbf-entry__toc-title"><?php esc_html_e( 'Table of contents', 'apparel' ); ?></span>
-						</div>
-						<div class="mbf-entry__toc-divider" aria-hidden="true"></div>
-						<div class="mbf-entry__toc-inner">
-							<ol class="mbf-entry__toc-list"></ol>
-						</div>
-					</nav>
-
 					<aside class="mbf-entry__lead-form" aria-label="<?php esc_attr_e( 'Start your online business form', 'apparel' ); ?>">
 						<div class="mbf-entry__lead-form-card">
 							<div class="mbf-entry__lead-form-heading">
@@ -98,7 +88,18 @@
 						<?php endif; ?>
 					</div>
 
-					<div class="mbf-entry__toc-mobile-anchor" aria-hidden="true"></div>
+					<?php if ( $is_blog_post ) : ?>
+						<nav class="mbf-entry__toc is-collapsed" aria-label="<?php esc_attr_e( 'Table of contents', 'apparel' ); ?>" aria-expanded="false">
+							<div class="mbf-entry__toc-header">
+								<span class="mbf-entry__toc-title"><?php esc_html_e( 'Table of contents', 'apparel' ); ?></span>
+								<span class="mbf-entry__toc-toggle" aria-hidden="true">+</span>
+							</div>
+							<div class="mbf-entry__toc-divider" aria-hidden="true"></div>
+							<div class="mbf-entry__toc-inner" hidden>
+								<ol class="mbf-entry__toc-list"></ol>
+							</div>
+						</nav>
+					<?php endif; ?>
 
 					<div class="entry-content">
 						<?php the_content(); ?>

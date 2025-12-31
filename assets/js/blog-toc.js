@@ -6,10 +6,7 @@
 		var tocList = document.querySelector( '.mbf-entry__toc-list' );
 		var contentArea = document.querySelector( '.mbf-entry__content-wrap .entry-content' );
 		var tocInner = document.querySelector( '.mbf-entry__toc-inner' );
-		var mobileQuery = window.matchMedia( '(max-width: 991.98px)' );
-		var tocMobileAnchor = document.querySelector( '.mbf-entry__toc-mobile-anchor' );
-		var tocOriginalParent = toc ? toc.parentElement : null;
-		var tocNextSibling = toc ? toc.nextElementSibling : null;
+		var tocToggle = document.querySelector( '.mbf-entry__toc-toggle' );
 
 		if ( ! toc || ! tocList || ! contentArea ) {
 			return;
@@ -95,49 +92,30 @@
 			} );
 		}
 
-		var moveTocToMobile = function () {
-			if ( ! tocMobileAnchor ) {
-				return;
-			}
-
-			tocMobileAnchor.insertAdjacentElement( 'afterend', toc );
-			toc.classList.add( 'is-mobile' );
-		};
-
-		var moveTocToDesktop = function () {
-			if ( ! tocOriginalParent ) {
-				return;
-			}
-
-			if ( tocNextSibling && tocNextSibling.parentElement === tocOriginalParent ) {
-				tocOriginalParent.insertBefore( toc, tocNextSibling );
-			} else {
-				tocOriginalParent.insertBefore( toc, tocOriginalParent.firstChild );
-			}
-
-			toc.classList.remove( 'is-mobile' );
-		};
-
-		var handleBreakpointChange = function () {
-			if ( mobileQuery.matches ) {
-				moveTocToMobile();
-				if ( tocInner ) {
+		var isExpanded = false;
+		var setExpandedState = function ( expanded ) {
+			isExpanded = !! expanded;
+			if ( tocInner ) {
+				if ( isExpanded ) {
+					tocInner.removeAttribute( 'hidden' );
+				} else {
 					tocInner.setAttribute( 'hidden', 'hidden' );
 				}
-			} else {
-				moveTocToDesktop();
-				if ( tocInner ) {
-					tocInner.removeAttribute( 'hidden' );
-				}
 			}
+			if ( tocToggle ) {
+				tocToggle.textContent = isExpanded ? '–' : '+';
+			}
+			toc.classList.toggle( 'is-collapsed', ! isExpanded );
+			toc.setAttribute( 'aria-expanded', isExpanded ? 'true' : 'false' );
 		};
 
-		handleBreakpointChange();
+		setExpandedState( false );
 
-		if ( mobileQuery.addEventListener ) {
-			mobileQuery.addEventListener( 'change', handleBreakpointChange );
-		} else if ( mobileQuery.addListener ) {
-			mobileQuery.addListener( handleBreakpointChange );
-		}
+		toc.addEventListener( 'click', function ( event ) {
+			if ( event.target.closest( 'a' ) ) {
+				return;
+			}
+			setExpandedState( ! isExpanded );
+		} );
 	} );
 }() );
