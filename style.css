@@ -6391,8 +6391,8 @@ body {
 	}
 }
 .single-post .mbf-entry__lead-form {
-	position: static;
-	top: auto;
+	position: sticky;
+	top: calc(var(--mbf-header-height) + 24px);
 }
 .single-post .mbf-entry__lead-form-heading {
 	font-family: var(--mbf-font-headings-family), sans-serif;
@@ -6486,12 +6486,16 @@ body {
 }
 .single-post .mbf-entry__article-media {
 	margin: 1.5rem 0 0;
+	border: 1px solid #e6e6e6;
+	border-radius: 12px;
+	padding: 14px;
+	background: #fff;
+	box-shadow: 0 6px 16px rgba(0, 0, 0, 0.04);
 }
 .single-post .mbf-entry__article-media img {
 	width: 100%;
 	display: block;
-	border-radius: var(--mbf-layout-elements-border-radius);
-	box-shadow: 0 18px 46px rgba(0, 0, 0, 0.08);
+	border-radius: 8px;
 }
 .single-post .mbf-entry__article-header + .entry-content {
 	margin-top: 2.75rem;
@@ -6547,15 +6551,16 @@ body {
 }
 
 .single-post .mbf-entry__toc {
-	position: sticky;
-	top: calc(var(--mbf-header-height) + 24px);
-	align-self: start;
+	position: static;
+	top: auto;
+	align-self: stretch;
 	border: 1px solid #ebebeb;
 	border-radius: 4px;
 	background: #fff;
 	box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
 	padding: 1.4rem 1.2rem;
 	font-family: var(--mbf-font-headings-family), sans-serif;
+	margin: 0;
 }
 .single-post .mbf-entry__toc.is-hidden {
 	display: none;
@@ -6572,32 +6577,6 @@ body {
 	font-weight: 800;
 	letter-spacing: 0.02em;
 	text-transform: uppercase;
-}
-.single-post .mbf-entry__toc-toggle {
-	border: none;
-	background: transparent;
-	color: inherit;
-	font-weight: 700;
-	font-size: 0.9rem;
-	display: inline-flex;
-	align-items: center;
-	gap: 0.4rem;
-	cursor: pointer;
-}
-.single-post .mbf-entry__toc-toggle:focus-visible {
-	outline: 2px solid var(--mbf-color-primary);
-	outline-offset: 3px;
-}
-.single-post .mbf-entry__toc-toggle-icon {
-	width: 12px;
-	height: 12px;
-	border-left: 2px solid currentColor;
-	border-bottom: 2px solid currentColor;
-	transform: rotate(-45deg);
-	transition: transform 0.2s ease;
-}
-.single-post .mbf-entry__toc.is-collapsed .mbf-entry__toc-toggle-icon {
-	transform: rotate(135deg);
 }
 .single-post .mbf-entry__toc-divider {
 	border-bottom: 1px solid #ebebeb;
@@ -6676,10 +6655,10 @@ body {
 }
 @media (max-width: 991.98px) {
 	.single-post .mbf-entry__toc {
-		position: static;
 		padding: 1rem 1.1rem;
 		box-shadow: none;
-		margin-top: 1.5rem;
+		margin-top: 0.75rem;
+		margin-bottom: 0.75rem;
 	}
 	.single-post .mbf-entry__toc-divider {
 		margin: 0 -1.1rem 0.75rem;

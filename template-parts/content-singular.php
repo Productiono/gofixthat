@@ -46,10 +46,6 @@
 					<nav class="mbf-entry__toc" aria-label="<?php esc_attr_e( 'Table of contents', 'apparel' ); ?>">
 						<div class="mbf-entry__toc-header">
 							<span class="mbf-entry__toc-title"><?php esc_html_e( 'Table of contents', 'apparel' ); ?></span>
-							<button class="mbf-entry__toc-toggle" type="button" aria-expanded="false">
-								<span class="mbf-entry__toc-toggle-label" data-label-collapsed="<?php esc_attr_e( 'Show', 'apparel' ); ?>" data-label-expanded="<?php esc_attr_e( 'Hide', 'apparel' ); ?>"><?php esc_html_e( 'Show', 'apparel' ); ?></span>
-								<span class="mbf-entry__toc-toggle-icon" aria-hidden="true"></span>
-							</button>
 						</div>
 						<div class="mbf-entry__toc-divider" aria-hidden="true"></div>
 						<div class="mbf-entry__toc-inner">
