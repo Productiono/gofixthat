@@ -6367,6 +6367,12 @@ body {
 	gap: 1.25rem;
 	align-self: start;
 }
+.single-post .mbf-entry__wrap,
+.single-post .mbf-entry__container,
+.single-post .mbf-entry__content-layout,
+.single-post .mbf-entry__left-rail {
+	overflow: visible;
+}
 .single-post .mbf-entry__content-layout {
 	display: grid;
 	grid-template-columns: 260px minmax(0, var(--mbf-entry-content-width)) 240px;
@@ -6464,7 +6470,10 @@ body {
 	align-self: start;
 }
 @media (min-width: 992px) {
-	.single-post .mbf-entry__lead-form,
+	.single-post .mbf-entry__lead-form {
+		position: sticky;
+		top: calc(var(--mbf-header-height) + var(--mbf-wpadminbar-height) + 24px);
+	}
 	.single-post .mbf-entry__sidebar {
 		position: sticky;
 		top: calc(var(--mbf-header-height) + 24px);
