@@ -400,10 +400,12 @@ if ( ! function_exists( 'mbf_blog_exit_popup' ) ) {
 					</p>
 				</div>
 				<div class="blog-exit-popup__form-shell">
-					<p class="blog-exit-popup__form-title"><?php esc_html_e( 'Start for free', 'apparel' ); ?></p>
-					<p class="blog-exit-popup__form-note"><?php esc_html_e( 'You agree to receive marketing emails.', 'apparel' ); ?></p>
-					<div class="blog-exit-popup__form">
-						<?php echo do_shortcode( '[fluentform id="2"]' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+					<div class="blog-exit-popup__form-card">
+						<p class="blog-exit-popup__form-title"><?php esc_html_e( 'Start for free', 'apparel' ); ?></p>
+						<p class="blog-exit-popup__form-note"><?php esc_html_e( 'You agree to receive marketing emails.', 'apparel' ); ?></p>
+						<div class="blog-exit-popup__form">
+							<?php echo do_shortcode( '[fluentform id="2"]' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+						</div>
 					</div>
 				</div>
 			</div>
