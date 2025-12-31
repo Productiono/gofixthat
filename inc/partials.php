@@ -359,3 +359,58 @@ if ( ! function_exists( 'mbf_list_categories' ) ) {
 		}
 	}
 }
+
+if ( ! function_exists( 'mbf_blog_exit_popup' ) ) {
+	/**
+	 * Blog Exit Popup markup.
+	 */
+	function mbf_blog_exit_popup() {
+		if ( is_admin() ) {
+			return;
+		}
+
+		if ( ! ( is_singular( 'post' ) || is_category() ) ) {
+			return;
+		}
+
+		$background = '';
+
+		if ( is_singular( 'post' ) ) {
+			$background = get_the_post_thumbnail_url( get_queried_object_id(), 'full' );
+		} elseif ( is_category() && get_header_image() ) {
+			$background = get_header_image();
+		}
+
+		$style_attr = $background ? sprintf( ' style="%s"', esc_attr( '--blog-exit-popup-bg:url("' . esc_url( $background ) . '");' ) ) : '';
+		$title_id   = 'blog-exit-popup-title';
+		?>
+		<div class="blog-exit-popup" aria-hidden="true" aria-modal="true" role="dialog" aria-labelledby="<?php echo esc_attr( $title_id ); ?>"<?php echo $style_attr; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
+			<div class="blog-exit-popup__content">
+				<button type="button" class="blog-exit-popup__close" aria-label="<?php esc_attr_e( 'Close popup', 'apparel' ); ?>">×</button>
+				<div class="blog-exit-popup__card">
+					<div class="blog-exit-popup__logo">
+						<?php if ( function_exists( 'the_custom_logo' ) && has_custom_logo() ) { ?>
+							<?php the_custom_logo(); ?>
+						<?php } else { ?>
+							<span class="blog-exit-popup__logo-text"><?php echo esc_html( get_bloginfo( 'name' ) ); ?></span>
+						<?php } ?>
+					</div>
+					<h2 class="blog-exit-popup__title" id="<?php echo esc_attr( $title_id ); ?>">
+						<?php printf( esc_html__( 'Your business starts with %s', 'apparel' ), esc_html( get_bloginfo( 'name' ) ) ); ?>
+					</h2>
+					<p class="blog-exit-popup__subtitle">
+						<?php esc_html_e( 'Try 3 days free, then 1 €/month for 3 months. What are you waiting for?', 'apparel' ); ?>
+					</p>
+				</div>
+				<div class="blog-exit-popup__form-shell">
+					<p class="blog-exit-popup__form-title"><?php esc_html_e( 'Start for free', 'apparel' ); ?></p>
+					<p class="blog-exit-popup__form-note"><?php esc_html_e( 'You agree to receive marketing emails.', 'apparel' ); ?></p>
+					<div class="blog-exit-popup__form">
+						<?php echo do_shortcode( '[fluentform id="2"]' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+					</div>
+				</div>
+			</div>
+		</div>
+		<?php
+	}
+}
