@@ -5,6 +5,9 @@
 		var toc = document.querySelector( '.mbf-entry__toc' );
 		var tocList = document.querySelector( '.mbf-entry__toc-list' );
 		var contentArea = document.querySelector( '.mbf-entry__content-wrap .entry-content' );
+		var tocToggle = document.querySelector( '.mbf-entry__toc-toggle' );
+		var tocInner = document.querySelector( '.mbf-entry__toc-inner' );
+		var mobileQuery = window.matchMedia( '(max-width: 991.98px)' );
 
 		if ( ! toc || ! tocList || ! contentArea ) {
 			return;
@@ -14,6 +17,11 @@
 
 		if ( ! headings.length ) {
 			toc.classList.add( 'is-hidden' );
+
+			if ( tocToggle ) {
+				tocToggle.setAttribute( 'hidden', 'hidden' );
+			}
+
 			return;
 		}
 
@@ -87,6 +95,46 @@
 
 			tocItems.forEach( function ( tocItem ) {
 				observer.observe( tocItem.heading );
+			} );
+		}
+
+		if ( tocToggle && tocInner ) {
+			var setTocExpanded = function ( isExpanded ) {
+				tocToggle.setAttribute( 'aria-expanded', isExpanded ? 'true' : 'false' );
+
+				if ( isExpanded ) {
+					toc.classList.remove( 'is-collapsed' );
+					tocInner.removeAttribute( 'hidden' );
+					return;
+				}
+
+				toc.classList.add( 'is-collapsed' );
+				tocInner.setAttribute( 'hidden', 'hidden' );
+			};
+
+			var handleBreakpointChange = function () {
+				if ( mobileQuery.matches ) {
+					setTocExpanded( false );
+				} else {
+					setTocExpanded( true );
+				}
+			};
+
+			handleBreakpointChange();
+
+			if ( mobileQuery.addEventListener ) {
+				mobileQuery.addEventListener( 'change', handleBreakpointChange );
+			} else if ( mobileQuery.addListener ) {
+				mobileQuery.addListener( handleBreakpointChange );
+			}
+
+			tocToggle.addEventListener( 'click', function () {
+				if ( ! mobileQuery.matches ) {
+					return;
+				}
+
+				var isExpanded = tocToggle.getAttribute( 'aria-expanded' ) === 'true';
+				setTocExpanded( ! isExpanded );
 			} );
 		}
 	} );
