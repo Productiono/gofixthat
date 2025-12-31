@@ -22,14 +22,14 @@
 
 	<div class="mbf-entry__container <?php echo $is_blog_post ? 'mbf-entry__container--with-toc' : ''; ?>">
 
-		<?php
-		if ( $is_blog_post ) {
-			$sidebar_cta_url   = apply_filters( 'mbf_single_post_sidebar_cta_url', home_url( '/' ) );
-			$sidebar_cta_image = apply_filters( 'mbf_single_post_sidebar_cta_image', 'https://images.unsplash.com/photo-1545239351-1141bd82e8a6?auto=format&fit=crop&w=640&q=80' );
-			$sidebar_cta_title = apply_filters( 'mbf_single_post_sidebar_cta_title', __( 'The point of sale for all your sales.', 'apparel' ) );
-			$sidebar_cta_label = apply_filters( 'mbf_single_post_sidebar_cta_label', __( 'Start for free', 'apparel' ) );
-		}
-		?>
+	<?php
+	if ( $is_blog_post ) {
+		$sidebar_cta_url   = apply_filters( 'mbf_single_post_sidebar_cta_url', home_url( '/' ) );
+		$sidebar_cta_image = apply_filters( 'mbf_single_post_sidebar_cta_image', 'https://images.unsplash.com/photo-1545239351-1141bd82e8a6?auto=format&fit=crop&w=640&q=80' );
+		$sidebar_cta_title = apply_filters( 'mbf_single_post_sidebar_cta_title', __( 'The point of sale for all your sales.', 'apparel' ) );
+		$sidebar_cta_label = apply_filters( 'mbf_single_post_sidebar_cta_label', __( 'Start for free', 'apparel' ) );
+	}
+	?>
 
 		<?php
 		/**
@@ -44,6 +44,10 @@
 			<div class="mbf-entry__content-layout">
 				<aside class="mbf-entry__lead-form" aria-label="<?php esc_attr_e( 'Start your online business form', 'apparel' ); ?>">
 					<div class="mbf-entry__lead-form-card">
+						<div class="mbf-entry__lead-form-heading">
+							<p><?php esc_html_e( 'Start your online business today.', 'apparel' ); ?></p>
+							<p><?php esc_html_e( 'For free.', 'apparel' ); ?></p>
+						</div>
 						<?php echo do_shortcode( '[fluentform id="3"]' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 					</div>
 				</aside>
@@ -96,17 +100,33 @@
 					?>
 				</div>
 
-				<aside class="mbf-entry__ad" aria-label="<?php esc_attr_e( 'Advertisement', 'apparel' ); ?>">
-					<div class="mbf-entry__sidebar-cta">
-						<figure class="mbf-entry__sidebar-cta-media">
-							<img src="<?php echo esc_url( $sidebar_cta_image ); ?>" alt="<?php esc_attr_e( 'Point of sale checkout display', 'apparel' ); ?>" loading="lazy" />
-						</figure>
-						<h3 class="mbf-entry__sidebar-cta-title"><?php echo esc_html( $sidebar_cta_title ); ?></h3>
-						<a class="mbf-entry__sidebar-cta-button" href="<?php echo esc_url( $sidebar_cta_url ); ?>">
-							<?php echo esc_html( $sidebar_cta_label ); ?>
-						</a>
-					</div>
-				</aside>
+				<div class="mbf-entry__sidebar">
+					<nav class="mbf-entry__toc" aria-label="<?php esc_attr_e( 'Table of contents', 'apparel' ); ?>">
+						<div class="mbf-entry__toc-header">
+							<span class="mbf-entry__toc-title"><?php esc_html_e( 'Table of contents', 'apparel' ); ?></span>
+							<button class="mbf-entry__toc-toggle" type="button" aria-expanded="false">
+								<span class="mbf-entry__toc-toggle-label" data-label-collapsed="<?php esc_attr_e( 'Show', 'apparel' ); ?>" data-label-expanded="<?php esc_attr_e( 'Hide', 'apparel' ); ?>"><?php esc_html_e( 'Show', 'apparel' ); ?></span>
+								<span class="mbf-entry__toc-toggle-icon" aria-hidden="true"></span>
+							</button>
+						</div>
+						<div class="mbf-entry__toc-divider" aria-hidden="true"></div>
+						<div class="mbf-entry__toc-inner">
+							<ol class="mbf-entry__toc-list"></ol>
+						</div>
+					</nav>
+
+					<aside class="mbf-entry__ad" aria-label="<?php esc_attr_e( 'Advertisement', 'apparel' ); ?>">
+						<div class="mbf-entry__sidebar-cta">
+							<figure class="mbf-entry__sidebar-cta-media">
+								<img src="<?php echo esc_url( $sidebar_cta_image ); ?>" alt="<?php esc_attr_e( 'Point of sale checkout display', 'apparel' ); ?>" loading="lazy" />
+							</figure>
+							<h3 class="mbf-entry__sidebar-cta-title"><?php echo esc_html( $sidebar_cta_title ); ?></h3>
+							<a class="mbf-entry__sidebar-cta-button" href="<?php echo esc_url( $sidebar_cta_url ); ?>">
+								<?php echo esc_html( $sidebar_cta_label ); ?>
+							</a>
+						</div>
+					</aside>
+				</div>
 			</div>
 		<?php else : ?>
 			<div class="mbf-entry__content-wrap">

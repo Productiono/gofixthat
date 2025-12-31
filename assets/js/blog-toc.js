@@ -101,6 +101,10 @@
 		if ( tocToggle && tocInner ) {
 			var setTocExpanded = function ( isExpanded ) {
 				tocToggle.setAttribute( 'aria-expanded', isExpanded ? 'true' : 'false' );
+				var label = tocToggle.querySelector( '.mbf-entry__toc-toggle-label' );
+				if ( label ) {
+					label.textContent = isExpanded ? label.dataset.labelExpanded : label.dataset.labelCollapsed;
+				}
 
 				if ( isExpanded ) {
 					toc.classList.remove( 'is-collapsed' );
