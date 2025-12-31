@@ -280,6 +280,10 @@ if ( ! function_exists( 'mbf_entry_comments' ) ) {
 	 * Entry Comments
 	 */
 	function mbf_entry_comments() {
+		if ( is_singular( 'post' ) ) {
+			return;
+		}
+
 		if ( post_password_required() ) {
 			return;
 		}

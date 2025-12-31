@@ -6362,118 +6362,64 @@ body {
 		display: block;
 	}
 }
-.single-post .mbf-entry__toc {
+.single-post .mbf-entry__lead-form {
 	position: sticky;
 	top: calc(var(--mbf-header-height) + 24px);
 	align-self: start;
-	background: var(--mbf-layout-background);
-	border: 1px solid var(--mbf-color-border);
-	border-radius: var(--mbf-layout-elements-border-radius);
-	padding: 1.25rem;
+}
+.single-post .mbf-entry__lead-form-card {
+	background: #73f28d;
+	color: #000;
+	padding: 1.6rem 1.8rem;
+	border-radius: 2px;
 	box-shadow: 0 14px 40px rgba(0, 0, 0, 0.06);
-}
-@media (max-width: 991.98px) {
-	.single-post .mbf-entry__toc {
-		position: static;
-		margin-bottom: 1.25rem;
-		padding: 0.25rem;
-	}
-}
-.single-post .mbf-entry__toc-inner {
-	display: grid;
-	gap: 0.75rem;
-}
-.single-post .mbf-entry__toc-title {
 	font-family: var(--mbf-font-headings-family), sans-serif;
-	font-size: 0.95rem;
-	font-weight: 700;
-	text-transform: uppercase;
-	letter-spacing: 0.06em;
-	margin: 0;
 }
-.single-post .mbf-entry__toc-list {
-	margin: 0;
-	padding: 0;
-	list-style: none;
-	display: grid;
-	gap: 0.35rem;
+.single-post .mbf-entry__lead-form-card .fluentform {
+	color: #000;
 }
-.single-post .mbf-entry__toc-list li {
-	border-top: 1px solid var(--mbf-color-border);
-	padding-top: 0.75rem;
-}
-.single-post .mbf-entry__toc-list li:first-child {
-	border-top: none;
-	padding-top: 0;
-}
-.single-post .mbf-entry__toc-list a {
-	display: block;
-	text-decoration: none;
-	color: var(--mbf-color-secondary);
-	line-height: 1.5;
-	transition: color 0.2s ease, transform 0.2s ease;
-}
-.single-post .mbf-entry__toc-list a:hover,
-.single-post .mbf-entry__toc-list a:focus {
-	color: var(--mbf-color-primary);
-	transform: translateX(4px);
-}
-.single-post .mbf-entry__toc-list .is-active > a {
-	color: var(--mbf-color-primary);
-	font-weight: 600;
-}
-.single-post .mbf-entry__toc.is-hidden {
-	display: none;
-}
-.single-post .mbf-entry__toc-toggle {
-	display: none;
-	align-items: center;
-	justify-content: space-between;
+.single-post .mbf-entry__lead-form-card .ff-el-group,
+.single-post .mbf-entry__lead-form-card .ff-el-input--content,
+.single-post .mbf-entry__lead-form-card .ff-submit-btn {
 	width: 100%;
-	background: var(--mbf-layout-background);
-	border: 1px solid var(--mbf-color-border);
-	border-radius: var(--mbf-layout-elements-border-radius);
-	padding: 0.9rem 1rem;
-	font-family: var(--mbf-font-headings-family), sans-serif;
-	font-size: 0.95rem;
+}
+.single-post .mbf-entry__lead-form-card .ff-el-group label,
+.single-post .mbf-entry__lead-form-card .ff-el-group .ff-el-label {
+	color: #000;
 	font-weight: 700;
-	text-transform: uppercase;
-	letter-spacing: 0.06em;
-	cursor: pointer;
-	transition: border-color 0.2s ease, box-shadow 0.2s ease;
+	font-size: 1rem;
 }
-.single-post .mbf-entry__toc-toggle:focus-visible {
-	outline: 2px solid var(--mbf-color-primary);
-	outline-offset: 2px;
+.single-post .mbf-entry__lead-form-card .ff-el-group input,
+.single-post .mbf-entry__lead-form-card .ff-el-group textarea,
+.single-post .mbf-entry__lead-form-card .ff-el-group select {
+	border: none;
+	border-bottom: 2px solid #000;
+	border-radius: 0;
+	background: transparent;
+	color: #000;
+	padding-left: 0;
+	padding-right: 0;
 }
-.single-post .mbf-entry__toc-toggle-icon {
-	display: inline-block;
-	font-size: 1.1rem;
-	line-height: 1;
-	transform: rotate(0deg);
-	transition: transform 0.2s ease;
+.single-post .mbf-entry__lead-form-card .ff-btn-submit,
+.single-post .mbf-entry__lead-form-card .ff-el-group .ff-btn {
+	background: transparent;
+	border: none;
+	border-bottom: 2px solid #000;
+	border-radius: 0;
+	color: #000;
+	font-weight: 700;
+	padding: 0.45rem 0;
+	text-align: left;
 }
-.single-post .mbf-entry__toc-toggle[aria-expanded="true"] .mbf-entry__toc-toggle-icon {
-	transform: rotate(45deg);
+.single-post .mbf-entry__lead-form-card .ff-btn-submit:hover,
+.single-post .mbf-entry__lead-form-card .ff-btn-submit:focus {
+	color: #000;
+	text-decoration: underline;
 }
 @media (max-width: 991.98px) {
-	.single-post .mbf-entry__toc-toggle {
-		display: flex;
-		box-shadow: 0 10px 26px rgba(0, 0, 0, 0.06);
-	}
-	.single-post .mbf-entry__toc-inner {
-		padding: 0 1.1rem 1.1rem;
-	}
-	.single-post .mbf-entry__toc.is-collapsed .mbf-entry__toc-inner {
-		display: none;
-	}
-}
-@media (min-width: 992px) {
-	.single-post .mbf-entry__toc {
-		min-width: 220px;
-	}
-	.single-post .mbf-entry__toc-inner {
-		padding: 0;
+	.single-post .mbf-entry__lead-form {
+		position: static;
+		margin-bottom: 1.5rem;
 	}
 }
 
@@ -6514,25 +6460,52 @@ body {
 	top: calc(var(--mbf-header-height) + 24px);
 	align-self: start;
 }
-.single-post .mbf-entry__ad-inner {
-	background: var(--mbf-layout-background);
-	border: 1px solid var(--mbf-color-border);
-	border-radius: var(--mbf-layout-elements-border-radius);
-	padding: 1rem;
+.single-post .mbf-entry__sidebar-cta {
+	background: #eef7a6;
+	padding: 1.2rem 1.4rem 1.5rem;
+	border-radius: 2px;
 	box-shadow: 0 14px 40px rgba(0, 0, 0, 0.06);
 }
-.single-post .mbf-entry__ad img {
+.single-post .mbf-entry__sidebar-cta-media {
+	margin: 0 0 1rem;
+}
+.single-post .mbf-entry__sidebar-cta-media img {
 	display: block;
 	width: 100%;
 	height: auto;
-	border-radius: var(--mbf-layout-elements-border-radius);
+	border-radius: 2px;
+}
+.single-post .mbf-entry__sidebar-cta-title {
+	font-family: var(--mbf-font-headings-family), sans-serif;
+	font-size: 1.3rem;
+	font-weight: 800;
+	line-height: 1.25;
+	text-transform: uppercase;
+	margin: 0 0 1.25rem;
+	color: #000;
+}
+.single-post .mbf-entry__sidebar-cta-button {
+	display: inline-block;
+	background: #000;
+	color: #fff;
+	padding: 0.6rem 1.2rem;
+	border-radius: 999px;
+	text-decoration: none;
+	font-weight: 700;
+	transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.single-post .mbf-entry__sidebar-cta-button:hover,
+.single-post .mbf-entry__sidebar-cta-button:focus {
+	color: #fff;
+	transform: translateY(-2px);
+	box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
 }
 @media (max-width: 991.98px) {
 	.single-post .mbf-entry__ad {
 		position: static;
 		margin-top: 2rem;
 	}
-	.single-post .mbf-entry__ad-inner {
+	.single-post .mbf-entry__sidebar-cta {
 		max-width: 420px;
 		margin: 0 auto;
 	}

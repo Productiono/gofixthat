@@ -55,7 +55,7 @@ if ( $prev_post || $next_post ) {
 										</h2>
 
 										<?php
-											mbf_get_post_meta( array( 'date', 'author', 'comments' ), true, 'post_prev_next_meta' );
+											mbf_get_post_meta( array( 'date', 'author' ), true, 'post_prev_next_meta' );
 										?>
 									</div>
 								</div>
@@ -104,7 +104,7 @@ if ( $prev_post || $next_post ) {
 										</h2>
 
 										<?php
-											mbf_get_post_meta( array( 'date', 'author', 'comments' ), true, 'post_prev_next_meta' );
+											mbf_get_post_meta( array( 'date', 'author' ), true, 'post_prev_next_meta' );
 										?>
 									</div>
 								</div>

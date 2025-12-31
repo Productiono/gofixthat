@@ -23,6 +23,15 @@
 	<div class="mbf-entry__container <?php echo $is_blog_post ? 'mbf-entry__container--with-toc' : ''; ?>">
 
 		<?php
+		if ( $is_blog_post ) {
+			$sidebar_cta_url   = apply_filters( 'mbf_single_post_sidebar_cta_url', home_url( '/' ) );
+			$sidebar_cta_image = apply_filters( 'mbf_single_post_sidebar_cta_image', 'https://images.unsplash.com/photo-1545239351-1141bd82e8a6?auto=format&fit=crop&w=640&q=80' );
+			$sidebar_cta_title = apply_filters( 'mbf_single_post_sidebar_cta_title', __( 'The point of sale for all your sales.', 'apparel' ) );
+			$sidebar_cta_label = apply_filters( 'mbf_single_post_sidebar_cta_label', __( 'Start for free', 'apparel' ) );
+		}
+		?>
+
+		<?php
 		/**
 		 * The mbf_entry_container_start hook.
 		 *
@@ -33,14 +42,9 @@
 
 		<?php if ( $is_blog_post ) : ?>
 			<div class="mbf-entry__content-layout">
-				<aside class="mbf-entry__toc" aria-label="<?php esc_attr_e( 'Table of contents', 'apparel' ); ?>">
-					<button class="mbf-entry__toc-toggle" type="button" aria-expanded="true" aria-controls="mbf-entry-toc-list">
-						<?php esc_html_e( 'Table of contents', 'apparel' ); ?>
-						<span class="mbf-entry__toc-toggle-icon" aria-hidden="true">+</span>
-					</button>
-					<div class="mbf-entry__toc-inner">
-						<div class="mbf-entry__toc-title"><?php esc_html_e( 'Inhalt', 'apparel' ); ?></div>
-						<ol class="mbf-entry__toc-list" id="mbf-entry-toc-list"></ol>
+				<aside class="mbf-entry__lead-form" aria-label="<?php esc_attr_e( 'Start your online business form', 'apparel' ); ?>">
+					<div class="mbf-entry__lead-form-card">
+						<?php echo do_shortcode( '[fluentform id="3"]' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 					</div>
 				</aside>
 
@@ -93,8 +97,14 @@
 				</div>
 
 				<aside class="mbf-entry__ad" aria-label="<?php esc_attr_e( 'Advertisement', 'apparel' ); ?>">
-					<div class="mbf-entry__ad-inner">
-						<img src="https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=480&q=80" alt="<?php esc_attr_e( 'Advertisement', 'apparel' ); ?>" loading="lazy" />
+					<div class="mbf-entry__sidebar-cta">
+						<figure class="mbf-entry__sidebar-cta-media">
+							<img src="<?php echo esc_url( $sidebar_cta_image ); ?>" alt="<?php esc_attr_e( 'Point of sale checkout display', 'apparel' ); ?>" loading="lazy" />
+						</figure>
+						<h3 class="mbf-entry__sidebar-cta-title"><?php echo esc_html( $sidebar_cta_title ); ?></h3>
+						<a class="mbf-entry__sidebar-cta-button" href="<?php echo esc_url( $sidebar_cta_url ); ?>">
+							<?php echo esc_html( $sidebar_cta_label ); ?>
+						</a>
 					</div>
 				</aside>
 			</div>
