@@ -121,14 +121,12 @@
 		var handleBreakpointChange = function () {
 			if ( mobileQuery.matches ) {
 				moveTocToMobile();
-				if ( tocInner ) {
-					tocInner.setAttribute( 'hidden', 'hidden' );
-				}
 			} else {
 				moveTocToDesktop();
-				if ( tocInner ) {
-					tocInner.removeAttribute( 'hidden' );
-				}
+			}
+
+			if ( tocInner ) {
+				tocInner.removeAttribute( 'hidden' );
 			}
 		};
 
