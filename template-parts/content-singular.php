@@ -7,7 +7,61 @@
 
 ?>
 
-<?php $is_blog_post = is_singular( 'post' ); ?>
+<?php
+$is_blog_post       = is_singular( 'post' );
+$primary_media_html = '';
+$entry_content_html = '';
+$video_caption_html = '';
+
+if ( $is_blog_post ) {
+	$raw_content       = get_the_content();
+	$formatted_content = apply_filters( 'the_content', $raw_content );
+	$formatted_content = str_replace( ']]>', ']]&gt;', $formatted_content );
+
+	$video_block_match   = '';
+	$video_block_pattern = '';
+	$video_iframe_html   = '';
+	$inline_image_html   = has_post_thumbnail() ? get_the_post_thumbnail( null, 'mbf-large-uncropped', array( 'loading' => 'lazy', 'class' => 'mbf-inline-featured-image' ) ) : '';
+
+	$figure_pattern = '#<figure[^>]*>(?:(?!</figure>).)*<iframe[^>]+youtube(?:-nocookie)?\\.com[^>]*>.*?</iframe>.*?</figure>#is';
+	$iframe_pattern = '#<iframe[^>]+youtube(?:-nocookie)?\\.com[^>]*>.*?</iframe>#is';
+
+	if ( preg_match( $figure_pattern, $formatted_content, $matches ) ) {
+		$video_block_pattern = $figure_pattern;
+		$video_block_match   = $matches[0];
+		if ( preg_match( '#<figcaption[^>]*>.*?</figcaption>#is', $video_block_match, $caption_matches ) ) {
+			$video_caption_html = $caption_matches[0];
+		}
+	} elseif ( preg_match( $iframe_pattern, $formatted_content, $matches ) ) {
+		$video_block_pattern = $iframe_pattern;
+		$video_block_match   = $matches[0];
+	}
+
+	if ( $video_block_match && preg_match( $iframe_pattern, $video_block_match, $iframe_matches ) ) {
+		$video_iframe_html = $iframe_matches[0];
+	}
+
+	if ( $video_iframe_html ) {
+		$primary_media_html = '<figure class="mbf-entry__article-media mbf-entry__article-media--video"><div class="mbf-video-embed">' . $video_iframe_html . '</div>' . $video_caption_html . '</figure>';
+	} elseif ( has_post_thumbnail() ) {
+		$primary_media_html = '<figure class="mbf-entry__article-media">' . get_the_post_thumbnail( null, 'mbf-large-uncropped' ) . '</figure>';
+	}
+
+	$entry_content_html = $formatted_content;
+
+	if ( $video_block_pattern && $video_block_match ) {
+		if ( $inline_image_html ) {
+			$replacement_html   = '<figure class="wp-block-image mbf-entry__inline-featured">' . $inline_image_html . $video_caption_html . '</figure>';
+			$entry_content_html = preg_replace( $video_block_pattern, $replacement_html, $formatted_content, 1 );
+		} else {
+			$entry_content_html = preg_replace( $video_block_pattern, '', $formatted_content, 1 );
+		}
+	}
+} else {
+	$entry_content_html = apply_filters( 'the_content', get_the_content() );
+	$entry_content_html = str_replace( ']]>', ']]&gt;', $entry_content_html );
+}
+?>
 
 <div class="mbf-entry__wrap <?php echo $is_blog_post ? 'mbf-entry__wrap--post' : ''; ?>">
 
@@ -81,7 +135,9 @@
 							</div>
 						<?php endif; ?>
 
-						<?php if ( has_post_thumbnail() ) : ?>
+						<?php if ( $is_blog_post && $primary_media_html ) : ?>
+							<?php echo $primary_media_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+						<?php elseif ( has_post_thumbnail() ) : ?>
 							<figure class="mbf-entry__article-media">
 								<?php the_post_thumbnail( 'mbf-large-uncropped' ); ?>
 							</figure>
@@ -102,7 +158,7 @@
 					<?php endif; ?>
 
 					<div class="entry-content">
-						<?php the_content(); ?>
+						<?php echo $entry_content_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 					</div>
 
 					<?php
@@ -141,7 +197,7 @@
 				?>
 
 				<div class="entry-content">
-					<?php the_content(); ?>
+					<?php echo $entry_content_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 				</div>
 
 				<?php
