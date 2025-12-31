@@ -373,71 +373,14 @@ if ( ! function_exists( 'mbf_blog_exit_popup' ) ) {
 			return;
 		}
 
-		$background = '';
-
-		if ( is_singular( 'post' ) ) {
-			$background = get_the_post_thumbnail_url( get_queried_object_id(), 'full' );
-		} elseif ( is_category() && get_header_image() ) {
-			$background = get_header_image();
-		}
-
-		$collage_images = array();
-
-		if ( $background ) {
-			$collage_images[] = $background;
-		}
-
-		$recent_posts = get_posts(
-			array(
-				'post_type'        => 'post',
-				'numberposts'      => 8,
-				'post_status'      => 'publish',
-				'fields'           => 'ids',
-				'post__not_in'     => array( get_queried_object_id() ),
-				'suppress_filters' => false,
-			)
-		);
-
-		foreach ( $recent_posts as $post_id ) {
-			$thumbnail = get_the_post_thumbnail_url( $post_id, 'large' );
-
-			if ( $thumbnail ) {
-				$collage_images[] = $thumbnail;
-			}
-		}
-
-		if ( get_header_image() ) {
-			$collage_images[] = get_header_image();
-		}
-
-		$collage_images[] = get_template_directory_uri() . '/screenshot.png';
-		$collage_images   = array_values( array_unique( array_filter( $collage_images ) ) );
-		$collage_images   = apply_filters( 'mbf_blog_exit_popup_collage_images', $collage_images );
-
-		if ( empty( $collage_images ) ) {
-			$collage_images[] = get_template_directory_uri() . '/screenshot.png';
-		}
-
-		$collage_images = array_values( array_filter( $collage_images ) );
-		$collage_images = array_slice( $collage_images, 0, 12 );
-
-		$seed_collage = $collage_images;
-
-		while ( count( $collage_images ) < 8 && ! empty( $seed_collage ) ) {
-			$collage_images[] = $seed_collage[ count( $collage_images ) % count( $seed_collage ) ];
-		}
-
-		$primary_background = $collage_images[0] ?? get_template_directory_uri() . '/screenshot.png';
-		$style_attr         = $primary_background ? sprintf( ' style="%s"', esc_attr( '--blog-exit-popup-bg:url("' . esc_url( $primary_background ) . '");' ) ) : '';
 		$title_id   = 'blog-exit-popup-title';
+		$video_url  = get_template_directory_uri() . '/assets/static/background-video.webm';
 		?>
-		<div class="blog-exit-popup" aria-hidden="true" aria-modal="true" role="dialog" aria-labelledby="<?php echo esc_attr( $title_id ); ?>"<?php echo $style_attr; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
+		<div class="blog-exit-popup" aria-hidden="true" aria-modal="true" role="dialog" aria-labelledby="<?php echo esc_attr( $title_id ); ?>">
 			<div class="blog-exit-popup__backdrop" aria-hidden="true">
-				<div class="blog-exit-popup__collage">
-					<?php foreach ( $collage_images as $index => $image ) { ?>
-						<div class="blog-exit-popup__tile blog-exit-popup__tile--<?php echo esc_attr( $index + 1 ); ?>" style="<?php printf( '%s', esc_attr( '--blog-exit-tile-bg:url("' . esc_url( $image ) . '");' ) ); ?>"></div>
-					<?php } ?>
-				</div>
+				<video class="blog-exit-popup__video" autoplay muted loop playsinline>
+					<source src="<?php echo esc_url( $video_url ); ?>" type="video/webm">
+				</video>
 			</div>
 			<div class="blog-exit-popup__content">
 				<button type="button" class="blog-exit-popup__close" aria-label="<?php esc_attr_e( 'Close popup', 'apparel' ); ?>">×</button>
