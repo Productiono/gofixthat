@@ -19,6 +19,13 @@
 			return;
 		}
 
+		var faqHeading = Array.prototype.find.call(
+			headings,
+			function ( heading ) {
+				return heading.textContent.trim().toLowerCase() === 'frequently asked questions';
+			}
+		);
+
 		var slugCounts = {};
 		var tocItems = [];
 
@@ -117,5 +124,66 @@
 			}
 			setExpandedState( ! isExpanded );
 		} );
+
+		if ( faqHeading ) {
+			var faqWrapper = document.createElement( 'div' );
+			faqWrapper.className = 'mbf-faq-section';
+
+			var faqStopper = faqHeading.nextElementSibling;
+			faqHeading.parentNode.insertBefore( faqWrapper, faqHeading );
+			faqWrapper.appendChild( faqHeading );
+
+			while ( faqStopper && faqStopper.tagName !== 'H2' ) {
+				var nextSibling = faqStopper.nextElementSibling;
+				faqWrapper.appendChild( faqStopper );
+				faqStopper = nextSibling;
+			}
+
+			var faqEntries = [];
+			var faqQuestions = faqWrapper.querySelectorAll( 'h3, h4' );
+
+			faqQuestions.forEach( function ( questionHeading ) {
+				var question = questionHeading.textContent.trim();
+				var answerParts = [];
+				var sibling = questionHeading.nextElementSibling;
+
+				while ( sibling && sibling.tagName !== 'H2' && sibling.tagName !== 'H3' && sibling.tagName !== 'H4' ) {
+					var textContent = sibling.textContent.trim();
+					if ( textContent ) {
+						answerParts.push( textContent );
+					}
+					sibling = sibling.nextElementSibling;
+				}
+
+				if ( question && answerParts.length ) {
+					faqEntries.push( {
+						question: question,
+						answer: answerParts.join( '\n\n' ),
+					} );
+				}
+			} );
+
+			if ( faqEntries.length ) {
+				var faqSchema = {
+					'@context': 'https://schema.org',
+					'@type': 'FAQPage',
+					mainEntity: faqEntries.map( function ( entry ) {
+						return {
+							'@type': 'Question',
+							name: entry.question,
+							acceptedAnswer: {
+								'@type': 'Answer',
+								text: entry.answer,
+							},
+						};
+					} ),
+				};
+
+				var schemaNode = document.createElement( 'script' );
+				schemaNode.type = 'application/ld+json';
+				schemaNode.textContent = JSON.stringify( faqSchema );
+				document.head.appendChild( schemaNode );
+			}
+		}
 	} );
 }() );

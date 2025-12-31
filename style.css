@@ -6573,7 +6573,7 @@ body {
 	border: 1px solid #e6e8ed;
 	border-radius: 10px;
 	background: #fff;
-	padding: 1.25rem 1.4rem;
+	padding: 1.1rem 1.4rem 1.2rem;
 	font-family: var(--mbf-font-headings-family), sans-serif;
 	margin: 1.4rem 0 1.8rem;
 	box-shadow: none;
@@ -6595,7 +6595,7 @@ body {
 	align-items: center;
 	justify-content: space-between;
 	gap: 0.75rem;
-	margin-bottom: 0.85rem;
+	margin-bottom: 0.65rem;
 }
 .single-post .mbf-entry__toc-title {
 	font-size: 0.95rem;
@@ -6619,10 +6619,15 @@ body {
 }
 .single-post .mbf-entry__toc-divider {
 	border-bottom: 1px solid #e6e8ed;
-	margin: 0 -1.4rem 1rem;
+	margin: 0 -1.4rem 0.75rem;
 }
 .single-post .mbf-entry__toc-inner[hidden] {
 	display: none;
+}
+.single-post .mbf-entry__toc-inner {
+	background: #f8fbff;
+	border-radius: 8px;
+	padding: 0.85rem 1rem;
 }
 .single-post .mbf-entry__toc-list {
 	list-style: decimal;
@@ -6645,6 +6650,23 @@ body {
 }
 .single-post .mbf-entry__toc-list .is-active > a {
 	font-weight: 800;
+}
+
+.single-post .mbf-faq-section {
+	background: #f6f6f1;
+	border-radius: 12px;
+	padding: 1.5rem 1.6rem 1.7rem;
+	margin: 2.2rem 0;
+}
+.single-post .mbf-faq-section > *:first-child {
+	margin-top: 0;
+}
+.single-post .mbf-faq-section > *:last-child {
+	margin-bottom: 0;
+}
+.single-post .mbf-faq-section h3,
+.single-post .mbf-faq-section h4 {
+	margin-top: 1.25rem;
 }
 
 .single-post .mbf-entry__ad {
