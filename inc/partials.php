@@ -207,6 +207,10 @@ if ( ! function_exists( 'mbf_entry_header' ) ) {
 			return;
 		}
 
+		if ( is_singular( 'post' ) ) {
+			return;
+		}
+
 		if ( 'none' === mbf_get_page_header_type() ) {
 			return;
 		}
