@@ -15,10 +15,6 @@ $secondary_cta_url      = apply_filters( 'mbf_blog_cta_secondary_url', $secondar
 
 <section class="mbf-blog-cta" aria-labelledby="mbf-blog-cta-title">
 	<div class="mbf-blog-cta__inner">
-		<div class="mbf-blog-cta__media mbf-blog-cta__media--left" aria-hidden="true">
-			<div class="mbf-blog-cta__image mbf-blog-cta__image--portrait"></div>
-		</div>
-
 		<div class="mbf-blog-cta__content">
 			<p class="mbf-blog-cta__eyebrow"><?php esc_html_e( 'Guided resources for your next launch', 'apparel' ); ?></p>
 			<h2 id="mbf-blog-cta-title" class="mbf-blog-cta__title">
@@ -36,11 +32,6 @@ $secondary_cta_url      = apply_filters( 'mbf_blog_cta_secondary_url', $secondar
 					<?php echo esc_html( $secondary_cta_label ); ?>
 				</a>
 			</div>
-		</div>
-
-		<div class="mbf-blog-cta__media mbf-blog-cta__media--right" aria-hidden="true">
-			<div class="mbf-blog-cta__image mbf-blog-cta__image--landscape"></div>
-			<div class="mbf-blog-cta__image mbf-blog-cta__image--square"></div>
 		</div>
 	</div>
 </section>
