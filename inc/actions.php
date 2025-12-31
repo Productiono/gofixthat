@@ -22,6 +22,7 @@ add_action( 'mbf_main_content_before', 'mbf_theme_breadcrumbs', 100 );
 /**
  * Main
  */
+add_action( 'mbf_main_before', 'mbf_blog_post_cta', 5 );
 add_action( 'mbf_main_before', 'mbf_page_header', 100 );
 
 /**

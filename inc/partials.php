@@ -227,6 +227,19 @@ if ( ! function_exists( 'mbf_entry_header' ) ) {
 	}
 }
 
+if ( ! function_exists( 'mbf_blog_post_cta' ) ) {
+	/**
+	 * Static CTA for blog posts.
+	 */
+	function mbf_blog_post_cta() {
+		if ( ! is_singular( 'post' ) ) {
+			return;
+		}
+
+		get_template_part( 'template-parts/entry/entry-blog-cta' );
+	}
+}
+
 if ( ! function_exists( 'mbf_entry_tags' ) ) {
 	/**
 	 * Entry Tags
