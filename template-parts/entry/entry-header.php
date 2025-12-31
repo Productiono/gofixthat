@@ -47,7 +47,7 @@ if ( 'title' === $header_type ) {
 
 				setup_postdata( $post );
 
-				mbf_get_post_meta( array( 'category', 'date', 'author', 'comments' ), true, 'post_meta' );
+				mbf_get_post_meta( array( 'category', 'date', 'author' ), true, 'post_meta' );
 
 				wp_reset_postdata();
 			}
