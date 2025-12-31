@@ -24,6 +24,7 @@ add_action( 'mbf_main_content_before', 'mbf_theme_breadcrumbs', 100 );
  */
 add_action( 'mbf_main_before', 'mbf_blog_post_cta', 5 );
 add_action( 'mbf_main_before', 'mbf_page_header', 100 );
+add_action( 'wp_footer', 'mbf_blog_exit_popup' );
 
 /**
  * Category
