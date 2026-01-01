@@ -72,7 +72,15 @@ $term_desc     = $term ? term_description( $term ) : '';
 				<?php endwhile; ?>
 			</div>
 		<?php else : ?>
-			<p class="docs-list__empty"><?php esc_html_e( 'No documentation available in this category yet.', 'apparel' ); ?></p>
+			<div class="docs-list__empty" role="status" aria-live="polite">
+				<p><?php esc_html_e( 'No documentation available in this category yet.', 'apparel' ); ?></p>
+				<div class="docs-list__empty-actions">
+					<?php echo mbf_get_doc_search_form(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+					<a class="docs-list__empty-link" href="<?php echo esc_url( get_post_type_archive_link( 'doc_article' ) ); ?>">
+						<?php esc_html_e( 'Browse all documentation', 'apparel' ); ?>
+					</a>
+				</div>
+			</div>
 		<?php endif; ?>
 	</main>
 </div>
