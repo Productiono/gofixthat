@@ -14,56 +14,9 @@ $docs_categories = get_terms(
 	)
 );
 
-$docs_nav_links = array(
-	array(
-		'label' => __( 'Docs Home', 'apparel' ),
-		'url'   => get_post_type_archive_link( 'docs' ),
-		'class' => 'is-active',
-	),
-);
-
-if ( ! empty( $docs_categories ) && ! is_wp_error( $docs_categories ) ) {
-	foreach ( $docs_categories as $category ) {
-		$docs_nav_links[] = array(
-			'label' => $category->name,
-			'url'   => get_term_link( $category ),
-		);
-	}
-}
-
-$docs_nav_links[] = array(
-	'label' => __( 'All Articles', 'apparel' ),
-	'url'   => '#docs-articles',
-);
-
-$render_docs_nav_links = static function ( $nav_links ) {
-	foreach ( $nav_links as $nav_link ) {
-		$classes = isset( $nav_link['class'] ) ? $nav_link['class'] : '';
-		printf(
-			'<a class="%1$s" href="%2$s">%3$s</a>',
-			esc_attr( trim( $classes ) ),
-			esc_url( $nav_link['url'] ),
-			esc_html( $nav_link['label'] )
-		);
-	}
-};
-
-$docs_search_markup = '<form role="search" aria-label="' . esc_attr__( 'Search documentation', 'apparel' ) . '" action="' . esc_url( home_url( '/' ) ) . '">
-	<span class="docs-search-icon" aria-hidden="true">
-		<svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-			<path d="m15.5 15.5 4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
-			<circle cx="11" cy="11" r="5.5" stroke="currentColor" stroke-width="1.6" />
-		</svg>
-	</span>
-	<input type="search" name="s" placeholder="' . esc_attr__( 'Search docs...', 'apparel' ) . '" aria-label="' . esc_attr__( 'Search query', 'apparel' ) . '" />
-	<input type="hidden" name="post_type" value="docs" />
-	<span class="docs-search-hint" aria-hidden="true">Ctrl K</span>
-</form>';
-
-$docs_utility_markup = '';
-ob_start();
-mbf_component( 'header_scheme_toggle' );
-$docs_utility_markup = '<div class="docs-utility">' . ob_get_clean() . '</div>';
+$docs_nav_links      = mbf_get_docs_nav_links( $docs_categories );
+$docs_search_markup  = mbf_get_docs_search_markup();
+$docs_utility_markup = mbf_get_docs_utility_markup();
 ?>
 <!doctype html>
 <html <?php language_attributes(); ?>>
@@ -75,19 +28,6 @@ $docs_utility_markup = '<div class="docs-utility">' . ob_get_clean() . '</div>';
 	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 	<?php wp_head(); ?>
 	<style>
-		:root {
-			--docs-text: #1d1d1d;
-			--docs-muted: #4a4a4a;
-			--docs-border: #e3e3e3;
-			--docs-surface: #f7f7f7;
-			--docs-card: #ffffff;
-			--docs-accent: #181818;
-		}
-
-		* {
-			box-sizing: border-box;
-		}
-
 		body.docs-landing-page {
 			margin: 0;
 			background: linear-gradient(180deg, #f6f6f6 0%, #f5f5f5 38%, #ffffff 80%);
@@ -96,219 +36,7 @@ $docs_utility_markup = '<div class="docs-utility">' . ob_get_clean() . '</div>';
 			-webkit-font-smoothing: antialiased;
 		}
 
-		.docs-page {
-			min-height: 100vh;
-			display: flex;
-			flex-direction: column;
-			background: transparent;
-		}
-
-		.docs-header {
-			position: sticky;
-			top: 0;
-			z-index: 50;
-			background: #fbfbfb;
-			border-bottom: 1px solid #ededed;
-			box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
-		}
-
-		.docs-header-inner {
-			max-width: 1320px;
-			margin: 0 auto;
-			padding: 16px 32px 14px;
-			display: grid;
-			grid-template-columns: auto 1fr auto;
-			align-items: center;
-			gap: 22px;
-		}
-
-		.docs-brand-nav {
-			display: flex;
-			align-items: center;
-			min-width: 0;
-			gap: 20px;
-		}
-
-		.docs-mobile-menu {
-			display: none;
-			align-items: center;
-			justify-content: center;
-			width: 44px;
-			height: 44px;
-			border-radius: 12px;
-			border: 1px solid #e3e3e3;
-			background: #fff;
-			box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
-			color: #1f1f1f;
-			cursor: pointer;
-		}
-
-		.docs-mobile-menu svg {
-			width: 20px;
-			height: 20px;
-		}
-
-		.docs-brand-nav .mbf-logo {
-			display: flex;
-			align-items: center;
-		}
-
-		.docs-brand-nav .mbf-header__logo img {
-			max-height: 32px;
-			width: auto;
-		}
-
-		.docs-nav {
-			display: flex;
-			align-items: center;
-			gap: 18px;
-			font-weight: 600;
-			font-size: 14px;
-			margin-left: 6px;
-			flex-wrap: wrap;
-		}
-
-		.docs-nav a {
-			text-decoration: none;
-			color: #2c2c2c;
-			padding: 10px 4px 12px;
-			border-bottom: 2px solid transparent;
-			transition: color 0.15s ease, border-color 0.15s ease;
-			display: inline-flex;
-			align-items: center;
-			gap: 8px;
-		}
-
-		.docs-nav a.is-active {
-			color: #111;
-			border-color: #1f1f1f;
-		}
-
-		.docs-nav a:hover {
-			color: #000;
-			border-color: rgba(0, 0, 0, 0.12);
-		}
-
-		.docs-search {
-			display: flex;
-			justify-content: center;
-			align-items: center;
-		}
-
-		.docs-search form {
-			width: min(720px, 100%);
-			position: relative;
-		}
-
-		.docs-search input {
-			width: 100%;
-			padding: 12px 110px 12px 44px;
-			border-radius: 14px;
-			border: 1px solid #dcdcdc;
-			background: #fff;
-			box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7), 0 10px 30px rgba(0, 0, 0, 0.06);
-			font-size: 14px;
-			color: #262626;
-			outline: none;
-		}
-
-		.docs-search input::placeholder {
-			color: #7a7a7a;
-		}
-
-		.docs-search .docs-search-icon {
-			position: absolute;
-			left: 16px;
-			top: 50%;
-			transform: translateY(-50%);
-			color: #9a9a9a;
-		}
-
-		.docs-search .docs-search-hint {
-			position: absolute;
-			right: 14px;
-			top: 50%;
-			transform: translateY(-50%);
-			font-size: 12px;
-			color: #5e5e5e;
-			background: #f1f1f1;
-			border: 1px solid #d9d9d9;
-			border-radius: 8px;
-			padding: 6px 8px;
-			font-weight: 600;
-		}
-
-		.docs-utility {
-			display: flex;
-			justify-content: flex-end;
-			align-items: center;
-			gap: 16px;
-			font-size: 13px;
-			color: #3f3f3f;
-			font-weight: 600;
-		}
-
-		.docs-utility a {
-			color: inherit;
-			text-decoration: none;
-		}
-
-		.docs-utility .mbf-site-scheme-toggle {
-			display: inline-flex;
-			align-items: center;
-			gap: 8px;
-			padding: 8px 10px;
-			border-radius: 12px;
-			border: 1px solid #e5e5e5;
-			background: #fff;
-			box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-			cursor: pointer;
-		}
-
-		.docs-utility .mbf-site__scheme-toggle-element {
-			background: #0f0f0f;
-			color: #fff;
-		}
-
-		.docs-mobile-panel {
-			display: none;
-			padding: 12px 18px 18px;
-			background: #ffffff;
-			border-bottom: 1px solid #ededed;
-			box-shadow: 0 14px 30px rgba(0, 0, 0, 0.06);
-			gap: 14px;
-		}
-
-		.docs-mobile-panel[hidden] {
-			display: none !important;
-		}
-
-		.docs-header.is-mobile-open .docs-mobile-panel {
-			display: grid;
-		}
-
-		.docs-nav-mobile {
-			display: grid;
-			gap: 8px;
-			font-weight: 700;
-		}
-
-		.docs-nav-mobile a {
-			display: block;
-			padding: 10px 6px;
-			border-radius: 10px;
-			text-decoration: none;
-			color: #1f1f1f;
-			background: #f7f7f7;
-			border: 1px solid #ececec;
-			box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
-		}
-
-		.docs-nav-mobile a:hover,
-		.docs-nav-mobile a.is-active {
-			background: #f0f0f0;
-			border-color: #e0e0e0;
-		}
+		<?php echo mbf_get_docs_header_css(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 
 		.docs-hero {
 			position: relative;
@@ -615,36 +343,7 @@ if ( function_exists( 'wp_body_open' ) ) {
 ?>
 
 <div class="docs-page">
-	<header class="docs-header">
-		<div class="docs-header-inner">
-			<div class="docs-brand-nav">
-				<?php mbf_component( 'header_logo' ); ?>
-				<nav class="docs-nav" aria-label="<?php esc_attr_e( 'Documentation navigation', 'apparel' ); ?>">
-					<?php $render_docs_nav_links( $docs_nav_links ); ?>
-				</nav>
-			</div>
-			<div class="docs-search">
-				<?php echo $docs_search_markup; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-			</div>
-			<?php echo $docs_utility_markup; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-			<button class="docs-mobile-menu" type="button" aria-label="<?php esc_attr_e( 'Open menu', 'apparel' ); ?>" aria-expanded="false" data-docs-mobile-toggle>
-				<svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-					<path d="M5 7h14M5 12h14M5 17h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
-				</svg>
-			</button>
-		</div>
-		<div class="docs-mobile-panel" data-docs-mobile-panel hidden>
-			<nav class="docs-nav docs-nav-mobile" aria-label="<?php esc_attr_e( 'Documentation navigation', 'apparel' ); ?>">
-				<?php $render_docs_nav_links( $docs_nav_links ); ?>
-			</nav>
-			<div class="docs-search docs-search-mobile">
-				<?php echo $docs_search_markup; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-			</div>
-			<div class="docs-utility docs-utility-mobile">
-				<?php echo $docs_utility_markup; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-			</div>
-		</div>
-	</header>
+	<?php mbf_render_docs_header( array( 'nav_links' => $docs_nav_links, 'search_markup' => $docs_search_markup, 'utility_markup' => $docs_utility_markup ) ); ?>
 
 	<?php mbf_site_search(); ?>
 
@@ -771,44 +470,7 @@ if ( function_exists( 'wp_body_open' ) ) {
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-	const header = document.querySelector('.docs-header');
-	const mobileToggle = document.querySelector('[data-docs-mobile-toggle]');
-	const mobilePanel = document.querySelector('[data-docs-mobile-panel]');
-
-	if (header && mobileToggle && mobilePanel) {
-		const closeMenu = () => {
-			header.classList.remove('is-mobile-open');
-			mobilePanel.setAttribute('hidden', 'hidden');
-			mobileToggle.setAttribute('aria-expanded', 'false');
-			mobileToggle.setAttribute('aria-label', '<?php echo esc_js( __( 'Open menu', 'apparel' ) ); ?>');
-		};
-
-		mobileToggle.addEventListener('click', () => {
-			const isOpen = header.classList.toggle('is-mobile-open');
-			mobileToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-			mobileToggle.setAttribute('aria-label', isOpen ? '<?php echo esc_js( __( 'Close menu', 'apparel' ) ); ?>' : '<?php echo esc_js( __( 'Open menu', 'apparel' ) ); ?>');
-
-			if (isOpen) {
-				mobilePanel.removeAttribute('hidden');
-			} else {
-				mobilePanel.setAttribute('hidden', 'hidden');
-			}
-		});
-
-		window.addEventListener('resize', () => {
-			if (window.innerWidth > 960 && header.classList.contains('is-mobile-open')) {
-				closeMenu();
-			}
-		});
-
-		document.addEventListener('keyup', (event) => {
-			if (event.key === 'Escape' && header.classList.contains('is-mobile-open')) {
-				closeMenu();
-			}
-		});
-	}
-});
+<?php echo mbf_docs_header_script(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 </script>
 
 <?php wp_footer(); ?>
