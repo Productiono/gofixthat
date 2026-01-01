@@ -229,3 +229,29 @@ add_filter(
 	10,
 	2
 );
+
+/**
+ * Serve the custom docs landing template when visiting /docs.
+ */
+function apparel_docs_template_route( $template ) {
+	$request_path = isset( $_SERVER['REQUEST_URI'] ) ? wp_parse_url( esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) ), PHP_URL_PATH ) : '';
+	$docs_path    = wp_parse_url( home_url( '/docs' ), PHP_URL_PATH );
+
+	$request_path = trim( $request_path, '/' );
+	$docs_path    = trim( $docs_path, '/' );
+
+	if ( $docs_path && $request_path === $docs_path ) {
+		global $wp_query;
+
+		if ( $wp_query instanceof WP_Query ) {
+			$wp_query->is_404 = false;
+		}
+
+		status_header( 200 );
+
+		return get_theme_file_path( '/template-docs.php' );
+	}
+
+	return $template;
+}
+add_filter( 'template_include', 'apparel_docs_template_route', 99 );
