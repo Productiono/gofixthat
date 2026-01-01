@@ -166,6 +166,7 @@ if ( ! class_exists( 'Apparel' ) ) {
 			require_once get_theme_file_path( '/inc/post-meta.php' );
 			require_once get_theme_file_path( '/inc/load-more.php' );
 			require_once get_theme_file_path( '/inc/deprecated.php' );
+			require_once get_theme_file_path( '/inc/docs.php' );
 		}
 
 		/**
