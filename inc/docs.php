@@ -119,9 +119,12 @@ function mbf_register_doc_article() {
 				'search_items'  => esc_html__( 'Search Doc Categories', 'apparel' ),
 			),
 			'hierarchical'      => true,
+			'public'            => true,
+			'publicly_queryable' => true,
 			'show_ui'           => true,
 			'show_admin_column' => true,
 			'show_in_rest'      => true,
+			'show_in_nav_menus' => true,
 			'capabilities'      => array(
 				'manage_terms' => 'manage_doc_terms',
 				'edit_terms'   => 'manage_doc_terms',
@@ -132,6 +135,7 @@ function mbf_register_doc_article() {
 				'slug'       => 'docs-category',
 				'with_front' => false,
 			),
+			'query_var'         => 'doc_category',
 		)
 	);
 
@@ -148,9 +152,12 @@ function mbf_register_doc_article() {
 				'search_items'  => esc_html__( 'Search Doc Subcategories', 'apparel' ),
 			),
 			'hierarchical'      => true,
+			'public'            => true,
+			'publicly_queryable' => true,
 			'show_ui'           => true,
 			'show_admin_column' => true,
 			'show_in_rest'      => true,
+			'show_in_nav_menus' => true,
 			'capabilities'      => array(
 				'manage_terms' => 'manage_doc_terms',
 				'edit_terms'   => 'manage_doc_terms',
@@ -161,6 +168,7 @@ function mbf_register_doc_article() {
 				'slug'       => 'docs-subcategory',
 				'with_front' => false,
 			),
+			'query_var'         => 'doc_subcategory',
 		)
 	);
 
@@ -187,6 +195,7 @@ function mbf_register_doc_article() {
 			'show_ui'             => true,
 			'show_in_rest'        => true,
 			'show_in_nav_menus'   => true,
+			'publicly_queryable'  => true,
 			'supports'            => array(
 				'title',
 				'editor',
@@ -207,7 +216,6 @@ function mbf_register_doc_article() {
 				'slug'       => $permalink_base . '%doc_category%/%doc_subcategory%',
 				'with_front' => false,
 			),
-			'publicly_queryable'  => true,
 			'query_var'           => 'doc_article',
 			'show_in_menu'        => false,
 			'has_archive'         => $options['permalink_base'],
@@ -337,6 +345,193 @@ function mbf_doc_article_permalink( $permalink, $post ) {
 	return $permalink;
 }
 add_filter( 'post_type_link', 'mbf_doc_article_permalink', 10, 2 );
+
+/**
+ * Get the primary term assigned to a Doc Article for a taxonomy.
+ *
+ * @param int    $post_id  Post ID.
+ * @param string $taxonomy Taxonomy name.
+ * @return WP_Term|null
+ */
+function mbf_docs_get_primary_term( $post_id, $taxonomy ) {
+	$terms = get_the_terms( $post_id, $taxonomy );
+
+	if ( is_wp_error( $terms ) || empty( $terms ) ) {
+		return null;
+	}
+
+	return array_shift( $terms );
+}
+
+/**
+ * Build a term lineage array from ancestors to the term itself.
+ *
+ * @param WP_Term $term Term object.
+ * @return array
+ */
+function mbf_docs_get_term_lineage( $term ) {
+	$lineage = array();
+
+	$ancestors = array_reverse( get_ancestors( $term->term_id, $term->taxonomy, 'taxonomy' ) );
+
+	foreach ( $ancestors as $ancestor_id ) {
+		$ancestor = get_term( $ancestor_id, $term->taxonomy );
+
+		if ( $ancestor && ! is_wp_error( $ancestor ) ) {
+			$lineage[] = $ancestor;
+		}
+	}
+
+	$lineage[] = $term;
+
+	return $lineage;
+}
+
+/**
+ * Build breadcrumb items for Docs contexts.
+ *
+ * @return array
+ */
+function mbf_docs_get_breadcrumb_items() {
+	if ( ! ( is_post_type_archive( 'doc_article' ) || is_tax( array( 'doc_category', 'doc_subcategory' ) ) || is_singular( 'doc_article' ) ) ) {
+		return array();
+	}
+
+	$items = array(
+		array(
+			'name' => get_bloginfo( 'name' ),
+			'link' => home_url( '/' ),
+		),
+	);
+
+	$archive_link  = get_post_type_archive_link( 'doc_article' );
+	$archive_title = post_type_archive_title( '', false );
+
+	if ( $archive_link ) {
+		$items[] = array(
+			'name' => $archive_title ? wp_strip_all_tags( $archive_title ) : esc_html__( 'Documentation', 'apparel' ),
+			'link' => $archive_link,
+		);
+	}
+
+	if ( is_tax( array( 'doc_category', 'doc_subcategory' ) ) ) {
+		$term = get_queried_object();
+
+		if ( $term instanceof WP_Term ) {
+			$terms = mbf_docs_get_term_lineage( $term );
+
+			foreach ( $terms as $taxonomy_term ) {
+				$term_link = get_term_link( $taxonomy_term );
+
+				if ( $term_link && ! is_wp_error( $term_link ) ) {
+					$items[] = array(
+						'name' => wp_strip_all_tags( $taxonomy_term->name ),
+						'link' => $term_link,
+					);
+				}
+			}
+		}
+	} elseif ( is_singular( 'doc_article' ) ) {
+		$seen_terms = array();
+
+		foreach ( array( 'doc_category', 'doc_subcategory' ) as $taxonomy ) {
+			$primary_term = mbf_docs_get_primary_term( get_the_ID(), $taxonomy );
+
+			if ( $primary_term instanceof WP_Term ) {
+				$terms = mbf_docs_get_term_lineage( $primary_term );
+
+				foreach ( $terms as $taxonomy_term ) {
+					if ( in_array( $taxonomy_term->term_id, $seen_terms, true ) ) {
+						continue;
+					}
+
+					$term_link = get_term_link( $taxonomy_term );
+
+					if ( $term_link && ! is_wp_error( $term_link ) ) {
+						$items[]    = array(
+							'name' => wp_strip_all_tags( $taxonomy_term->name ),
+							'link' => $term_link,
+						);
+						$seen_terms[] = $taxonomy_term->term_id;
+					}
+				}
+			}
+		}
+
+		$items[] = array(
+			'name' => wp_strip_all_tags( get_the_title() ),
+			'link' => get_permalink(),
+		);
+	}
+
+	return $items;
+}
+
+/**
+ * Render breadcrumb structured data for Docs templates.
+ */
+function mbf_docs_render_breadcrumb_structured_data() {
+	if ( mbf_doing_request() ) {
+		return;
+	}
+
+	$items = mbf_docs_get_breadcrumb_items();
+
+	if ( count( $items ) < 2 ) {
+		return;
+	}
+
+	$list_items = array();
+	$position   = 1;
+
+	foreach ( $items as $item ) {
+		if ( empty( $item['name'] ) || empty( $item['link'] ) ) {
+			continue;
+		}
+
+		$list_items[] = array(
+			'@type'    => 'ListItem',
+			'position' => $position,
+			'name'     => $item['name'],
+			'item'     => $item['link'],
+		);
+
+		++$position;
+	}
+
+	if ( count( $list_items ) < 2 ) {
+		return;
+	}
+
+	$structured_data = array(
+		'@context'        => 'https://schema.org',
+		'@type'           => 'BreadcrumbList',
+		'itemListElement' => $list_items,
+	);
+
+	echo "\n" . '<script type="application/ld+json">' . wp_json_encode( $structured_data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ) . '</script>' . "\n";
+}
+add_action( 'wp_head', 'mbf_docs_render_breadcrumb_structured_data' );
+
+/**
+ * Output a robots noindex tag for empty Doc archives.
+ */
+function mbf_docs_output_noindex_meta() {
+	if ( mbf_doing_request() ) {
+		return;
+	}
+
+	if ( ! ( is_post_type_archive( 'doc_article' ) || is_tax( array( 'doc_category', 'doc_subcategory' ) ) ) ) {
+		return;
+	}
+
+	if ( have_posts() ) {
+		return;
+	}
+
+	echo "\n" . '<meta name="robots" content="noindex,follow" />' . "\n";
+}
+add_action( 'wp_head', 'mbf_docs_output_noindex_meta', 1 );
 
 /**
  * Register Docs admin menu and submenu pages.
