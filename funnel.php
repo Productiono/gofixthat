@@ -7,6 +7,10 @@
  */
 
 get_header();
+
+// Remove default title outputs for this template.
+remove_action( 'mbf_main_before', 'mbf_entry_header', 10 );
+remove_action( 'mbf_main_before', 'mbf_page_header', 100 );
 ?>
 
 <div id="primary" class="mbf-content-area">
