@@ -282,7 +282,11 @@ if ( ! function_exists( 'mbf_search_only_posts' ) ) {
 	 */
 	function mbf_search_only_posts( $query ) {
 		if ( ! is_admin() && $query->is_main_query() && $query->is_search ) {
-			$query->set( 'post_type', 'post' );
+			$post_type = $query->get( 'post_type' );
+
+			if ( empty( $post_type ) ) {
+				$query->set( 'post_type', 'post' );
+			}
 		}
 	}
 	add_action( 'pre_get_posts', 'mbf_search_only_posts' );
