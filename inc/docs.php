@@ -56,6 +56,30 @@ function mbf_docs_sanitize_options( $options ) {
 }
 
 /**
+ * Register rewrite tags for Doc Article taxonomy placeholders.
+ */
+function mbf_register_doc_article_rewrite_tags() {
+	add_rewrite_tag( '%doc_category%', '([^/]+)', 'doc_category=' );
+	add_rewrite_tag( '%doc_subcategory%', '([^/]+)', 'doc_subcategory=' );
+}
+add_action( 'init', 'mbf_register_doc_article_rewrite_tags', 5 );
+
+/**
+ * Register Doc Article rewrite rules.
+ */
+function mbf_register_doc_article_rewrite_rules() {
+	$options        = mbf_docs_get_options();
+	$permalink_base = trailingslashit( $options['permalink_base'] );
+
+	add_rewrite_rule(
+		'^' . $permalink_base . '([^/]+)/([^/]+)/([^/]+)/?$',
+		'index.php?post_type=doc_article&name=$matches[3]&doc_category=$matches[1]&doc_subcategory=$matches[2]',
+		'top'
+	);
+}
+add_action( 'init', 'mbf_register_doc_article_rewrite_rules' );
+
+/**
  * Get the first taxonomy term slug for a post.
  *
  * @param int    $post_id  Post ID.
@@ -81,9 +105,6 @@ function mbf_get_doc_article_term_slug( $post_id, $taxonomy, $fallback ) {
 function mbf_register_doc_article() {
 	$options        = mbf_docs_get_options();
 	$permalink_base = trailingslashit( $options['permalink_base'] );
-
-	add_rewrite_tag( '%doc_category%', '([^/]+)', 'doc_category=' );
-	add_rewrite_tag( '%doc_subcategory%', '([^/]+)', 'doc_subcategory=' );
 
 	register_taxonomy(
 		'doc_category',
@@ -191,12 +212,6 @@ function mbf_register_doc_article() {
 			'show_in_menu'        => false,
 			'has_archive'         => $options['permalink_base'],
 		)
-	);
-
-	add_rewrite_rule(
-		'^' . $permalink_base . '([^/]+)/([^/]+)/([^/]+)/?$',
-		'index.php?post_type=doc_article&name=$matches[3]&doc_category=$matches[1]&doc_subcategory=$matches[2]',
-		'top'
 	);
 }
 add_action( 'init', 'mbf_register_doc_article' );
@@ -635,19 +650,30 @@ add_action( 'pre_get_posts', 'mbf_doc_article_order_query' );
  *
  * @param mixed $old_value Previous value.
  * @param mixed $value     New value.
- * @param string $option   Option name.
  */
-function mbf_docs_maybe_flush_rewrite( $old_value, $value, $option ) {
-	unset( $option );
-
-	$old_base = isset( $old_value['permalink_base'] ) ? $old_value['permalink_base'] : mbf_docs_default_options()['permalink_base'];
-	$new_base = isset( $value['permalink_base'] ) ? $value['permalink_base'] : mbf_docs_default_options()['permalink_base'];
-
-	if ( $old_base !== $new_base ) {
-		flush_rewrite_rules();
+function mbf_docs_schedule_rewrite_flush( $old_value, $value ) {
+	if ( $old_value === $value ) {
+		return;
 	}
+
+	update_option( 'mbf_docs_flush_rewrite_rules', '1', false );
 }
-add_action( 'update_option_mbf_docs_system_options', 'mbf_docs_maybe_flush_rewrite', 10, 3 );
+add_action( 'update_option_mbf_docs_system_options', 'mbf_docs_schedule_rewrite_flush', 10, 2 );
+
+/**
+ * Flush rewrite rules on the next init after settings update.
+ */
+function mbf_docs_maybe_flush_rewrite() {
+	$should_flush = get_option( 'mbf_docs_flush_rewrite_rules', '0' );
+
+	if ( '1' !== (string) $should_flush ) {
+		return;
+	}
+
+	flush_rewrite_rules();
+	delete_option( 'mbf_docs_flush_rewrite_rules' );
+}
+add_action( 'init', 'mbf_docs_maybe_flush_rewrite', 20 );
 
 /**
  * Canonical redirect for doc article permalinks.
@@ -657,9 +683,25 @@ function mbf_redirect_doc_article_canonical() {
 		return;
 	}
 
+	$post_id = get_queried_object_id();
+	if ( ! $post_id ) {
+		return;
+	}
+
 	global $wp;
 
-	$canonical_url  = get_permalink();
+	$canonical_url  = get_permalink( $post_id );
+	$category_slug    = mbf_get_doc_article_term_slug( $post_id, 'doc_category', 'uncategorized' );
+	$subcategory_slug = mbf_get_doc_article_term_slug( $post_id, 'doc_subcategory', 'general' );
+
+	$requested_category    = sanitize_title( (string) get_query_var( 'doc_category' ) );
+	$requested_subcategory = sanitize_title( (string) get_query_var( 'doc_subcategory' ) );
+
+	if ( ( $requested_category && $requested_category !== $category_slug ) || ( $requested_subcategory && $requested_subcategory !== $subcategory_slug ) ) {
+		wp_safe_redirect( $canonical_url, 301 );
+		exit;
+	}
+
 	$canonical_path = trailingslashit( wp_parse_url( $canonical_url, PHP_URL_PATH ) );
 	$request_path   = isset( $wp->request ) ? trailingslashit( '/' . ltrim( $wp->request, '/' ) ) : '';
 
