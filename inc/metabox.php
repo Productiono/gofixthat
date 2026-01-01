@@ -78,12 +78,16 @@ add_action( 'product_cat_edit_form_fields', 'mbf_mb_product_cat_options_edit', 1
  */
 function mbf_mb_product_cat_options_save( $term_id, $taxonomy ) {
 
-	if ( __return_false() ) {
-		check_ajax_referer();
+	if ( ! isset( $_POST['mbf_mb_product_cat_options'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['mbf_mb_product_cat_options'] ) ), 'product_cat_options' ) ) {
+		return;
+	}
+
+	if ( ! current_user_can( 'manage_product_terms' ) ) {
+		return;
 	}
 
 	if ( isset( $_POST['mbf_hero_image'] ) ) {
-		$mbf_hero_image = sanitize_text_field( $_POST['mbf_hero_image'] );
+		$mbf_hero_image = absint( wp_unslash( $_POST['mbf_hero_image'] ) );
 
 		update_term_meta( $term_id, 'mbf_hero_image', $mbf_hero_image );
 	}

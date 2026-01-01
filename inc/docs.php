@@ -39,6 +39,10 @@ function mbf_docs_get_options() {
  * @return array
  */
 function mbf_docs_sanitize_options( $options ) {
+	if ( ! current_user_can( 'manage_options' ) ) {
+		return mbf_docs_default_options();
+	}
+
 	$defaults = mbf_docs_default_options();
 
 	$clean = array();
@@ -646,6 +650,10 @@ add_action( 'admin_init', 'mbf_register_docs_settings' );
  * Render the settings page for Docs.
  */
 function mbf_render_docs_settings_page() {
+	if ( ! current_user_can( 'manage_options' ) ) {
+		wp_die( esc_html__( 'You are not allowed to manage Docs settings.', 'apparel' ) );
+	}
+
 	?>
 	<div class="wrap">
 		<h1><?php esc_html_e( 'Docs Settings', 'apparel' ); ?></h1>
@@ -1064,7 +1072,7 @@ function mbf_save_doc_article_meta( $post_id, $post, $update ) {
 		return;
 	}
 
-	$order = isset( $_POST['mbf_doc_display_order'] ) ? absint( $_POST['mbf_doc_display_order'] ) : 0;
+	$order = isset( $_POST['mbf_doc_display_order'] ) ? absint( wp_unslash( $_POST['mbf_doc_display_order'] ) ) : 0;
 	update_post_meta( $post_id, 'doc_display_order', $order );
 
 	$feature_flag = ! empty( $_POST['mbf_doc_feature_flag'] );
@@ -1146,6 +1154,10 @@ function mbf_can_submit_docs() {
  * @return WP_REST_Response|WP_Error
  */
 function mbf_handle_doc_submission( WP_REST_Request $request ) {
+	if ( ! current_user_can( 'edit_doc_articles' ) ) {
+		return new WP_Error( 'mbf_doc_permission_denied', esc_html__( 'You are not allowed to submit doc articles.', 'apparel' ), array( 'status' => 403 ) );
+	}
+
 	$category_id    = $request->get_param( 'doc_category' );
 	$subcategory_id = $request->get_param( 'doc_subcategory' );
 
