@@ -200,34 +200,37 @@ if ( ! class_exists( 'Apparel' ) ) {
 	new Apparel();
 }
 
-// Disable the block editor for posts, pages, and docs post type.
-add_filter(
-	'use_block_editor_for_post_type',
-	function( $use_block_editor, $post_type ) {
-		$classic_types = array( 'post', 'page', 'docs' );
+/**
+ * Disable the block editor for Doc Articles only.
+ *
+ * @param bool   $use_block_editor Whether to enable block editor.
+ * @param string $post_type        Current post type.
+ * @return bool
+ */
+function mbf_disable_gutenberg_for_docs( $use_block_editor, $post_type ) {
+	if ( 'doc_article' === $post_type ) {
+		return false;
+	}
 
-		if ( in_array( $post_type, $classic_types, true ) ) {
-			return false;
+	return $use_block_editor;
+}
+add_filter( 'use_block_editor_for_post_type', 'mbf_disable_gutenberg_for_docs', 10, 2 );
+add_filter( 'gutenberg_can_edit_post_type', 'mbf_disable_gutenberg_for_docs', 10, 2 );
+
+/**
+ * Automatically route the /docs page to the custom template.
+ *
+ * @param string $template Path to the template.
+ * @return string
+ */
+function mbf_docs_page_template( $template ) {
+	if ( is_page( 'docs' ) ) {
+		$new_template = locate_template( 'page-docs.php' );
+		if ( $new_template ) {
+			return $new_template;
 		}
+	}
 
-		return $use_block_editor;
-	},
-	10,
-	2
-);
-
-// Fallback for Gutenberg plugin to keep the classic editor for the same post types.
-add_filter(
-	'gutenberg_can_edit_post_type',
-	function( $can_edit, $post_type ) {
-		$classic_types = array( 'post', 'page', 'docs' );
-
-		if ( in_array( $post_type, $classic_types, true ) ) {
-			return false;
-		}
-
-		return $can_edit;
-	},
-	10,
-	2
-);
+	return $template;
+}
+add_filter( 'template_include', 'mbf_docs_page_template' );
