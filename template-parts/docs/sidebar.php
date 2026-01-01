@@ -12,14 +12,15 @@ $walker        = new MBF_Docs_Sidebar_Walker();
 <div class="docs-sidebar__inner">
 	<div class="docs-sidebar__header">
 		<span class="docs-sidebar__title"><?php echo esc_html( $sidebar_title ); ?></span>
-		<button type="button" class="docs-sidebar__toggle docs-sidebar__toggle--close" data-docs-sidebar-toggle aria-expanded="true">
+		<button type="button" class="docs-sidebar__toggle docs-sidebar__toggle--close" data-docs-sidebar-toggle data-docs-sidebar-focus-target aria-expanded="true">
 			<span aria-hidden="true">×</span>
 			<span class="screen-reader-text"><?php esc_html_e( 'Close documentation navigation', 'apparel' ); ?></span>
 		</button>
 	</div>
 
 	<?php if ( ! empty( $sidebar_items ) ) : ?>
-		<nav class="docs-sidebar__nav" aria-label="<?php esc_attr_e( 'Documentation navigation', 'apparel' ); ?>">
+		<nav class="docs-sidebar__nav" aria-label="<?php esc_attr_e( 'Documentation navigation', 'apparel' ); ?>" aria-labelledby="docs-sidebar-heading">
+			<h2 class="screen-reader-text" id="docs-sidebar-heading"><?php esc_html_e( 'Documentation navigation', 'apparel' ); ?></h2>
 			<ul class="docs-sidebar__list">
 				<?php
 				echo $walker->walk( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped

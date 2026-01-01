@@ -1,0 +1,19 @@
+{
+    "name": "merchants-best-friends/apparel",
+    "description": "Apparel theme development dependencies.",
+    "type": "project",
+    "require": {},
+    "require-dev": {
+        "brain/monkey": "^4.0",
+        "phpunit/phpunit": "^9.6"
+    },
+    "config": {
+        "platform": {
+            "php": "8.0"
+        },
+        "sort-packages": true
+    },
+    "scripts": {
+        "test": "phpunit"
+    }
+}

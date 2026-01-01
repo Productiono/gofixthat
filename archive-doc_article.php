@@ -67,7 +67,15 @@ $archive_title = post_type_archive_title( '', false );
 				<?php endwhile; ?>
 			</div>
 		<?php else : ?>
-			<p class="docs-list__empty"><?php esc_html_e( 'No documentation available yet.', 'apparel' ); ?></p>
+			<div class="docs-list__empty" role="status" aria-live="polite">
+				<p><?php esc_html_e( 'No documentation available yet.', 'apparel' ); ?></p>
+				<div class="docs-list__empty-actions">
+					<?php echo mbf_get_doc_search_form(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+					<a class="docs-list__empty-link" href="<?php echo esc_url( home_url( '/' ) ); ?>">
+						<?php esc_html_e( 'Return to the homepage', 'apparel' ); ?>
+					</a>
+				</div>
+			</div>
 		<?php endif; ?>
 	</main>
 </div>

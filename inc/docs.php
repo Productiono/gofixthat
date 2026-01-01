@@ -47,10 +47,29 @@ function mbf_docs_sanitize_options( $options ) {
 
 	$clean = array();
 
-	$clean['permalink_base'] = isset( $options['permalink_base'] ) ? sanitize_title_with_dashes( $options['permalink_base'] ) : $defaults['permalink_base'];
+	$provided_base = isset( $options['permalink_base'] ) ? trim( (string) $options['permalink_base'] ) : '';
+	$sanitized_base = sanitize_title_with_dashes( trim( $provided_base, '/' ) );
 
-	if ( empty( $clean['permalink_base'] ) ) {
+	if ( '' === $sanitized_base ) {
+		add_settings_error(
+			'mbf_docs_system_options',
+			'mbf_docs_invalid_permalink_base',
+			esc_html__( 'Permalink base cannot be empty. The default "docs" base has been restored.', 'apparel' ),
+			'error'
+		);
+
 		$clean['permalink_base'] = $defaults['permalink_base'];
+	} else {
+		if ( $sanitized_base !== $provided_base ) {
+			add_settings_error(
+				'mbf_docs_system_options',
+				'mbf_docs_sanitized_permalink_base',
+				esc_html__( 'Permalink base updated to a sanitized value for safety.', 'apparel' ),
+				'updated'
+			);
+		}
+
+		$clean['permalink_base'] = $sanitized_base;
 	}
 
 	$clean['show_admin_columns'] = ! empty( $options['show_admin_columns'] );
@@ -654,9 +673,25 @@ function mbf_render_docs_settings_page() {
 		wp_die( esc_html__( 'You are not allowed to manage Docs settings.', 'apparel' ) );
 	}
 
+	$options        = mbf_docs_get_options();
+	$permalink_base = $options['permalink_base'];
+
 	?>
 	<div class="wrap">
 		<h1><?php esc_html_e( 'Docs Settings', 'apparel' ); ?></h1>
+		<?php settings_errors( 'mbf_docs_system_options' ); ?>
+		<p><?php esc_html_e( 'Control how documentation URLs are generated and how Docs appear in the admin.', 'apparel' ); ?></p>
+		<div class="notice notice-info inline">
+			<p>
+				<?php
+				printf(
+					/* translators: %s: permalink base */
+					esc_html__( 'Docs permalink base is currently set to "%s". Updating this will refresh rewrite rules automatically.', 'apparel' ),
+					esc_html( $permalink_base )
+				);
+				?>
+			</p>
+		</div>
 		<form action="options.php" method="post">
 			<?php
 			settings_fields( 'mbf_docs_system' );
@@ -674,9 +709,15 @@ function mbf_render_docs_settings_page() {
 function mbf_render_docs_permalink_field() {
 	$options        = mbf_docs_get_options();
 	$permalink_base = $options['permalink_base'];
+
+	$preview = trailingslashit( home_url( '/' . $permalink_base ) ) . esc_html__( 'category/subcategory/sample-article', 'apparel' ) . '/';
 	?>
-	<input type="text" name="mbf_docs_system_options[permalink_base]" value="<?php echo esc_attr( $permalink_base ); ?>" class="regular-text" />
-	<p class="description"><?php esc_html_e( 'Base slug used for Doc Article URLs.', 'apparel' ); ?></p>
+	<input type="text" name="mbf_docs_system_options[permalink_base]" value="<?php echo esc_attr( $permalink_base ); ?>" class="regular-text" aria-describedby="mbf-docs-permalink-helper" />
+	<p id="mbf-docs-permalink-helper" class="description">
+		<?php esc_html_e( 'Use a short, lowercase slug without slashes. Saving will sanitize unsafe characters automatically.', 'apparel' ); ?>
+		<br />
+		<strong><?php esc_html_e( 'Preview:', 'apparel' ); ?></strong> <?php echo esc_html( $preview ); ?>
+	</p>
 	<?php
 }
 
@@ -859,6 +900,7 @@ function mbf_docs_schedule_rewrite_flush( $old_value, $value ) {
 		return;
 	}
 
+	mbf_clear_doc_sidebar_cache();
 	update_option( 'mbf_docs_flush_rewrite_rules', '1', false );
 }
 add_action( 'update_option_mbf_docs_system_options', 'mbf_docs_schedule_rewrite_flush', 10, 2 );
@@ -1687,6 +1729,9 @@ function mbf_enqueue_doc_assets() {
 	var toggles = sidebar.querySelectorAll('[data-docs-sidebar-toggle]');
 	var backdrop = sidebar.querySelector('[data-docs-sidebar-backdrop]');
 	var mediaQuery = window.matchMedia('(min-width: 960px)');
+	var previouslyFocusedToggle = null;
+	var focusTarget = sidebar.querySelector('[data-docs-sidebar-focus-target]');
+	var focusableSelector = 'a[href], button:not([disabled]), input, select, textarea, [tabindex]:not([tabindex="-1"])';
 
 	function setVisibility( isOpen ) {
 		sidebar.classList.toggle('is-open', isOpen);
@@ -1701,6 +1746,16 @@ function mbf_enqueue_doc_assets() {
 			}
 		}
 
+		if ( isOpen && ! mediaQuery.matches ) {
+			var target = focusTarget || ( drawer ? drawer.querySelector(focusableSelector) : null );
+
+			if ( target ) {
+				target.focus();
+			}
+		} else if ( ! isOpen && previouslyFocusedToggle && ! mediaQuery.matches ) {
+			previouslyFocusedToggle.focus();
+		}
+
 		if ( backdrop ) {
 			if ( isOpen && ! mediaQuery.matches ) {
 				backdrop.removeAttribute('hidden');
@@ -1712,6 +1767,9 @@ function mbf_enqueue_doc_assets() {
 
 	function toggleSidebar() {
 		var isOpen = sidebar.classList.contains('is-open');
+		if ( ! isOpen && ! mediaQuery.matches && this instanceof HTMLElement ) {
+			previouslyFocusedToggle = this;
+		}
 		setVisibility( ! isOpen );
 	}
 

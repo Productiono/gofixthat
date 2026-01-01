@@ -10108,10 +10108,13 @@ div[class*=" gallery-columns-"] {
 }
 
 .docs-sidebar__toggle:hover,
-.docs-sidebar__toggle:focus {
+.docs-sidebar__toggle:focus,
+.docs-sidebar__toggle:focus-visible {
 	background: #eef1f6;
 	border-color: #d5d9e2;
 	transform: translateY(-1px);
+	outline: 2px solid #0f1720;
+	outline-offset: 2px;
 }
 
 .docs-sidebar__toggle-icon {
@@ -10160,9 +10163,12 @@ div[class*=" gallery-columns-"] {
 }
 
 .docs-sidebar__link:hover,
-.docs-sidebar__link:focus {
+.docs-sidebar__link:focus,
+.docs-sidebar__link:focus-visible {
 	background: #eef1f6;
 	color: #0f1720;
+	outline: 2px solid #0f1720;
+	outline-offset: 2px;
 }
 
 .docs-sidebar__item.is-active > .docs-sidebar__link {
@@ -10341,6 +10347,39 @@ div[class*=" gallery-columns-"] {
 .docs-list__empty {
 	margin: 0;
 	color: #4b5563;
+	display: grid;
+	gap: 10px;
+	align-items: start;
+}
+
+.docs-list__empty-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px;
+	align-items: center;
+}
+
+.docs-list__empty-link {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	background: #0f1720;
+	color: #fff;
+	border-radius: 10px;
+	padding: 8px 12px;
+	text-decoration: none;
+	font-weight: 700;
+	transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.docs-list__empty-link:hover,
+.docs-list__empty-link:focus,
+.docs-list__empty-link:focus-visible {
+	color: #fff;
+	transform: translateY(-1px);
+	box-shadow: 0 10px 20px rgba(0, 0, 0, 0.18);
+	outline: 2px solid #0f1720;
+	outline-offset: 2px;
 }
 
 @media (max-width: 959.98px) {
@@ -10381,5 +10420,40 @@ div[class*=" gallery-columns-"] {
 
 	.docs-sidebar__backdrop[hidden] {
 		display: none;
+	}
+}
+
+@media (max-width: 639.98px) {
+	.docs-main__top {
+		gap: 10px;
+	}
+
+	.docs-search {
+		width: 100%;
+	}
+
+	.docs-search__field {
+		min-width: auto;
+		width: 100%;
+	}
+
+	.docs-list__empty-actions {
+		flex-direction: column;
+		align-items: stretch;
+	}
+
+	.docs-list__empty-link {
+		justify-content: center;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.docs-sidebar,
+	.docs-sidebar__toggle,
+	.docs-sidebar__link,
+	.docs-list__empty-link,
+	.docs-search__submit {
+		transition-duration: 0.01ms;
+		transition-delay: 0ms;
 	}
 }
