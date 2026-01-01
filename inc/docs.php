@@ -262,6 +262,10 @@ function mbf_register_doc_capabilities() {
 		'delete_doc_articles',
 		'delete_others_doc_articles',
 		'manage_doc_terms',
+		'edit_private_doc_articles',
+		'edit_published_doc_articles',
+		'delete_private_doc_articles',
+		'delete_published_doc_articles',
 	);
 
 	$administrator = get_role( 'administrator' );
@@ -299,6 +303,45 @@ function mbf_register_doc_capabilities() {
 	}
 }
 add_action( 'init', 'mbf_register_doc_capabilities', 5 );
+
+/**
+ * Guarantee administrators retain full doc_article capabilities.
+ *
+ * @param array   $allcaps All capabilities.
+ * @param string  $caps    Required caps.
+ * @param array   $args    Context args.
+ * @param WP_User $user    User object.
+ * @return array
+ */
+function mbf_grant_admin_doc_caps( $allcaps, $caps, $args, $user ) {
+	if ( empty( $user ) || ! isset( $allcaps['manage_options'] ) ) {
+		return $allcaps;
+	}
+
+	$doc_caps = array(
+		'edit_doc_article',
+		'read_doc_article',
+		'delete_doc_article',
+		'edit_doc_articles',
+		'edit_others_doc_articles',
+		'publish_doc_articles',
+		'read_private_doc_articles',
+		'delete_doc_articles',
+		'delete_others_doc_articles',
+		'manage_doc_terms',
+		'edit_private_doc_articles',
+		'edit_published_doc_articles',
+		'delete_private_doc_articles',
+		'delete_published_doc_articles',
+	);
+
+	foreach ( $doc_caps as $cap ) {
+		$allcaps[ $cap ] = true;
+	}
+
+	return $allcaps;
+}
+add_filter( 'user_has_cap', 'mbf_grant_admin_doc_caps', 10, 4 );
 
 /**
  * Map doc capabilities to primitive caps.
