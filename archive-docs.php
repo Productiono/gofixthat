@@ -78,6 +78,25 @@ $docs_categories = get_terms(
 			gap: 20px;
 		}
 
+		.docs-mobile-menu {
+			display: none;
+			align-items: center;
+			justify-content: center;
+			width: 44px;
+			height: 44px;
+			border-radius: 12px;
+			border: 1px solid #e3e3e3;
+			background: #fff;
+			box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
+			color: #1f1f1f;
+			cursor: pointer;
+		}
+
+		.docs-mobile-menu svg {
+			width: 20px;
+			height: 20px;
+		}
+
 		.docs-brand-nav .mbf-logo {
 			display: flex;
 			align-items: center;
@@ -354,7 +373,7 @@ $docs_categories = get_terms(
 
 		.docs-articles-grid {
 			display: grid;
-			grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+			grid-template-columns: repeat(2, minmax(0, 1fr));
 			gap: 14px;
 		}
 
@@ -443,26 +462,52 @@ $docs_categories = get_terms(
 		}
 
 		@media (max-width: 960px) {
+			.docs-page {
+				padding-top: 82px;
+			}
+
+			.docs-header {
+				position: fixed;
+				inset: 0 0 auto 0;
+			}
+
 			.docs-header-inner {
-				grid-template-columns: 1fr;
-				padding: 16px 18px 12px;
-				gap: 12px;
+				grid-template-columns: 1fr auto;
+				padding: 14px 18px 12px;
+				gap: 10px;
 			}
 
 			.docs-brand-nav {
-				justify-content: space-between;
+				justify-content: flex-start;
+				gap: 10px;
 			}
 
 			.docs-nav {
+				display: none;
 				margin-left: 0;
 			}
 
 			.docs-utility {
+				display: none;
 				justify-content: flex-start;
 			}
 
 			.docs-articles-header {
 				align-items: flex-start;
+			}
+
+			.docs-search {
+				display: none;
+			}
+
+			.docs-mobile-menu {
+				display: inline-flex;
+			}
+		}
+
+		@media (max-width: 640px) {
+			.docs-articles-grid {
+				grid-template-columns: 1fr;
 			}
 		}
 	</style>
@@ -511,6 +556,11 @@ if ( function_exists( 'wp_body_open' ) ) {
 			<div class="docs-utility">
 				<?php mbf_component( 'header_scheme_toggle' ); ?>
 			</div>
+			<button class="docs-mobile-menu" type="button" aria-label="<?php esc_attr_e( 'Open menu', 'apparel' ); ?>">
+				<svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+					<path d="M5 7h14M5 12h14M5 17h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+				</svg>
+			</button>
 		</div>
 	</header>
 
@@ -589,11 +639,21 @@ if ( function_exists( 'wp_body_open' ) ) {
 				</div>
 			</div>
 
-			<?php if ( have_posts() ) : ?>
+			<?php
+			$docs_articles = new WP_Query(
+				array(
+					'post_type'      => 'docs',
+					'posts_per_page' => 4,
+					'post_status'    => 'publish',
+				)
+			);
+
+			if ( $docs_articles->have_posts() ) :
+				?>
 				<div class="docs-articles-grid">
 					<?php
-					while ( have_posts() ) :
-						the_post();
+					while ( $docs_articles->have_posts() ) :
+						$docs_articles->the_post();
 						$article_terms = get_the_terms( get_the_ID(), 'docs_category' );
 						?>
 						<article class="docs-article">
@@ -614,23 +674,15 @@ if ( function_exists( 'wp_body_open' ) ) {
 									?>
 								</div>
 							<?php endif; ?>
-						</article>
-					<?php endwhile; ?>
-				</div>
-
-				<div class="docs-pagination">
+							</article>
+						<?php endwhile; ?>
+					</div>
 					<?php
-					the_posts_pagination(
-						array(
-							'prev_text' => '',
-							'next_text' => '',
-						)
-					);
+					wp_reset_postdata();
+				else :
 					?>
-				</div>
-			<?php else : ?>
-				<p class="docs-empty-state"><?php esc_html_e( 'No docs have been published yet. Add a new doc from the WordPress admin to get started.', 'apparel' ); ?></p>
-			<?php endif; ?>
+					<p class="docs-empty-state"><?php esc_html_e( 'No docs have been published yet. Add a new doc from the WordPress admin to get started.', 'apparel' ); ?></p>
+				<?php endif; ?>
 		</div>
 	</section>
 
