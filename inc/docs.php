@@ -1225,11 +1225,21 @@ function mbf_sort_doc_items( &$items ) {
 }
 
 /**
+ * Deep clone the sidebar items array to avoid mutating cache entries.
+ *
+ * @param array $items Sidebar items.
+ * @return array
+ */
+function mbf_clone_doc_items( $items ) {
+	return json_decode( wp_json_encode( $items ), true );
+}
+
+/**
  * Build the hierarchical docs collection for use in sidebar navigation.
  *
  * @return array
  */
-function mbf_get_doc_sidebar_items() {
+function mbf_build_doc_sidebar_items() {
 	$categories = get_terms(
 		array(
 			'taxonomy'   => 'doc_category',
@@ -1241,8 +1251,7 @@ function mbf_get_doc_sidebar_items() {
 		return array();
 	}
 
-	$active_ids = mbf_get_active_doc_references();
-	$items      = array();
+	$items = array();
 
 	foreach ( $categories as $category ) {
 		$category_node = array(
@@ -1263,6 +1272,10 @@ function mbf_get_doc_sidebar_items() {
 				'post_type'      => 'doc_article',
 				'posts_per_page' => -1,
 				'post_status'    => 'publish',
+				'fields'         => 'ids',
+				'no_found_rows'  => true,
+				'update_post_meta_cache' => true,
+				'update_post_term_cache' => true,
 				'tax_query'      => array(
 					array(
 						'taxonomy' => 'doc_category',
@@ -1276,17 +1289,17 @@ function mbf_get_doc_sidebar_items() {
 		$subcategory_map      = array();
 		$uncategorized_posts  = array();
 
-		foreach ( $posts as $post ) {
+		foreach ( $posts as $post_id ) {
 			$article_node = array(
-				'id'       => $post->ID,
-				'title'    => get_the_title( $post ),
-				'url'      => get_permalink( $post ),
-				'order'    => get_post_meta( $post->ID, 'doc_display_order', true ),
+				'id'       => $post_id,
+				'title'    => get_the_title( $post_id ),
+				'url'      => get_permalink( $post_id ),
+				'order'    => get_post_meta( $post_id, 'doc_display_order', true ),
 				'type'     => 'article',
 				'children' => array(),
 			);
 
-			$subcategories = get_the_terms( $post, 'doc_subcategory' );
+			$subcategories = get_the_terms( $post_id, 'doc_subcategory' );
 
 			if ( ! empty( $subcategories ) && ! is_wp_error( $subcategories ) ) {
 				foreach ( $subcategories as $subcategory ) {
@@ -1330,8 +1343,80 @@ function mbf_get_doc_sidebar_items() {
 
 	mbf_sort_doc_items( $items );
 
-	return mbf_flag_active_docs( $items, $active_ids );
+	return $items;
 }
+
+/**
+ * Retrieve cached sidebar items and apply active state flags.
+ *
+ * @return array
+ */
+function mbf_get_doc_sidebar_items() {
+	$cache_key = 'mbf_doc_sidebar_items';
+	$items     = get_transient( $cache_key );
+
+	if ( false === $items ) {
+		$items = mbf_build_doc_sidebar_items();
+		set_transient( $cache_key, $items, DAY_IN_SECONDS );
+	}
+
+	if ( empty( $items ) ) {
+		return array();
+	}
+
+	$active_ids = mbf_get_active_doc_references();
+
+	return mbf_flag_active_docs( mbf_clone_doc_items( $items ), $active_ids );
+}
+
+/**
+ * Clear cached doc sidebar items.
+ *
+ * @return void
+ */
+function mbf_clear_doc_sidebar_cache() {
+	delete_transient( 'mbf_doc_sidebar_items' );
+}
+
+/**
+ * Invalidate sidebar cache when doc terms are changed.
+ *
+ * @param int    $term_id  Term ID.
+ * @param int    $tt_id    Term taxonomy ID.
+ * @param string $taxonomy Taxonomy slug.
+ * @return void
+ */
+function mbf_maybe_clear_doc_sidebar_on_term_change( $term_id, $tt_id, $taxonomy ) {
+	unset( $term_id, $tt_id );
+
+	if ( in_array( $taxonomy, array( 'doc_category', 'doc_subcategory' ), true ) ) {
+		mbf_clear_doc_sidebar_cache();
+	}
+}
+add_action( 'created_term', 'mbf_maybe_clear_doc_sidebar_on_term_change', 10, 3 );
+add_action( 'edited_term', 'mbf_maybe_clear_doc_sidebar_on_term_change', 10, 3 );
+add_action( 'delete_term', 'mbf_maybe_clear_doc_sidebar_on_term_change', 10, 3 );
+
+/**
+ * Invalidate sidebar cache when doc articles change.
+ *
+ * @param int     $post_id Post ID.
+ * @param WP_Post $post    Post object.
+ * @param bool    $update  Whether this is an existing post being updated.
+ * @return void
+ */
+function mbf_maybe_clear_doc_sidebar_on_save_post( $post_id, $post, $update ) {
+	unset( $update );
+
+	if ( wp_is_post_revision( $post_id ) || wp_is_post_autosave( $post_id ) ) {
+		return;
+	}
+
+	if ( 'doc_article' === $post->post_type ) {
+		mbf_clear_doc_sidebar_cache();
+	}
+}
+add_action( 'save_post', 'mbf_maybe_clear_doc_sidebar_on_save_post', 10, 3 );
 
 /**
  * Determine the active doc items for highlighting in the sidebar.
@@ -1563,10 +1648,19 @@ function mbf_get_doc_search_form() {
 }
 
 /**
+ * Determine if the current view is a docs template.
+ *
+ * @return bool
+ */
+function mbf_is_docs_template() {
+	return is_singular( 'doc_article' ) || is_post_type_archive( 'doc_article' ) || is_tax( array( 'doc_category', 'doc_subcategory' ) );
+}
+
+/**
  * Enqueue inline behaviors for documentation templates.
  */
 function mbf_enqueue_doc_assets() {
-	if ( ! ( is_singular( 'doc_article' ) || is_post_type_archive( 'doc_article' ) || is_tax( array( 'doc_category', 'doc_subcategory' ) ) ) ) {
+	if ( ! mbf_is_docs_template() ) {
 		return;
 	}
 
@@ -1635,6 +1729,12 @@ function mbf_enqueue_doc_assets() {
 } )();
 JS;
 
-	wp_add_inline_script( 'mbf-scripts', $script );
+	$script_handle = 'mbf-scripts';
+
+	if ( ! wp_script_is( $script_handle, 'enqueued' ) ) {
+		wp_enqueue_script( $script_handle );
+	}
+
+	wp_add_inline_script( $script_handle, $script );
 }
 add_action( 'wp_enqueue_scripts', 'mbf_enqueue_doc_assets' );
