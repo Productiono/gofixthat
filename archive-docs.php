@@ -503,6 +503,68 @@ $docs_categories = get_terms(
 			.docs-mobile-menu {
 				display: inline-flex;
 			}
+
+			.docs-mobile-panel {
+				display: none;
+			}
+		}
+
+		@media (max-width: 960px) {
+			body.docs-mobile-open {
+				overflow: hidden;
+			}
+
+			.docs-mobile-panel {
+				display: block;
+				position: fixed;
+				inset: 76px 0 auto 0;
+				background: #fbfbfb;
+				border-bottom: 1px solid #ededed;
+				box-shadow: 0 16px 40px rgba(0, 0, 0, 0.06);
+				z-index: 49;
+			}
+
+			.docs-mobile-panel-inner {
+				padding: 14px 18px 20px;
+				display: flex;
+				flex-direction: column;
+				gap: 14px;
+			}
+
+			.docs-mobile-panel .docs-nav {
+				display: flex;
+				flex-direction: column;
+				gap: 6px;
+			}
+
+			.docs-mobile-panel .docs-nav a {
+				border: 1px solid #e3e3e3;
+				border-radius: 12px;
+				padding: 12px 14px;
+				box-shadow: 0 8px 20px rgba(0, 0, 0, 0.03);
+				background: #fff;
+			}
+
+			.docs-mobile-panel .docs-nav a.is-active {
+				border-color: #111;
+			}
+
+			.docs-mobile-panel .docs-search {
+				display: block;
+			}
+
+			.docs-mobile-panel .docs-search form {
+				width: 100%;
+			}
+
+			.docs-mobile-panel .docs-search input {
+				width: 100%;
+			}
+
+			.docs-mobile-panel .docs-utility {
+				display: flex;
+				justify-content: flex-start;
+			}
 		}
 
 		@media (max-width: 640px) {
@@ -556,13 +618,48 @@ if ( function_exists( 'wp_body_open' ) ) {
 			<div class="docs-utility">
 				<?php mbf_component( 'header_scheme_toggle' ); ?>
 			</div>
-			<button class="docs-mobile-menu" type="button" aria-label="<?php esc_attr_e( 'Open menu', 'apparel' ); ?>">
+			<button class="docs-mobile-menu" type="button" aria-label="<?php esc_attr_e( 'Open menu', 'apparel' ); ?>" aria-expanded="false" aria-controls="docs-mobile-panel">
 				<svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
 					<path d="M5 7h14M5 12h14M5 17h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
 				</svg>
 			</button>
 		</div>
 	</header>
+	<div id="docs-mobile-panel" class="docs-mobile-panel" hidden>
+		<div class="docs-mobile-panel-inner">
+			<nav aria-label="<?php esc_attr_e( 'Documentation navigation', 'apparel' ); ?>" class="docs-nav">
+				<a href="<?php echo esc_url( get_post_type_archive_link( 'docs' ) ); ?>" class="is-active"><?php esc_html_e( 'Home', 'apparel' ); ?></a>
+				<?php
+				if ( ! empty( $docs_categories ) && ! is_wp_error( $docs_categories ) ) {
+					foreach ( $docs_categories as $category ) {
+						printf(
+							'<a href="%1$s">%2$s</a>',
+							esc_url( get_term_link( $category ) ),
+							esc_html( $category->name )
+						);
+					}
+				}
+				?>
+				<a href="#docs-articles"><?php esc_html_e( 'All Articles', 'apparel' ); ?></a>
+			</nav>
+			<div class="docs-search">
+				<form role="search" aria-label="<?php esc_attr_e( 'Search documentation', 'apparel' ); ?>" action="<?php echo esc_url( home_url( '/' ) ); ?>">
+					<span class="docs-search-icon" aria-hidden="true">
+						<svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+							<path d="m15.5 15.5 4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+							<circle cx="11" cy="11" r="5.5" stroke="currentColor" stroke-width="1.6" />
+						</svg>
+					</span>
+					<input type="search" name="s" placeholder="<?php esc_attr_e( 'Search docs...', 'apparel' ); ?>" aria-label="<?php esc_attr_e( 'Search query', 'apparel' ); ?>" />
+					<input type="hidden" name="post_type" value="docs" />
+					<span class="docs-search-hint" aria-hidden="true">Ctrl K</span>
+				</form>
+			</div>
+			<div class="docs-utility">
+				<?php mbf_component( 'header_scheme_toggle' ); ?>
+			</div>
+		</div>
+	</div>
 
 	<?php mbf_site_search(); ?>
 
@@ -684,9 +781,65 @@ if ( function_exists( 'wp_body_open' ) ) {
 					<p class="docs-empty-state"><?php esc_html_e( 'No docs have been published yet. Add a new doc from the WordPress admin to get started.', 'apparel' ); ?></p>
 				<?php endif; ?>
 		</div>
-	</section>
+</section>
 
 </div>
+
+<script>
+	(function () {
+		const menuButton = document.querySelector('.docs-mobile-menu');
+		const panel = document.getElementById('docs-mobile-panel');
+
+		if (!menuButton || !panel) {
+			return;
+		}
+
+		const closeMenu = () => {
+			document.body.classList.remove('docs-mobile-open');
+			panel.setAttribute('hidden', '');
+			menuButton.setAttribute('aria-expanded', 'false');
+		};
+
+		const openMenu = () => {
+			document.body.classList.add('docs-mobile-open');
+			panel.removeAttribute('hidden');
+			menuButton.setAttribute('aria-expanded', 'true');
+		};
+
+		const toggleMenu = () => {
+			if (document.body.classList.contains('docs-mobile-open')) {
+				closeMenu();
+			} else {
+				openMenu();
+			}
+		};
+
+		menuButton.addEventListener('click', (event) => {
+			event.preventDefault();
+			toggleMenu();
+		});
+
+		document.addEventListener('keydown', (event) => {
+			if (event.key === 'Escape' && document.body.classList.contains('docs-mobile-open')) {
+				closeMenu();
+			}
+		});
+
+		document.addEventListener('click', (event) => {
+			if (
+				document.body.classList.contains('docs-mobile-open') &&
+				!panel.contains(event.target) &&
+				!menuButton.contains(event.target)
+			) {
+				closeMenu();
+			}
+		});
+
+		panel.querySelectorAll('a, button').forEach((interactive) => {
+			interactive.addEventListener('click', closeMenu);
+		});
+	})();
+</script>
 
 <?php wp_footer(); ?>
 </body>
