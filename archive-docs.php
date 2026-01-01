@@ -13,6 +13,57 @@ $docs_categories = get_terms(
 		'order'      => 'ASC',
 	)
 );
+
+$docs_nav_links = array(
+	array(
+		'label' => __( 'Docs Home', 'apparel' ),
+		'url'   => get_post_type_archive_link( 'docs' ),
+		'class' => 'is-active',
+	),
+);
+
+if ( ! empty( $docs_categories ) && ! is_wp_error( $docs_categories ) ) {
+	foreach ( $docs_categories as $category ) {
+		$docs_nav_links[] = array(
+			'label' => $category->name,
+			'url'   => get_term_link( $category ),
+		);
+	}
+}
+
+$docs_nav_links[] = array(
+	'label' => __( 'All Articles', 'apparel' ),
+	'url'   => '#docs-articles',
+);
+
+$render_docs_nav_links = static function ( $nav_links ) {
+	foreach ( $nav_links as $nav_link ) {
+		$classes = isset( $nav_link['class'] ) ? $nav_link['class'] : '';
+		printf(
+			'<a class="%1$s" href="%2$s">%3$s</a>',
+			esc_attr( trim( $classes ) ),
+			esc_url( $nav_link['url'] ),
+			esc_html( $nav_link['label'] )
+		);
+	}
+};
+
+$docs_search_markup = '<form role="search" aria-label="' . esc_attr__( 'Search documentation', 'apparel' ) . '" action="' . esc_url( home_url( '/' ) ) . '">
+	<span class="docs-search-icon" aria-hidden="true">
+		<svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+			<path d="m15.5 15.5 4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+			<circle cx="11" cy="11" r="5.5" stroke="currentColor" stroke-width="1.6" />
+		</svg>
+	</span>
+	<input type="search" name="s" placeholder="' . esc_attr__( 'Search docs...', 'apparel' ) . '" aria-label="' . esc_attr__( 'Search query', 'apparel' ) . '" />
+	<input type="hidden" name="post_type" value="docs" />
+	<span class="docs-search-hint" aria-hidden="true">Ctrl K</span>
+</form>';
+
+$docs_utility_markup = '';
+ob_start();
+mbf_component( 'header_scheme_toggle' );
+$docs_utility_markup = '<div class="docs-utility">' . ob_get_clean() . '</div>';
 ?>
 <!doctype html>
 <html <?php language_attributes(); ?>>
@@ -217,6 +268,46 @@ $docs_categories = get_terms(
 		.docs-utility .mbf-site__scheme-toggle-element {
 			background: #0f0f0f;
 			color: #fff;
+		}
+
+		.docs-mobile-panel {
+			display: none;
+			padding: 12px 18px 18px;
+			background: #ffffff;
+			border-bottom: 1px solid #ededed;
+			box-shadow: 0 14px 30px rgba(0, 0, 0, 0.06);
+			gap: 14px;
+		}
+
+		.docs-mobile-panel[hidden] {
+			display: none !important;
+		}
+
+		.docs-header.is-mobile-open .docs-mobile-panel {
+			display: grid;
+		}
+
+		.docs-nav-mobile {
+			display: grid;
+			gap: 8px;
+			font-weight: 700;
+		}
+
+		.docs-nav-mobile a {
+			display: block;
+			padding: 10px 6px;
+			border-radius: 10px;
+			text-decoration: none;
+			color: #1f1f1f;
+			background: #f7f7f7;
+			border: 1px solid #ececec;
+			box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+		}
+
+		.docs-nav-mobile a:hover,
+		.docs-nav-mobile a.is-active {
+			background: #f0f0f0;
+			border-color: #e0e0e0;
 		}
 
 		.docs-hero {
@@ -472,14 +563,14 @@ $docs_categories = get_terms(
 			}
 
 			.docs-header-inner {
-				grid-template-columns: 1fr auto;
+				grid-template-columns: auto 1fr auto;
 				padding: 14px 18px 12px;
 				gap: 10px;
 			}
 
 			.docs-brand-nav {
 				justify-content: flex-start;
-				gap: 10px;
+				gap: 12px;
 			}
 
 			.docs-nav {
@@ -498,6 +589,10 @@ $docs_categories = get_terms(
 
 			.docs-search {
 				display: none;
+			}
+
+			.docs-mobile-panel {
+				grid-template-columns: 1fr;
 			}
 
 			.docs-mobile-menu {
@@ -525,42 +620,29 @@ if ( function_exists( 'wp_body_open' ) ) {
 			<div class="docs-brand-nav">
 				<?php mbf_component( 'header_logo' ); ?>
 				<nav class="docs-nav" aria-label="<?php esc_attr_e( 'Documentation navigation', 'apparel' ); ?>">
-					<a href="<?php echo esc_url( get_post_type_archive_link( 'docs' ) ); ?>" class="is-active"><?php esc_html_e( 'Docs Home', 'apparel' ); ?></a>
-					<?php
-					if ( ! empty( $docs_categories ) && ! is_wp_error( $docs_categories ) ) {
-						foreach ( $docs_categories as $category ) {
-							printf(
-								'<a href="%1$s">%2$s</a>',
-								esc_url( get_term_link( $category ) ),
-								esc_html( $category->name )
-							);
-						}
-					}
-					?>
-					<a href="#docs-articles"><?php esc_html_e( 'All Articles', 'apparel' ); ?></a>
+					<?php $render_docs_nav_links( $docs_nav_links ); ?>
 				</nav>
 			</div>
 			<div class="docs-search">
-				<form role="search" aria-label="<?php esc_attr_e( 'Search documentation', 'apparel' ); ?>" action="<?php echo esc_url( home_url( '/' ) ); ?>">
-					<span class="docs-search-icon" aria-hidden="true">
-						<svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-							<path d="m15.5 15.5 4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
-							<circle cx="11" cy="11" r="5.5" stroke="currentColor" stroke-width="1.6" />
-						</svg>
-					</span>
-					<input type="search" name="s" placeholder="<?php esc_attr_e( 'Search docs...', 'apparel' ); ?>" aria-label="<?php esc_attr_e( 'Search query', 'apparel' ); ?>" />
-					<input type="hidden" name="post_type" value="docs" />
-					<span class="docs-search-hint" aria-hidden="true">Ctrl K</span>
-				</form>
+				<?php echo $docs_search_markup; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 			</div>
-			<div class="docs-utility">
-				<?php mbf_component( 'header_scheme_toggle' ); ?>
-			</div>
-			<button class="docs-mobile-menu" type="button" aria-label="<?php esc_attr_e( 'Open menu', 'apparel' ); ?>">
+			<?php echo $docs_utility_markup; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+			<button class="docs-mobile-menu" type="button" aria-label="<?php esc_attr_e( 'Open menu', 'apparel' ); ?>" aria-expanded="false" data-docs-mobile-toggle>
 				<svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
 					<path d="M5 7h14M5 12h14M5 17h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
 				</svg>
 			</button>
+		</div>
+		<div class="docs-mobile-panel" data-docs-mobile-panel hidden>
+			<nav class="docs-nav docs-nav-mobile" aria-label="<?php esc_attr_e( 'Documentation navigation', 'apparel' ); ?>">
+				<?php $render_docs_nav_links( $docs_nav_links ); ?>
+			</nav>
+			<div class="docs-search docs-search-mobile">
+				<?php echo $docs_search_markup; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+			</div>
+			<div class="docs-utility docs-utility-mobile">
+				<?php echo $docs_utility_markup; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+			</div>
 		</div>
 	</header>
 
@@ -687,6 +769,47 @@ if ( function_exists( 'wp_body_open' ) ) {
 	</section>
 
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+	const header = document.querySelector('.docs-header');
+	const mobileToggle = document.querySelector('[data-docs-mobile-toggle]');
+	const mobilePanel = document.querySelector('[data-docs-mobile-panel]');
+
+	if (header && mobileToggle && mobilePanel) {
+		const closeMenu = () => {
+			header.classList.remove('is-mobile-open');
+			mobilePanel.setAttribute('hidden', 'hidden');
+			mobileToggle.setAttribute('aria-expanded', 'false');
+			mobileToggle.setAttribute('aria-label', '<?php echo esc_js( __( 'Open menu', 'apparel' ) ); ?>');
+		};
+
+		mobileToggle.addEventListener('click', () => {
+			const isOpen = header.classList.toggle('is-mobile-open');
+			mobileToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+			mobileToggle.setAttribute('aria-label', isOpen ? '<?php echo esc_js( __( 'Close menu', 'apparel' ) ); ?>' : '<?php echo esc_js( __( 'Open menu', 'apparel' ) ); ?>');
+
+			if (isOpen) {
+				mobilePanel.removeAttribute('hidden');
+			} else {
+				mobilePanel.setAttribute('hidden', 'hidden');
+			}
+		});
+
+		window.addEventListener('resize', () => {
+			if (window.innerWidth > 960 && header.classList.contains('is-mobile-open')) {
+				closeMenu();
+			}
+		});
+
+		document.addEventListener('keyup', (event) => {
+			if (event.key === 'Escape' && header.classList.contains('is-mobile-open')) {
+				closeMenu();
+			}
+		});
+	}
+});
+</script>
 
 <?php wp_footer(); ?>
 </body>
