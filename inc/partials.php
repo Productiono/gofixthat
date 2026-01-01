@@ -413,3 +413,29 @@ if ( ! function_exists( 'mbf_blog_exit_popup' ) ) {
 		<?php
 	}
 }
+
+if ( ! function_exists( 'mbf_cookie_consent_notice' ) ) {
+	/**
+	 * Cookie consent notice markup.
+	 */
+	function mbf_cookie_consent_notice() {
+		if ( is_admin() ) {
+			return;
+		}
+		?>
+		<div class="mbf-cookie-consent" role="region" aria-label="<?php esc_attr_e( 'Cookie consent notice', 'apparel' ); ?>" hidden>
+			<p class="mbf-cookie-consent__message">
+				<?php esc_html_e( 'We use cookies to improve your experience. Choose whether to accept or reject them.', 'apparel' ); ?>
+			</p>
+			<div class="mbf-cookie-consent__actions" aria-label="<?php esc_attr_e( 'Cookie consent actions', 'apparel' ); ?>">
+				<button type="button" class="mbf-cookie-consent__button mbf-cookie-consent__button--primary" data-cookie-consent="accept">
+					<?php esc_html_e( 'Accept', 'apparel' ); ?>
+				</button>
+				<button type="button" class="mbf-cookie-consent__button" data-cookie-consent="reject">
+					<?php esc_html_e( 'Reject', 'apparel' ); ?>
+				</button>
+			</div>
+		</div>
+		<?php
+	}
+}
