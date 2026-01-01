@@ -56,9 +56,9 @@
 		.docs-header-inner {
 			max-width: 1320px;
 			margin: 0 auto;
-			padding: 16px 28px 12px;
+			padding: 14px 28px 12px;
 			display: grid;
-			grid-template-columns: 1fr auto 1fr;
+			grid-template-columns: auto 1fr auto;
 			align-items: center;
 			gap: 20px;
 		}
@@ -66,120 +66,52 @@
 		.docs-brand-nav {
 			display: flex;
 			align-items: center;
-			gap: 28px;
 			min-width: 0;
+			gap: 14px;
 		}
 
-		.docs-logo {
-			font-weight: 700;
-			font-size: 20px;
-			letter-spacing: -0.6px;
-			color: #000;
-			display: inline-flex;
-			align-items: center;
-			gap: 6px;
-		}
-
-		.docs-logo::before {
-			content: '';
-			width: 14px;
-			height: 14px;
-			border-radius: 4px;
-			border: 2px solid #111;
-			display: inline-block;
-			transform: rotate(-20deg);
-		}
-
-		.docs-nav {
+		.docs-brand-nav .mbf-logo {
 			display: flex;
 			align-items: center;
-			gap: 18px;
-			font-size: 14px;
-			font-weight: 500;
-			color: #3a3a3a;
-			white-space: nowrap;
 		}
 
-		.docs-nav a {
-			color: inherit;
-			text-decoration: none;
-			padding: 12px 4px 10px;
-			border-bottom: 2px solid transparent;
-			transition: color 0.2s ease, border-color 0.2s ease;
-		}
-
-		.docs-nav a.active {
-			color: #0f0f0f;
-			border-color: #0f0f0f;
-		}
-
-		.docs-nav a:hover {
-			color: #0f0f0f;
+		.docs-brand-nav .mbf-header__logo img {
+			max-height: 36px;
+			width: auto;
 		}
 
 		.docs-search {
 			display: flex;
 			justify-content: center;
+			align-items: center;
 		}
 
-		.docs-search input {
-			width: 360px;
-			max-width: 100%;
-			padding: 11px 44px 11px 36px;
-			border: 1px solid #dcdcdc;
-			border-radius: 8px;
+		.docs-search .mbf-header__search-toggle {
+			display: inline-flex;
+			align-items: center;
+			gap: 8px;
+			font-weight: 600;
+			color: #1f1f1f;
+			padding: 10px 12px;
+			border: 1px solid #e5e5e5;
+			border-radius: 10px;
 			background: #fff;
-			box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 1px 3px rgba(0, 0, 0, 0.04);
+			box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+		}
+
+		.docs-search .mbf-header__search-toggle .mbf-header__search-label {
 			font-size: 14px;
-			color: #2a2a2a;
-			outline: none;
-			transition: border-color 0.2s ease, box-shadow 0.2s ease;
-		}
-
-		.docs-search input:focus {
-			border-color: #b4b4b4;
-			box-shadow: 0 0 0 3px rgba(60, 60, 60, 0.08);
-		}
-
-		.docs-search .search-wrapper {
-			position: relative;
-			width: 100%;
-			display: flex;
-			justify-content: center;
-		}
-
-		.docs-search svg {
-			position: absolute;
-			left: 12px;
-			top: 50%;
-			transform: translateY(-50%);
-			width: 16px;
-			height: 16px;
-			color: #7a7a7a;
-		}
-
-		.docs-shortcut {
-			position: absolute;
-			right: 12px;
-			top: 50%;
-			transform: translateY(-50%);
-			font-size: 11px;
-			color: #6a6a6a;
-			background: #f5f5f5;
-			padding: 3px 8px;
-			border-radius: 6px;
-			border: 1px solid #dedede;
-			line-height: 1;
+			color: #1f1f1f;
 		}
 
 		.docs-utility {
 			display: flex;
 			justify-content: flex-end;
 			align-items: center;
-			gap: 18px;
+			gap: 16px;
 			font-size: 13px;
 			color: #3f3f3f;
-			font-weight: 500;
+			font-weight: 600;
 		}
 
 		.docs-utility a {
@@ -187,13 +119,21 @@
 			text-decoration: none;
 		}
 
-		.docs-utility .docs-settings {
-			width: 18px;
-			height: 18px;
+		.docs-utility .mbf-site-scheme-toggle {
 			display: inline-flex;
 			align-items: center;
-			justify-content: center;
-			color: #4b4b4b;
+			gap: 8px;
+			padding: 8px 10px;
+			border-radius: 12px;
+			border: 1px solid #e5e5e5;
+			background: #fff;
+			box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+			cursor: pointer;
+		}
+
+		.docs-utility .mbf-site__scheme-toggle-element {
+			background: #0f0f0f;
+			color: #fff;
 		}
 
 		.docs-hero {
@@ -303,6 +243,86 @@
 			color: #181818;
 		}
 
+		.docs-section-gap {
+			height: 72px;
+		}
+
+		.docs-cta-section {
+			padding: 0 24px 110px;
+			background: radial-gradient(circle at 25% 20%, rgba(0, 0, 0, 0.02), transparent 45%);
+		}
+
+		.docs-cta-inner {
+			max-width: 1120px;
+			margin: 0 auto;
+			padding: 42px 46px;
+			background: linear-gradient(135deg, #0f172a, #1f2937);
+			color: #f5f7ff;
+			border: 1px solid rgba(255, 255, 255, 0.08);
+			border-radius: 18px;
+			box-shadow: 0 18px 36px rgba(0, 0, 0, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+			display: grid;
+			grid-template-columns: 1.2fr auto;
+			align-items: center;
+			gap: 28px;
+		}
+
+		.docs-cta-title {
+			margin: 0 0 12px;
+			font-size: clamp(22px, 3vw + 10px, 28px);
+			letter-spacing: -0.3px;
+		}
+
+		.docs-cta-text {
+			margin: 0;
+			font-size: 15px;
+			line-height: 1.65;
+			color: #d8deef;
+		}
+
+		.docs-cta-actions {
+			display: flex;
+			align-items: center;
+			gap: 14px;
+		}
+
+		.docs-cta-primary,
+		.docs-cta-secondary {
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			gap: 8px;
+			padding: 12px 18px;
+			border-radius: 12px;
+			font-weight: 700;
+			font-size: 14px;
+			text-decoration: none;
+			transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease, color 0.15s ease;
+			border: 1px solid transparent;
+		}
+
+		.docs-cta-primary {
+			background: #3b82f6;
+			color: #fff;
+			box-shadow: 0 10px 28px rgba(59, 130, 246, 0.35);
+		}
+
+		.docs-cta-primary:hover {
+			transform: translateY(-1px);
+			box-shadow: 0 12px 30px rgba(59, 130, 246, 0.42);
+		}
+
+		.docs-cta-secondary {
+			color: #f5f7ff;
+			border-color: rgba(255, 255, 255, 0.24);
+			background: rgba(255, 255, 255, 0.08);
+		}
+
+		.docs-cta-secondary:hover {
+			background: rgba(255, 255, 255, 0.12);
+			transform: translateY(-1px);
+		}
+
 		@media (max-width: 1024px) {
 			.docs-header-inner {
 				grid-template-columns: 1fr;
@@ -319,10 +339,6 @@
 				justify-content: flex-start;
 			}
 
-			.docs-search input {
-				width: 100%;
-			}
-
 			.docs-utility {
 				justify-content: flex-start;
 			}
@@ -331,14 +347,6 @@
 		@media (max-width: 768px) {
 			.docs-header-inner {
 				padding: 14px 16px 10px;
-			}
-
-			.docs-nav {
-				gap: 14px;
-			}
-
-			.docs-nav a {
-				padding: 10px 4px 8px;
 			}
 
 			.docs-hero {
@@ -356,10 +364,20 @@
 			.docs-card {
 				padding: 18px 18px;
 			}
+
+			.docs-cta-inner {
+				grid-template-columns: 1fr;
+				padding: 32px 28px;
+			}
+
+			.docs-cta-actions {
+				flex-wrap: wrap;
+				justify-content: flex-start;
+			}
 		}
 	</style>
 </head>
-<body <?php body_class( 'docs-landing-page' ); ?>>
+<body <?php body_class( 'docs-landing-page' ); ?> <?php mbf_site_scheme(); ?>>
 <?php
 if ( function_exists( 'wp_body_open' ) ) {
 	wp_body_open();
@@ -370,35 +388,21 @@ if ( function_exists( 'wp_body_open' ) ) {
 	<header class="docs-header">
 		<div class="docs-header-inner">
 			<div class="docs-brand-nav">
-				<div class="docs-logo">Plivo</div>
-				<nav class="docs-nav" aria-label="<?php esc_attr_e( 'Documentation navigation', 'apparel' ); ?>">
-					<a href="#" class="active">Home</a>
-					<a href="#"><?php esc_html_e( 'AI Agents', 'apparel' ); ?></a>
-					<a href="#"><?php esc_html_e( 'Verify', 'apparel' ); ?></a>
-					<a href="#"><?php esc_html_e( 'Programmable APIs', 'apparel' ); ?></a>
-				</nav>
+				<?php mbf_component( 'header_logo' ); ?>
 			</div>
 			<div class="docs-search">
-				<div class="search-wrapper">
-					<svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-						<path d="M11 4a7 7 0 1 1 0 14 7 7 0 0 1 0-14Zm0 0a7 7 0 0 1 7 7m-2.5 4.5L19 21" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-					</svg>
-					<input type="search" name="s" placeholder="<?php esc_attr_e( 'Search...', 'apparel' ); ?>" aria-label="<?php esc_attr_e( 'Search documentation', 'apparel' ); ?>">
-					<span class="docs-shortcut">Ctrl K</span>
-				</div>
+				<?php mbf_component( 'header_search_toggle' ); ?>
 			</div>
 			<div class="docs-utility">
 				<a href="#"><?php esc_html_e( 'Support', 'apparel' ); ?></a>
 				<a href="#"><?php esc_html_e( 'Log in', 'apparel' ); ?></a>
 				<a href="#"><?php esc_html_e( 'Request Trial', 'apparel' ); ?></a>
-				<span class="docs-settings" aria-hidden="true">
-					<svg viewBox="0 0 24 24" fill="none">
-						<path d="M12 9.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Zm0-5c.6 0 1.1.4 1.2.9l.2 1a1 1 0 0 0 .8.8l1.1.2a1.2 1.2 0 0 1 .9 1.2c0 .6-.4 1.1-.9 1.2l-1.1.2a1 1 0 0 0-.8.8l-.2 1c-.1.5-.6.9-1.2.9s-1.1-.4-1.2-.9l-.2-1a1 1 0 0 0-.8-.8l-1.1-.2a1.2 1.2 0 0 1-.9-1.2c0-.6.4-1.1.9-1.2l1.1-.2a1 1 0 0 0 .8-.8l.2-1c.1-.5.6-.9 1.2-.9Z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
-					</svg>
-				</span>
+				<?php mbf_component( 'header_scheme_toggle' ); ?>
 			</div>
 		</div>
 	</header>
+
+	<?php mbf_site_search(); ?>
 
 	<section class="docs-hero" aria-labelledby="docs-hero-title">
 		<div class="docs-hero-inner">
@@ -462,6 +466,21 @@ if ( function_exists( 'wp_body_open' ) ) {
 					<p><?php esc_html_e( 'Get started with Plivo and transform your communication and customer engagement across multiple channels.', 'apparel' ); ?></p>
 				</div>
 			</article>
+		</div>
+	</section>
+
+	<div class="docs-section-gap" aria-hidden="true"></div>
+
+	<section class="docs-cta-section" aria-labelledby="docs-cta-title">
+		<div class="docs-cta-inner">
+			<div>
+				<h2 class="docs-cta-title" id="docs-cta-title"><?php esc_html_e( 'Build with confidence on Plivo', 'apparel' ); ?></h2>
+				<p class="docs-cta-text"><?php esc_html_e( 'Get expert guidance, production-ready examples, and the latest best practices to ship reliable experiences faster.', 'apparel' ); ?></p>
+			</div>
+			<div class="docs-cta-actions">
+				<a class="docs-cta-primary" href="#"><?php esc_html_e( 'Start building', 'apparel' ); ?></a>
+				<a class="docs-cta-secondary" href="#"><?php esc_html_e( 'Talk to an expert', 'apparel' ); ?></a>
+			</div>
 		</div>
 	</section>
 </div>
