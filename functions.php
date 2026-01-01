@@ -237,6 +237,7 @@ add_filter(
 function apparel_docs_template_route( $template ) {
 	$request_path = isset( $_SERVER['REQUEST_URI'] ) ? wp_parse_url( esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) ), PHP_URL_PATH ) : '';
 	$docs_path    = wp_parse_url( home_url( '/docs' ), PHP_URL_PATH );
+	$template_path = get_theme_file_path( '/archive-docs.php' );
 
 	$request_path = trim( $request_path, '/' );
 	$docs_path    = trim( $docs_path, '/' );
@@ -250,7 +251,9 @@ function apparel_docs_template_route( $template ) {
 
 		status_header( 200 );
 
-		return get_theme_file_path( '/template-docs.php' );
+		if ( file_exists( $template_path ) ) {
+			return $template_path;
+		}
 	}
 
 	return $template;
