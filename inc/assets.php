@@ -59,6 +59,55 @@ if ( ! function_exists( 'mbf_enqueue_scripts' ) ) {
 			wp_enqueue_script( 'mbf-blog-popup' );
 		}
 
+		$cookie_js = <<<JS
+(function () {
+	const storageKey = 'mbfCookieConsent';
+	const consentBar = document.querySelector('.mbf-cookie-consent');
+	if (!consentBar) {
+		return;
+	}
+	const hasStoredChoice = () => {
+		try {
+			if (window.localStorage.getItem(storageKey)) {
+				return true;
+			}
+		} catch (error) {
+			// Local storage not available.
+		}
+		return document.cookie.split('; ').some((entry) => entry.startsWith(storageKey + '='));
+	};
+	if (hasStoredChoice()) {
+		return;
+	}
+	const rememberChoice = (value) => {
+		const expiryDate = new Date();
+		expiryDate.setFullYear(expiryDate.getFullYear() + 1);
+		try {
+			window.localStorage.setItem(storageKey, value);
+		} catch (error) {
+			// Local storage not available.
+		}
+		document.cookie = storageKey + '=' + value + '; expires=' + expiryDate.toUTCString() + '; path=/';
+		consentBar.hidden = true;
+	};
+	const acceptButton = consentBar.querySelector('[data-cookie-consent=\"accept\"]');
+	const rejectButton = consentBar.querySelector('[data-cookie-consent=\"reject\"]');
+	if (acceptButton) {
+		acceptButton.addEventListener('click', function () {
+			rememberChoice('accepted');
+		});
+	}
+	if (rejectButton) {
+		rejectButton.addEventListener('click', function () {
+			rememberChoice('rejected');
+		});
+	}
+	consentBar.hidden = false;
+})();
+JS;
+
+		wp_add_inline_script( 'mbf-scripts', $cookie_js );
+
 		// Enqueue comment reply script.
 		if ( is_singular() && ! is_singular( 'post' ) && comments_open() && get_option( 'thread_comments' ) ) {
 			wp_enqueue_script( 'comment-reply' );
@@ -311,6 +360,83 @@ CSS;
 
 			wp_add_inline_style( 'mbf-styles', $popup_css );
 		}
+
+		$cookie_css = <<<CSS
+.mbf-cookie-consent {
+	position: fixed;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	z-index: 9998;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	padding: 12px 18px;
+	background: #0f0f0f;
+	color: #f5f5f5;
+	border-top: 1px solid rgba(255, 255, 255, 0.08);
+	box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.08);
+	font-size: 0.95rem;
+	line-height: 1.5;
+}
+.mbf-cookie-consent[hidden] {
+	display: none;
+}
+.mbf-cookie-consent__message {
+	margin: 0;
+	max-width: 780px;
+}
+.mbf-cookie-consent__actions {
+	display: flex;
+	gap: 10px;
+	flex-shrink: 0;
+	flex-wrap: wrap;
+}
+.mbf-cookie-consent__button {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	padding: 8px 14px;
+	border-radius: 8px;
+	border: 1px solid rgba(255, 255, 255, 0.25);
+	background: transparent;
+	color: #f5f5f5;
+	font-weight: 600;
+	cursor: pointer;
+	transition: color 0.15s ease, border-color 0.15s ease, background-color 0.15s ease;
+}
+.mbf-cookie-consent__button:hover,
+.mbf-cookie-consent__button:focus-visible {
+	border-color: rgba(255, 255, 255, 0.5);
+	color: #ffffff;
+}
+.mbf-cookie-consent__button--primary {
+	background: #f5f5f5;
+	color: #0f0f0f;
+	border-color: #f5f5f5;
+}
+.mbf-cookie-consent__button--primary:hover,
+.mbf-cookie-consent__button--primary:focus-visible {
+	background: #ffffff;
+	border-color: #ffffff;
+}
+@media (max-width: 640px) {
+	.mbf-cookie-consent {
+		flex-direction: column;
+		align-items: flex-start;
+		text-align: left;
+		gap: 10px;
+	}
+	.mbf-cookie-consent__actions {
+		width: 100%;
+		justify-content: flex-start;
+	}
+}
+CSS;
+
+		wp_add_inline_style( 'mbf-styles', $cookie_css );
 
 		// Enqueue typography styles.
 		mbf_enqueue_typography_styles( 'mbf-styles' );
