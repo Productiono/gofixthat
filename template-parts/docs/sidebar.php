@@ -5,8 +5,13 @@
  * @package Apparel
  */
 
-$sidebar_items = isset( $args['items'] ) ? $args['items'] : mbf_get_doc_sidebar_items();
-$sidebar_title = isset( $args['title'] ) ? $args['title'] : esc_html__( 'Documentation', 'apparel' );
+$sidebar_args   = isset( $args ) && is_array( $args ) ? $args : array();
+if ( empty( $sidebar_args ) && function_exists( 'get_query_var' ) ) {
+	$sidebar_args = get_query_var( 'mbf_docs_sidebar_args', array() );
+}
+
+$sidebar_items = isset( $sidebar_args['items'] ) ? $sidebar_args['items'] : mbf_get_doc_sidebar_items();
+$sidebar_title = isset( $sidebar_args['title'] ) ? $sidebar_args['title'] : esc_html__( 'Documentation', 'apparel' );
 $walker        = new MBF_Docs_Sidebar_Walker();
 ?>
 <div class="docs-sidebar__inner">

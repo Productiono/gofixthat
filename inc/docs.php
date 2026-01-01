@@ -1589,6 +1589,57 @@ function mbf_flag_active_docs( $items, $active_ids ) {
 	return $items;
 }
 
+/**
+ * Determine whether get_template_part supports the $args parameter.
+ *
+ * @return bool
+ */
+function mbf_docs_template_part_supports_args() {
+	static $supports_args = null;
+
+	if ( null !== $supports_args ) {
+		return $supports_args;
+	}
+
+	if ( ! function_exists( 'get_template_part' ) ) {
+		return false;
+	}
+
+	try {
+		$reflection    = new ReflectionFunction( 'get_template_part' );
+		$supports_args = $reflection->getNumberOfParameters() >= 3;
+	} catch ( ReflectionException $exception ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
+		$supports_args = false;
+	}
+
+	return $supports_args;
+}
+
+/**
+ * Render the docs sidebar template with backward compatibility for older WordPress versions.
+ *
+ * @param array $args Sidebar arguments.
+ * @return void
+ */
+function mbf_render_docs_sidebar( $args = array() ) {
+	$context = is_array( $args ) ? $args : array();
+
+	if ( mbf_docs_template_part_supports_args() ) {
+		get_template_part( 'template-parts/docs/sidebar', null, $context );
+		return;
+	}
+
+	if ( function_exists( 'set_query_var' ) ) {
+		$previous_args = function_exists( 'get_query_var' ) ? get_query_var( 'mbf_docs_sidebar_args' ) : null;
+		set_query_var( 'mbf_docs_sidebar_args', $context );
+		get_template_part( 'template-parts/docs/sidebar' );
+		set_query_var( 'mbf_docs_sidebar_args', $previous_args );
+		return;
+	}
+
+	get_template_part( 'template-parts/docs/sidebar' );
+}
+
 if ( ! class_exists( 'MBF_Docs_Sidebar_Walker' ) ) {
 	/**
 	 * Sidebar walker for the docs navigation.

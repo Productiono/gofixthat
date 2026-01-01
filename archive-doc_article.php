@@ -14,7 +14,7 @@ $archive_title = post_type_archive_title( '', false );
 <div class="docs-shell" data-docs-sidebar>
 	<div class="docs-sidebar__backdrop" data-docs-sidebar-backdrop hidden></div>
 	<aside id="docs-sidebar" class="docs-sidebar" data-docs-sidebar-drawer aria-hidden="true">
-		<?php get_template_part( 'template-parts/docs/sidebar', null, array( 'items' => $sidebar_items ) ); ?>
+		<?php mbf_render_docs_sidebar( array( 'items' => $sidebar_items ) ); ?>
 	</aside>
 
 	<main class="docs-main" id="primary" role="main">
