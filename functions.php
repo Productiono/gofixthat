@@ -7,6 +7,22 @@
  * @package Apparel
  */
 
+if ( ! defined( 'WP_DEBUG' ) ) {
+	define( 'WP_DEBUG', true ); // Log errors for debugging.
+}
+
+if ( ! defined( 'WP_DEBUG_LOG' ) ) {
+	define( 'WP_DEBUG_LOG', WP_CONTENT_DIR . '/debug.log' ); // Persist logs to wp-content/debug.log.
+}
+
+if ( ! defined( 'WP_DEBUG_DISPLAY' ) ) {
+	define( 'WP_DEBUG_DISPLAY', false ); // Hide error output from visitors.
+}
+
+if ( function_exists( 'ini_set' ) ) {
+	@ini_set( 'display_errors', '0' );
+}
+
 if ( ! class_exists( 'Apparel' ) ) {
 	/**
 	 * Main Core Class

@@ -5,14 +5,22 @@
  * @package Apparel
  */
 
-$sidebar_args   = isset( $args ) && is_array( $args ) ? $args : array();
+$sidebar_args = isset( $args ) && is_array( $args ) ? $args : array();
+
 if ( empty( $sidebar_args ) && function_exists( 'get_query_var' ) ) {
 	$sidebar_args = get_query_var( 'mbf_docs_sidebar_args', array() );
 }
 
-$sidebar_items = isset( $sidebar_args['items'] ) ? $sidebar_args['items'] : mbf_get_doc_sidebar_items();
+if ( isset( $sidebar_args['items'] ) ) {
+	$sidebar_items = is_array( $sidebar_args['items'] ) ? $sidebar_args['items'] : array();
+} elseif ( function_exists( 'mbf_get_doc_sidebar_items' ) ) {
+	$sidebar_items = mbf_get_doc_sidebar_items();
+} else {
+	$sidebar_items = array();
+}
+
 $sidebar_title = isset( $sidebar_args['title'] ) ? $sidebar_args['title'] : esc_html__( 'Documentation', 'apparel' );
-$walker        = new MBF_Docs_Sidebar_Walker();
+$walker        = class_exists( 'MBF_Docs_Sidebar_Walker' ) ? new MBF_Docs_Sidebar_Walker() : null;
 ?>
 <div class="docs-sidebar__inner">
 	<div class="docs-sidebar__header">
@@ -23,7 +31,7 @@ $walker        = new MBF_Docs_Sidebar_Walker();
 		</button>
 	</div>
 
-	<?php if ( ! empty( $sidebar_items ) ) : ?>
+	<?php if ( $walker instanceof Walker && ! empty( $sidebar_items ) ) : ?>
 		<nav class="docs-sidebar__nav" aria-label="<?php esc_attr_e( 'Documentation navigation', 'apparel' ); ?>" aria-labelledby="docs-sidebar-heading">
 			<h2 class="screen-reader-text" id="docs-sidebar-heading"><?php esc_html_e( 'Documentation navigation', 'apparel' ); ?></h2>
 			<ul class="docs-sidebar__list">
