@@ -5,14 +5,69 @@
  * @package Apparel
  */
 
+$docs_categories = get_terms(
+	array(
+		'taxonomy'   => 'docs_category',
+		'hide_empty' => false,
+		'orderby'    => 'name',
+		'order'      => 'ASC',
+	)
+);
+
+$docs_nav_links      = mbf_get_docs_nav_links( $docs_categories, get_queried_object_id() );
+$docs_search_markup  = mbf_get_docs_search_markup();
+$docs_utility_markup = mbf_get_docs_utility_markup();
+
+add_filter(
+	'body_class',
+	function( $classes ) {
+		$classes[] = 'docs-category-page';
+		return $classes;
+	}
+);
+
+add_action( 'wp_head', 'mbf_docs_render_header_styles' );
+add_action(
+	'wp_head',
+	function() {
+		?>
+		<style>
+			body.docs-category-page .mbf-header,
+			body.docs-category-page .mbf-header-before {
+				display: none;
+			}
+
+			body.docs-category-page .mbf-site-content {
+				margin-top: 0;
+			}
+
+			body.docs-category-page .docs-category-shell {
+				padding: 24px 18px 32px;
+			}
+
+			@media (max-width: 960px) {
+				body.docs-category-page .docs-category-shell {
+					padding-top: 18px;
+				}
+			}
+		</style>
+		<?php
+	}
+);
+
 get_header(); ?>
 
-<div id="primary" class="mbf-content-area">
+<div class="docs-page docs-category-layout">
+	<?php mbf_render_docs_header( array( 'nav_links' => $docs_nav_links, 'search_markup' => $docs_search_markup, 'utility_markup' => $docs_utility_markup ) ); ?>
+	<?php mbf_site_search(); ?>
 
-	<?php
-	/**
-	 * The mbf_main_before hook.
-	 *
+	<div class="docs-category-shell">
+		<div id="primary" class="mbf-content-area">
+
+		<?php
+		/**
+		 * The mbf_main_before hook.
+		 *
 	 * @since 1.0.0
 	 */
 	do_action( 'mbf_main_before' );
@@ -99,5 +154,9 @@ get_header(); ?>
 	?>
 </div>
 
-<?php get_sidebar(); ?>
+	<?php get_sidebar(); ?>
+	</div>
+</div>
+
+<?php mbf_docs_render_header_script(); ?>
 <?php get_footer(); ?>
