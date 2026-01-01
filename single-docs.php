@@ -106,6 +106,71 @@ if ( ! function_exists( 'mbf_render_docs_sidebar_term' ) ) {
 		</li>
 		<?php
 	}
+	if ( ! function_exists( 'mbf_render_docs_sidebar_children' ) ) {
+		/**
+		 * Render only the child terms and docs for a given term.
+		 *
+		 * @param WP_Term $term            The parent term.
+		 * @param array   $active_term_ids The active term and ancestor IDs.
+		 * @param int     $current_post_id Current docs ID.
+		 * @param int     $level           Nesting depth.
+		 */
+		function mbf_render_docs_sidebar_children( $term, $active_term_ids, $current_post_id, $level = 0 ) {
+			$child_terms = get_terms(
+				array(
+					'taxonomy'   => 'docs_category',
+					'hide_empty' => false,
+					'parent'     => $term->term_id,
+					'orderby'    => 'name',
+					'order'      => 'ASC',
+				)
+			);
+
+			$child_posts = get_posts(
+				array(
+					'post_type'      => 'docs',
+					'posts_per_page' => 50,
+					'orderby'        => array(
+						'menu_order' => 'ASC',
+						'title'      => 'ASC',
+					),
+					'tax_query'      => array(
+						array(
+							'taxonomy'         => 'docs_category',
+							'terms'            => array( $term->term_id ),
+							'include_children' => false,
+						),
+					),
+					'fields'         => '',
+				)
+			);
+
+			if ( ! empty( $child_posts ) ) {
+				foreach ( $child_posts as $child_post ) {
+					$is_current = (int) $child_post->ID === (int) $current_post_id;
+					?>
+					<li class="docs-sidebar-item docs-sidebar-doc level-<?php echo (int) $level; ?> <?php echo $is_current ? 'is-active' : ''; ?>">
+						<a class="docs-sidebar-link" href="<?php echo esc_url( get_permalink( $child_post ) ); ?>">
+							<span class="docs-sidebar-icon" aria-hidden="true">
+								<svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+									<path d="M8 5h5.6c.4 0 .8.2 1 .4l2 2c.2.2.4.6.4 1V19c0 .6-.4 1-1 1H8c-.6 0-1-.4-1-1V6c0-.6.4-1 1-1Z" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" />
+									<path d="M14 5v3.2c0 .4.4.8.8.8H18" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" />
+								</svg>
+							</span>
+							<span class="docs-sidebar-text"><?php echo esc_html( get_the_title( $child_post ) ); ?></span>
+						</a>
+					</li>
+					<?php
+				}
+			}
+
+			if ( ! empty( $child_terms ) && ! is_wp_error( $child_terms ) ) {
+				foreach ( $child_terms as $child_term ) {
+					mbf_render_docs_sidebar_term( $child_term, $active_term_ids, $current_post_id, $level );
+				}
+			}
+		}
+	}
 }
 
 while ( have_posts() ) :
@@ -200,20 +265,23 @@ while ( have_posts() ) :
 		}
 	);
 
-		if ( $root_term ) {
-			usort(
-				$top_level_terms,
-				function ( $a, $b ) use ( $root_term ) {
-					if ( $a->term_id === $root_term->term_id ) {
+	if ( $root_term ) {
+		usort(
+			$top_level_terms,
+			function ( $a, $b ) use ( $root_term ) {
+				if ( $a->term_id === $root_term->term_id ) {
 					return -1;
 				}
 				if ( $b->term_id === $root_term->term_id ) {
 					return 1;
 				}
 				return strcasecmp( $a->name, $b->name );
-				}
-			);
-		}
+			}
+		);
+	}
+
+	$prev_doc = get_adjacent_post( true, '', true, 'docs_category' );
+	$next_doc = get_adjacent_post( true, '', false, 'docs_category' );
 
 	?>
 	<!doctype html>
@@ -227,10 +295,10 @@ while ( have_posts() ) :
 	<?php wp_head(); ?>
 	<style>
 		:root {
-			--docs-text: #1c1c1c;
-			--docs-muted: #4a4a4a;
-			--docs-border: #e5e5e5;
-			--docs-surface: #f7f7f7;
+			--docs-text: #1f1f1f;
+			--docs-muted: #525252;
+			--docs-border: #e6e6e6;
+			--docs-surface: #f9f9f9;
 			--docs-accent: #0f0f0f;
 		}
 
@@ -246,6 +314,7 @@ while ( have_posts() ) :
 			color: var(--docs-text);
 			background: #ffffff;
 			-webkit-font-smoothing: antialiased;
+			line-height: 1.6;
 		}
 
 		.docs-page {
@@ -401,10 +470,10 @@ while ( have_posts() ) :
 		.docs-single-shell {
 			max-width: 1320px;
 			margin: 0 auto;
-			padding: 36px 32px 64px;
+			padding: 38px 36px 72px;
 			display: grid;
 			grid-template-columns: 260px 1fr 220px;
-			gap: 34px;
+			gap: 40px;
 			width: 100%;
 		}
 
@@ -432,19 +501,35 @@ while ( have_posts() ) :
 			top: 84px;
 			max-height: calc(100vh - 100px);
 			overflow: auto;
-			padding-right: 6px;
+			padding-right: 10px;
+			scrollbar-width: thin;
+			scrollbar-color: #cfcfcf transparent;
+		}
+
+		.docs-sidebar::-webkit-scrollbar {
+			width: 6px;
+		}
+
+		.docs-sidebar::-webkit-scrollbar-track {
+			background: transparent;
+		}
+
+		.docs-sidebar::-webkit-scrollbar-thumb {
+			background: #cfcfcf;
+			border-radius: 999px;
 		}
 
 		.docs-sidebar-group + .docs-sidebar-group {
-			margin-top: 24px;
+			margin-top: 30px;
 		}
 
 		.docs-sidebar-heading {
 			font-size: 15px;
 			font-weight: 700;
-			margin-bottom: 12px;
+			margin-bottom: 14px;
 			color: #1e1e1e;
 			letter-spacing: -0.01em;
+			line-height: 1.2;
 		}
 
 		.docs-sidebar-list,
@@ -467,9 +552,9 @@ while ( have_posts() ) :
 			color: inherit;
 			font-size: 14px;
 			font-weight: 600;
-			padding: 9px 12px;
+			padding: 10px 12px;
 			border-radius: 12px;
-			transition: background 0.15s ease, color 0.15s ease;
+			transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
 		}
 
 		.docs-sidebar-link:hover {
@@ -478,7 +563,10 @@ while ( have_posts() ) :
 
 		.docs-sidebar-doc.is-active .docs-sidebar-link,
 		.docs-sidebar-term.is-active-branch > .docs-sidebar-link {
-			background: #e8e8e8;
+			background: #ebebeb;
+			box-shadow: inset 0 0 0 1px #dedede;
+			color: #0f0f0f;
+			font-weight: 700;
 		}
 
 		.docs-sidebar-icon {
@@ -493,6 +581,7 @@ while ( have_posts() ) :
 			overflow: hidden;
 			text-overflow: ellipsis;
 			white-space: nowrap;
+			color: #161616;
 		}
 
 		.docs-sidebar-chevron svg {
@@ -511,19 +600,20 @@ while ( have_posts() ) :
 		}
 
 		.docs-article {
-			max-width: 760px;
+			max-width: 840px;
 			margin: 0 auto;
 		}
 
 		.docs-article-header {
-			margin-bottom: 10px;
+			margin-bottom: 12px;
 		}
 
 		.docs-article-title {
-			font-size: 30px;
-			margin: 0 0 6px;
+			font-size: 32px;
+			margin: 0 0 8px;
 			font-weight: 700;
 			letter-spacing: -0.01em;
+			color: #121212;
 		}
 
 		.docs-article-meta {
@@ -536,46 +626,127 @@ while ( have_posts() ) :
 		}
 
 		.docs-article-body {
-			font-size: 15px;
-			line-height: 1.7;
-			color: #202020;
+			font-size: 16px;
+			line-height: 1.68;
+			color: #1f1f1f;
 		}
 
 		.docs-article-body h2 {
-			margin: 24px 0 10px;
-			font-size: 18px;
+			margin: 26px 0 12px;
+			font-size: 19px;
 			font-weight: 700;
 			letter-spacing: -0.01em;
+			color: #131313;
 		}
 
 		.docs-article-body h3 {
 			margin: 18px 0 8px;
 			font-size: 16px;
 			font-weight: 700;
+			color: #151515;
+			letter-spacing: -0.005em;
 		}
 
 		.docs-article-body p {
-			margin: 0 0 12px;
+			margin: 0 0 14px;
 		}
 
 		.docs-article-body ul {
-			padding-left: 20px;
-			margin: 6px 0 14px;
+			padding-left: 22px;
+			margin: 6px 0 18px;
 		}
 
 		.docs-article-body li + li {
-			margin-top: 8px;
+			margin-top: 10px;
+		}
+
+		.docs-article-body strong {
+			color: #0f0f0f;
 		}
 
 		.docs-article-body a {
-			color: #1f5eea;
-			text-decoration: underline;
+			color: #1c1c1c;
+			text-decoration: none;
+			box-shadow: inset 0 -1px 0 #cfcfcf;
+			transition: color 0.15s ease, box-shadow 0.15s ease;
+		}
+
+		.docs-article-body a:hover {
+			color: #0c0c0c;
+			box-shadow: inset 0 -2px 0 #bcbcbc;
+		}
+
+		.docs-article-body figure {
+			margin: 18px 0;
+		}
+
+		.docs-article-body img,
+		.docs-article-body picture,
+		.docs-article-body video,
+		.docs-article-body iframe {
+			display: block;
+			width: 100%;
+			max-width: 100%;
+			height: auto;
+			border-radius: 12px;
+			border: 1px solid #e4e4e4;
+			background: #fbfbfb;
+			box-shadow: 0 10px 24px rgba(0, 0, 0, 0.04);
+			overflow: hidden;
+			margin: 18px 0;
+		}
+
+		.docs-article-body iframe {
+			min-height: 320px;
 		}
 
 		.docs-article-divider {
-			margin: 32px 0;
+			margin: 32px 0 22px;
 			height: 1px;
 			background: #ededed;
+		}
+
+		.docs-article-nav {
+			display: flex;
+			justify-content: space-between;
+			gap: 12px;
+			margin-top: 8px;
+			flex-wrap: wrap;
+		}
+
+		.docs-article-nav a {
+			flex: 1 1 220px;
+			display: inline-flex;
+			align-items: center;
+			justify-content: space-between;
+			gap: 8px;
+			text-decoration: none;
+			color: #111;
+			padding: 12px 14px;
+			border: 1px solid #e4e4e4;
+			border-radius: 12px;
+			background: #fbfbfb;
+			box-shadow: 0 8px 22px rgba(0, 0, 0, 0.03);
+			font-weight: 700;
+			letter-spacing: -0.01em;
+		}
+
+		.docs-article-nav a span {
+			font-weight: 500;
+			color: #4b4b4b;
+		}
+
+		.docs-article-nav strong {
+			display: block;
+			font-size: 15px;
+			font-weight: 700;
+			color: #0f0f0f;
+			letter-spacing: -0.01em;
+		}
+
+		.docs-article-nav a:hover {
+			border-color: #d8d8d8;
+			background: #f6f6f6;
 		}
 
 		.docs-toc {
@@ -585,6 +756,7 @@ while ( have_posts() ) :
 			overflow: auto;
 			font-size: 14px;
 			color: #5a5a5a;
+			padding-left: 6px;
 		}
 
 		.docs-toc h3 {
@@ -609,7 +781,7 @@ while ( have_posts() ) :
 		}
 
 		.docs-toc-list li {
-			margin: 6px 0;
+			margin: 8px 0;
 		}
 
 		.docs-toc-list a {
@@ -617,6 +789,7 @@ while ( have_posts() ) :
 			text-decoration: none;
 			display: block;
 			padding: 6px 2px;
+			line-height: 1.4;
 		}
 
 		.docs-toc-list a:hover {
@@ -749,7 +922,7 @@ if ( function_exists( 'wp_body_open' ) ) {
 						<div class="docs-sidebar-group">
 							<div class="docs-sidebar-heading"><?php echo esc_html( $top_term->name ); ?></div>
 							<ul class="docs-sidebar-list">
-								<?php mbf_render_docs_sidebar_term( $top_term, $active_term_ids, get_the_ID() ); ?>
+								<?php mbf_render_docs_sidebar_children( $top_term, $active_term_ids, get_the_ID() ); ?>
 							</ul>
 						</div>
 						<?php
@@ -785,6 +958,24 @@ if ( function_exists( 'wp_body_open' ) ) {
 			</div>
 
 			<div class="docs-article-divider" aria-hidden="true"></div>
+
+			<?php if ( $prev_doc || $next_doc ) : ?>
+				<nav class="docs-article-nav" aria-label="<?php esc_attr_e( 'Article navigation', 'apparel' ); ?>">
+					<?php if ( $prev_doc ) : ?>
+						<a class="docs-article-prev" href="<?php echo esc_url( get_permalink( $prev_doc ) ); ?>">
+							<span><?php esc_html_e( 'Previous', 'apparel' ); ?></span>
+							<strong><?php echo esc_html( get_the_title( $prev_doc ) ); ?></strong>
+						</a>
+					<?php endif; ?>
+
+					<?php if ( $next_doc ) : ?>
+						<a class="docs-article-next" href="<?php echo esc_url( get_permalink( $next_doc ) ); ?>">
+							<span><?php esc_html_e( 'Next', 'apparel' ); ?></span>
+							<strong><?php echo esc_html( get_the_title( $next_doc ) ); ?></strong>
+						</a>
+					<?php endif; ?>
+				</nav>
+			<?php endif; ?>
 		</article>
 
 		<aside class="docs-toc" aria-label="<?php esc_attr_e( 'On this page', 'apparel' ); ?>">
