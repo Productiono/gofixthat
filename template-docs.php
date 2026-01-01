@@ -400,9 +400,8 @@ if ( function_exists( 'wp_body_open' ) ) {
 				<?php mbf_component( 'header_scheme_toggle' ); ?>
 			</div>
 		</div>
+		<?php mbf_site_search(); ?>
 	</header>
-
-	<?php mbf_site_search(); ?>
 
 	<section class="docs-hero" aria-labelledby="docs-hero-title">
 		<div class="docs-hero-inner">
