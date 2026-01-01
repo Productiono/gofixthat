@@ -494,6 +494,31 @@ function mbf_doc_article_filter_query( $query ) {
 add_action( 'pre_get_posts', 'mbf_doc_article_filter_query' );
 
 /**
+ * Order frontend doc archives by display order then title.
+ *
+ * @param WP_Query $query Query instance.
+ */
+function mbf_doc_article_order_query( $query ) {
+	if ( is_admin() || ! $query->is_main_query() ) {
+		return;
+	}
+
+	if ( ! ( $query->is_post_type_archive( 'doc_article' ) || $query->is_tax( array( 'doc_category', 'doc_subcategory' ) ) ) ) {
+		return;
+	}
+
+	$query->set(
+		'orderby',
+		array(
+			'meta_value_num' => 'ASC',
+			'title'          => 'ASC',
+		)
+	);
+	$query->set( 'meta_key', 'doc_display_order' );
+}
+add_action( 'pre_get_posts', 'mbf_doc_article_order_query' );
+
+/**
  * Flush rewrite rules when Docs settings change.
  *
  * @param mixed $old_value Previous value.
@@ -583,5 +608,487 @@ function mbf_register_doc_article_meta_fields() {
 			'description'       => esc_html__( 'Controls hero visibility on Doc Article templates.', 'apparel' ),
 		)
 	);
+
+	$term_meta_permissions = function() {
+		return current_user_can( 'manage_categories' );
+	};
+
+	register_term_meta(
+		'doc_category',
+		'doc_display_order',
+		array(
+			'type'              => 'integer',
+			'default'           => 0,
+			'description'       => esc_html__( 'Controls ordering within doc categories.', 'apparel' ),
+			'single'            => true,
+			'sanitize_callback' => 'absint',
+			'show_in_rest'      => true,
+			'auth_callback'     => $term_meta_permissions,
+		)
+	);
+
+	register_term_meta(
+		'doc_subcategory',
+		'doc_display_order',
+		array(
+			'type'              => 'integer',
+			'default'           => 0,
+			'description'       => esc_html__( 'Controls ordering within doc subcategories.', 'apparel' ),
+			'single'            => true,
+			'sanitize_callback' => 'absint',
+			'show_in_rest'      => true,
+			'auth_callback'     => $term_meta_permissions,
+		)
+	);
 }
 add_action( 'init', 'mbf_register_doc_article_meta_fields' );
+
+/**
+ * Retrieve the preferred order value for a docs term.
+ *
+ * @param int $term_id Term ID.
+ * @return int
+ */
+function mbf_get_doc_term_order( $term_id ) {
+	$order = get_term_meta( $term_id, 'doc_display_order', true );
+
+	return $order ? absint( $order ) : 0;
+}
+
+/**
+ * Sort docs items by their provided order then title.
+ *
+ * @param array $items Items to sort in place.
+ * @return void
+ */
+function mbf_sort_doc_items( &$items ) {
+	usort(
+		$items,
+		function( $a, $b ) {
+			$order_a = isset( $a['order'] ) ? absint( $a['order'] ) : 0;
+			$order_b = isset( $b['order'] ) ? absint( $b['order'] ) : 0;
+			$strtolower = function_exists( 'mb_strtolower' ) ? 'mb_strtolower' : 'strtolower';
+
+			if ( $order_a === $order_b ) {
+				return strcmp( $strtolower( $a['title'] ), $strtolower( $b['title'] ) );
+			}
+
+			return $order_a > $order_b ? 1 : -1;
+		}
+	);
+}
+
+/**
+ * Build the hierarchical docs collection for use in sidebar navigation.
+ *
+ * @return array
+ */
+function mbf_get_doc_sidebar_items() {
+	$categories = get_terms(
+		array(
+			'taxonomy'   => 'doc_category',
+			'hide_empty' => false,
+		)
+	);
+
+	if ( is_wp_error( $categories ) ) {
+		return array();
+	}
+
+	$active_ids = mbf_get_active_doc_references();
+	$items      = array();
+
+	foreach ( $categories as $category ) {
+		$category_node = array(
+			'id'       => $category->term_id,
+			'title'    => $category->name,
+			'url'      => get_term_link( $category ),
+			'order'    => mbf_get_doc_term_order( $category->term_id ),
+			'type'     => 'category',
+			'children' => array(),
+		);
+
+		if ( is_wp_error( $category_node['url'] ) ) {
+			continue;
+		}
+
+		$posts = get_posts(
+			array(
+				'post_type'      => 'doc_article',
+				'posts_per_page' => -1,
+				'post_status'    => 'publish',
+				'tax_query'      => array(
+					array(
+						'taxonomy' => 'doc_category',
+						'field'    => 'term_id',
+						'terms'    => array( $category->term_id ),
+					),
+				),
+			)
+		);
+
+		$subcategory_map      = array();
+		$uncategorized_posts  = array();
+
+		foreach ( $posts as $post ) {
+			$article_node = array(
+				'id'       => $post->ID,
+				'title'    => get_the_title( $post ),
+				'url'      => get_permalink( $post ),
+				'order'    => get_post_meta( $post->ID, 'doc_display_order', true ),
+				'type'     => 'article',
+				'children' => array(),
+			);
+
+			$subcategories = get_the_terms( $post, 'doc_subcategory' );
+
+			if ( ! empty( $subcategories ) && ! is_wp_error( $subcategories ) ) {
+				foreach ( $subcategories as $subcategory ) {
+					if ( ! isset( $subcategory_map[ $subcategory->term_id ] ) ) {
+						$subcategory_map[ $subcategory->term_id ] = array(
+							'id'       => $subcategory->term_id,
+							'title'    => $subcategory->name,
+							'url'      => get_term_link( $subcategory ),
+							'order'    => mbf_get_doc_term_order( $subcategory->term_id ),
+							'type'     => 'subcategory',
+							'children' => array(),
+						);
+					}
+
+					if ( is_wp_error( $subcategory_map[ $subcategory->term_id ]['url'] ) ) {
+						continue;
+					}
+
+					$subcategory_map[ $subcategory->term_id ]['children'][] = $article_node;
+				}
+			} else {
+				$uncategorized_posts[] = $article_node;
+			}
+		}
+
+		foreach ( $subcategory_map as &$subcategory_node ) {
+			mbf_sort_doc_items( $subcategory_node['children'] );
+		}
+		unset( $subcategory_node );
+
+		$category_node['children'] = array_values( $subcategory_map );
+
+		if ( $uncategorized_posts ) {
+			$category_node['children'] = array_merge( $category_node['children'], $uncategorized_posts );
+		}
+
+		mbf_sort_doc_items( $category_node['children'] );
+
+		$items[] = $category_node;
+	}
+
+	mbf_sort_doc_items( $items );
+
+	return mbf_flag_active_docs( $items, $active_ids );
+}
+
+/**
+ * Determine the active doc items for highlighting in the sidebar.
+ *
+ * @return array
+ */
+function mbf_get_active_doc_references() {
+	$post_ids        = array();
+	$category_ids    = array();
+	$subcategory_ids = array();
+
+	if ( is_singular( 'doc_article' ) ) {
+		$post_ids[] = get_the_ID();
+
+		$category_terms = get_the_terms( get_the_ID(), 'doc_category' );
+		if ( ! empty( $category_terms ) && ! is_wp_error( $category_terms ) ) {
+			$category_ids = wp_list_pluck( $category_terms, 'term_id' );
+		}
+
+		$subcategory_terms = get_the_terms( get_the_ID(), 'doc_subcategory' );
+		if ( ! empty( $subcategory_terms ) && ! is_wp_error( $subcategory_terms ) ) {
+			$subcategory_ids = wp_list_pluck( $subcategory_terms, 'term_id' );
+		}
+	} elseif ( is_tax( 'doc_category' ) ) {
+		$term         = get_queried_object();
+		$category_ids = array( $term->term_id );
+	} elseif ( is_tax( 'doc_subcategory' ) ) {
+		$term            = get_queried_object();
+		$subcategory_ids = array( $term->term_id );
+	}
+
+	return array(
+		'posts'        => $post_ids,
+		'categories'   => $category_ids,
+		'subcategories' => $subcategory_ids,
+	);
+}
+
+/**
+ * Apply active states to docs items.
+ *
+ * @param array $items      Sidebar items.
+ * @param array $active_ids Active ids array.
+ * @return array
+ */
+function mbf_flag_active_docs( $items, $active_ids ) {
+	foreach ( $items as &$item ) {
+		$item['is_active'] = false;
+
+		if ( 'article' === $item['type'] && in_array( $item['id'], $active_ids['posts'], true ) ) {
+			$item['is_active'] = true;
+		}
+
+		if ( 'category' === $item['type'] && in_array( $item['id'], $active_ids['categories'], true ) ) {
+			$item['is_active'] = true;
+		}
+
+		if ( 'subcategory' === $item['type'] && in_array( $item['id'], $active_ids['subcategories'], true ) ) {
+			$item['is_active'] = true;
+		}
+
+		if ( ! empty( $item['children'] ) ) {
+			$item['children'] = mbf_flag_active_docs( $item['children'], $active_ids );
+			foreach ( $item['children'] as $child ) {
+				if ( ! empty( $child['is_active'] ) ) {
+					$item['is_active'] = true;
+					break;
+				}
+			}
+		}
+	}
+
+	return $items;
+}
+
+if ( ! class_exists( 'MBF_Docs_Sidebar_Walker' ) ) {
+	/**
+	 * Sidebar walker for the docs navigation.
+	 */
+	class MBF_Docs_Sidebar_Walker extends Walker {
+		/**
+		 * What the class handles.
+		 *
+		 * @var string
+		 */
+		public $tree_type = array( 'doc_category', 'doc_subcategory', 'doc_article' );
+
+		/**
+		 * DB fields to use.
+		 *
+		 * @var array
+		 */
+		public $db_fields = array( 'parent' => 'parent', 'id' => 'id' );
+
+		/**
+		 * Starts the list before the elements are added.
+		 *
+		 * @param string $output Passed by reference. Used to append additional content.
+		 * @param int    $depth  Depth of menu item. Used for padding.
+		 * @param array  $args   Additional arguments.
+		 */
+		public function start_lvl( &$output, $depth = 0, $args = array() ) {
+			$indent     = str_repeat( "\t", $depth );
+			$list_class = ! empty( $args['list_class'] ) ? $args['list_class'] : 'docs-sidebar__list';
+
+			$output .= "\n{$indent}<ul class=\"" . esc_attr( $list_class ) . "\">\n";
+		}
+
+		/**
+		 * Ends the list of after the elements are added.
+		 *
+		 * @param string $output Passed by reference. Used to append additional content.
+		 * @param int    $depth  Depth of menu item. Used for padding.
+		 * @param array  $args   Additional arguments.
+		 */
+		public function end_lvl( &$output, $depth = 0, $args = array() ) {
+			unset( $args );
+			$indent  = str_repeat( "\t", $depth );
+			$output .= "{$indent}</ul>\n";
+		}
+
+		/**
+		 * Start the element output.
+		 *
+		 * @param string $output Passed by reference. Used to append additional content.
+		 * @param array  $item   Data object.
+		 * @param int    $depth  Depth of menu item.
+		 * @param array  $args   Additional arguments.
+		 * @param int    $id     Current item ID.
+		 */
+		public function start_el( &$output, $item, $depth = 0, $args = array(), $id = 0 ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
+			$indent     = ( $depth ) ? str_repeat( "\t", $depth ) : '';
+			$link_class = ! empty( $args['link_class'] ) ? $args['link_class'] : 'docs-sidebar__link';
+			$item_class = array( 'docs-sidebar__item', 'docs-sidebar__item--' . $item['type'] );
+
+			if ( ! empty( $item['is_active'] ) ) {
+				$item_class[] = 'is-active';
+			}
+
+			$output .= $indent . '<li class="' . esc_attr( implode( ' ', $item_class ) ) . '">';
+
+			$is_current = ! empty( $item['is_active'] ) && ( 'article' === $item['type'] || ( 'category' === $item['type'] && is_tax( 'doc_category' ) ) || ( 'subcategory' === $item['type'] && is_tax( 'doc_subcategory' ) ) );
+
+			$output .= '<a class="' . esc_attr( $link_class ) . '" href="' . esc_url( $item['url'] ) . '"';
+
+			if ( $is_current ) {
+				$output .= ' aria-current="page"';
+			}
+
+			$output .= '>' . esc_html( $item['title'] ) . '</a>';
+		}
+
+		/**
+		 * Ends the element output, if needed.
+		 *
+		 * @param string $output Passed by reference. Used to append additional content.
+		 * @param array  $item   Data object.
+		 * @param int    $depth  Depth of menu item.
+		 * @param array  $args   Additional arguments.
+		 */
+		public function end_el( &$output, $item, $depth = 0, $args = array() ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
+			unset( $item, $args, $depth );
+			$output .= "</li>\n";
+		}
+
+		/**
+		 * Display an individual element and its children.
+		 *
+		 * @param array  $element           Element data.
+		 * @param array  $children_elements Children elements (unused).
+		 * @param int    $max_depth         Max depth.
+		 * @param int    $depth             Current depth.
+		 * @param array  $args              Additional args.
+		 * @param string $output            Output reference.
+		 */
+		public function display_element( $element, &$children_elements, $max_depth, $depth, $args, &$output ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
+			$this->start_el( $output, $element, $depth, $args[0] );
+
+			if ( ( 0 === $max_depth || ( $depth + 1 ) < $max_depth ) && ! empty( $element['children'] ) ) {
+				$this->start_lvl( $output, $depth, $args[0] );
+
+				foreach ( $element['children'] as $child ) {
+					$this->display_element( $child, $children_elements, $max_depth, $depth + 1, $args, $output );
+				}
+
+				$this->end_lvl( $output, $depth, $args[0] );
+			}
+
+			$this->end_el( $output, $element, $depth, $args[0] );
+		}
+
+		/**
+		 * Traverse elements to create list markup.
+		 *
+		 * @param array $elements Elements to list.
+		 * @param int   $max_depth Max depth.
+		 * @return string
+		 */
+		public function walk( $elements, $max_depth, ...$args ) {
+			$output = '';
+
+			if ( empty( $args[0] ) ) {
+				$args[0] = array();
+			}
+
+			foreach ( (array) $elements as $e ) {
+				$this->display_element( $e, array(), $max_depth, 0, $args, $output );
+			}
+
+			return $output;
+		}
+	}
+}
+
+/**
+ * Render a scoped search form for documentation.
+ *
+ * @return string
+ */
+function mbf_get_doc_search_form() {
+	$form  = '<form role="search" method="get" class="docs-search" action="' . esc_url( home_url( '/' ) ) . '">';
+	$form .= '<label class="screen-reader-text" for="docs-search-field">' . esc_html__( 'Search documentation', 'apparel' ) . '</label>';
+	$form .= '<input type="search" id="docs-search-field" class="docs-search__field" placeholder="' . esc_attr__( 'Search docs', 'apparel' ) . '" value="' . esc_attr( get_search_query() ) . '" name="s" />';
+	$form .= '<input type="hidden" name="post_type" value="doc_article" />';
+	$form .= '<button type="submit" class="docs-search__submit">' . esc_html__( 'Search', 'apparel' ) . '</button>';
+	$form .= '</form>';
+
+	return $form;
+}
+
+/**
+ * Enqueue inline behaviors for documentation templates.
+ */
+function mbf_enqueue_doc_assets() {
+	if ( ! ( is_singular( 'doc_article' ) || is_post_type_archive( 'doc_article' ) || is_tax( array( 'doc_category', 'doc_subcategory' ) ) ) ) {
+		return;
+	}
+
+	$script = <<<'JS'
+( function() {
+	var sidebar = document.querySelector('[data-docs-sidebar]');
+	if ( ! sidebar ) {
+		return;
+	}
+
+	var drawer = sidebar.querySelector('[data-docs-sidebar-drawer]');
+	var toggles = sidebar.querySelectorAll('[data-docs-sidebar-toggle]');
+	var backdrop = sidebar.querySelector('[data-docs-sidebar-backdrop]');
+	var mediaQuery = window.matchMedia('(min-width: 960px)');
+
+	function setVisibility( isOpen ) {
+		sidebar.classList.toggle('is-open', isOpen);
+
+		if ( drawer ) {
+			drawer.setAttribute('aria-hidden', isOpen || mediaQuery.matches ? 'false' : 'true');
+		}
+
+		if ( toggles.length ) {
+			for ( var i = 0; i < toggles.length; i++ ) {
+				toggles[i].setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+			}
+		}
+
+		if ( backdrop ) {
+			if ( isOpen && ! mediaQuery.matches ) {
+				backdrop.removeAttribute('hidden');
+			} else {
+				backdrop.setAttribute('hidden', 'hidden');
+			}
+		}
+	}
+
+	function toggleSidebar() {
+		var isOpen = sidebar.classList.contains('is-open');
+		setVisibility( ! isOpen );
+	}
+
+	function closeSidebar() {
+		setVisibility( false );
+	}
+
+	setVisibility( mediaQuery.matches );
+
+	for ( var i = 0; i < toggles.length; i++ ) {
+		toggles[i].addEventListener('click', toggleSidebar );
+	}
+
+	if ( backdrop ) {
+		backdrop.addEventListener('click', closeSidebar );
+	}
+
+	mediaQuery.addEventListener('change', function( event ) {
+		setVisibility( event.matches );
+	});
+
+	document.addEventListener('keyup', function( event ) {
+		if ( 'Escape' === event.key && sidebar.classList.contains('is-open') && ! mediaQuery.matches ) {
+			closeSidebar();
+		}
+	});
+} )();
+JS;
+
+	wp_add_inline_script( 'mbf-scripts', $script );
+}
+add_action( 'wp_enqueue_scripts', 'mbf_enqueue_doc_assets' );
