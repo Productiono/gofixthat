@@ -101,6 +101,12 @@ function mbf_register_doc_article() {
 			'show_ui'           => true,
 			'show_admin_column' => true,
 			'show_in_rest'      => true,
+			'capabilities'      => array(
+				'manage_terms' => 'manage_doc_terms',
+				'edit_terms'   => 'manage_doc_terms',
+				'delete_terms' => 'manage_doc_terms',
+				'assign_terms' => 'edit_doc_articles',
+			),
 			'rewrite'           => array(
 				'slug'       => 'docs-category',
 				'with_front' => false,
@@ -124,6 +130,12 @@ function mbf_register_doc_article() {
 			'show_ui'           => true,
 			'show_admin_column' => true,
 			'show_in_rest'      => true,
+			'capabilities'      => array(
+				'manage_terms' => 'manage_doc_terms',
+				'edit_terms'   => 'manage_doc_terms',
+				'delete_terms' => 'manage_doc_terms',
+				'assign_terms' => 'edit_doc_articles',
+			),
 			'rewrite'           => array(
 				'slug'       => 'docs-subcategory',
 				'with_front' => false,
@@ -165,7 +177,7 @@ function mbf_register_doc_article() {
 				'doc_category',
 				'doc_subcategory',
 			),
-				'map_meta_cap'        => true,
+			'map_meta_cap'        => true,
 			'capability_type'     => array( 'doc_article', 'doc_articles' ),
 			'capabilities'        => array(
 				'create_posts' => 'edit_doc_articles',
@@ -188,6 +200,106 @@ function mbf_register_doc_article() {
 	);
 }
 add_action( 'init', 'mbf_register_doc_article' );
+
+/**
+ * Add doc-specific capabilities and dedicated role.
+ */
+function mbf_register_doc_capabilities() {
+	$doc_caps = array(
+		'edit_doc_article',
+		'read_doc_article',
+		'delete_doc_article',
+		'edit_doc_articles',
+		'edit_others_doc_articles',
+		'publish_doc_articles',
+		'read_private_doc_articles',
+		'delete_doc_articles',
+		'delete_others_doc_articles',
+		'manage_doc_terms',
+	);
+
+	$administrator = get_role( 'administrator' );
+	if ( $administrator ) {
+		foreach ( $doc_caps as $cap ) {
+			$administrator->add_cap( $cap );
+		}
+	}
+
+	$docs_role = get_role( 'docs_manager' );
+	if ( ! $docs_role ) {
+		$docs_role = add_role(
+			'docs_manager',
+			esc_html__( 'Docs Manager', 'apparel' ),
+			array(
+				'read'                    => true,
+				'upload_files'            => true,
+				'read_doc_article'        => true,
+				'delete_doc_article'      => true,
+				'edit_doc_articles'       => true,
+				'publish_doc_articles'    => true,
+				'edit_others_doc_articles' => true,
+				'delete_doc_articles'     => true,
+				'delete_others_doc_articles' => true,
+				'read_private_doc_articles' => true,
+				'manage_doc_terms'        => true,
+			)
+		);
+	}
+
+	if ( $docs_role ) {
+		foreach ( $doc_caps as $cap ) {
+			$docs_role->add_cap( $cap );
+		}
+	}
+}
+add_action( 'init', 'mbf_register_doc_capabilities', 5 );
+
+/**
+ * Map doc capabilities to primitive caps.
+ *
+ * @param array  $caps    Primitive caps.
+ * @param string $cap     Requested cap.
+ * @param int    $user_id User ID.
+ * @param array  $args    Context args.
+ * @return array
+ */
+function mbf_map_doc_meta_cap( $caps, $cap, $user_id, $args ) {
+	switch ( $cap ) {
+		case 'edit_doc_article':
+		case 'delete_doc_article':
+		case 'read_doc_article':
+			$post = get_post( isset( $args[0] ) ? $args[0] : 0 );
+
+			if ( ! $post || 'doc_article' !== $post->post_type ) {
+				return $caps;
+			}
+
+			if ( 'read_doc_article' === $cap ) {
+				if ( 'private' !== $post->post_status || user_can( $user_id, 'read_private_doc_articles' ) ) {
+					return array( 'read' );
+				}
+
+				return array( 'do_not_allow' );
+			}
+
+			$is_author_cap = (int) $post->post_author === (int) $user_id ? 'edit_doc_articles' : 'edit_others_doc_articles';
+			$delete_cap    = (int) $post->post_author === (int) $user_id ? 'delete_doc_articles' : 'delete_others_doc_articles';
+
+			return 'edit_doc_article' === $cap ? array( $is_author_cap ) : array( $delete_cap );
+
+		case 'edit_doc_articles':
+		case 'edit_others_doc_articles':
+		case 'publish_doc_articles':
+		case 'read_private_doc_articles':
+		case 'delete_doc_articles':
+		case 'delete_others_doc_articles':
+		case 'manage_doc_terms':
+			return array( $cap );
+	}
+
+	return $caps;
+}
+add_filter( 'map_meta_cap', 'mbf_map_doc_meta_cap', 10, 4 );
 
 /**
  * Replace taxonomy placeholders in doc article permalinks.
@@ -642,6 +754,203 @@ function mbf_register_doc_article_meta_fields() {
 	);
 }
 add_action( 'init', 'mbf_register_doc_article_meta_fields' );
+
+/**
+ * Add Doc Article settings metabox.
+ */
+function mbf_add_doc_article_metaboxes() {
+	add_meta_box(
+		'mbf-doc-article-settings',
+		esc_html__( 'Doc Settings', 'apparel' ),
+		'mbf_render_doc_article_metabox',
+		'doc_article',
+		'side',
+		'high'
+	);
+}
+add_action( 'add_meta_boxes_doc_article', 'mbf_add_doc_article_metaboxes' );
+
+/**
+ * Render doc article settings metabox.
+ *
+ * @param WP_Post $post Post instance.
+ */
+function mbf_render_doc_article_metabox( $post ) {
+	wp_nonce_field( 'mbf_doc_article_meta', 'mbf_doc_article_meta_nonce' );
+
+	$order        = get_post_meta( $post->ID, 'doc_display_order', true );
+	$feature_flag = (bool) get_post_meta( $post->ID, 'doc_feature_flag', true );
+	$show_hero    = (bool) get_post_meta( $post->ID, 'doc_show_hero', true );
+	?>
+	<p>
+		<label for="mbf_doc_display_order"><?php esc_html_e( 'Display Order', 'apparel' ); ?></label><br />
+		<input type="number" id="mbf_doc_display_order" name="mbf_doc_display_order" value="<?php echo esc_attr( absint( $order ) ); ?>" class="small-text" />
+	</p>
+	<p>
+		<label>
+			<input type="checkbox" name="mbf_doc_feature_flag" value="1" <?php checked( $feature_flag ); ?> />
+			<?php esc_html_e( 'Enable feature flag', 'apparel' ); ?>
+		</label>
+	</p>
+	<p>
+		<label>
+			<input type="checkbox" name="mbf_doc_show_hero" value="1" <?php checked( $show_hero ); ?> />
+			<?php esc_html_e( 'Show hero on templates', 'apparel' ); ?>
+		</label>
+	</p>
+	<?php
+}
+
+/**
+ * Validate and persist doc article metadata.
+ *
+ * @param int     $post_id Post ID.
+ * @param WP_Post $post    Post object.
+ * @param bool    $update  Whether this is an update.
+ */
+function mbf_save_doc_article_meta( $post_id, $post, $update ) {
+	unset( $update );
+
+	if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
+		return;
+	}
+
+	if ( wp_is_post_revision( $post_id ) || wp_is_post_autosave( $post_id ) ) {
+		return;
+	}
+
+	if ( ! isset( $_POST['mbf_doc_article_meta_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['mbf_doc_article_meta_nonce'] ) ), 'mbf_doc_article_meta' ) ) {
+		return;
+	}
+
+	if ( ! current_user_can( 'edit_doc_article', $post_id ) ) {
+		return;
+	}
+
+	$order = isset( $_POST['mbf_doc_display_order'] ) ? absint( $_POST['mbf_doc_display_order'] ) : 0;
+	update_post_meta( $post_id, 'doc_display_order', $order );
+
+	$feature_flag = ! empty( $_POST['mbf_doc_feature_flag'] );
+	update_post_meta( $post_id, 'doc_feature_flag', $feature_flag );
+
+	$show_hero = ! empty( $_POST['mbf_doc_show_hero'] );
+	update_post_meta( $post_id, 'doc_show_hero', $show_hero );
+
+	$categories    = wp_get_post_terms( $post_id, 'doc_category' );
+	$subcategories = wp_get_post_terms( $post_id, 'doc_subcategory' );
+
+	if ( ! is_wp_error( $subcategories ) && ! empty( $subcategories ) && ( empty( $categories ) || is_wp_error( $categories ) ) ) {
+		wp_set_object_terms( $post_id, array(), 'doc_subcategory' );
+	}
+}
+add_action( 'save_post_doc_article', 'mbf_save_doc_article_meta', 10, 3 );
+
+/**
+ * Register REST endpoint for doc submissions.
+ */
+function mbf_register_doc_submission_endpoint() {
+	register_rest_route(
+		'docs/v1',
+		'/submit',
+		array(
+			'methods'             => WP_REST_Server::CREATABLE,
+			'callback'            => 'mbf_handle_doc_submission',
+			'permission_callback' => 'mbf_can_submit_docs',
+			'args'                => array(
+				'title'          => array(
+					'type'              => 'string',
+					'required'          => true,
+					'sanitize_callback' => 'sanitize_text_field',
+				),
+				'content'        => array(
+					'type'              => 'string',
+					'required'          => true,
+					'sanitize_callback' => 'wp_kses_post',
+				),
+				'doc_category'   => array(
+					'type'     => 'integer',
+					'required' => false,
+				),
+				'doc_subcategory' => array(
+					'type'     => 'integer',
+					'required' => false,
+				),
+				'display_order' => array(
+					'type'     => 'integer',
+					'default'  => 0,
+				),
+				'feature_flag'  => array(
+					'type'     => 'boolean',
+					'default'  => false,
+				),
+				'show_hero'     => array(
+					'type'    => 'boolean',
+					'default' => true,
+				),
+			),
+		)
+	);
+}
+add_action( 'rest_api_init', 'mbf_register_doc_submission_endpoint' );
+
+/**
+ * Permission callback for doc submissions.
+ *
+ * @return bool
+ */
+function mbf_can_submit_docs() {
+	return current_user_can( 'edit_doc_articles' );
+}
+
+/**
+ * Handle doc submission REST requests.
+ *
+ * @param WP_REST_Request $request Request object.
+ * @return WP_REST_Response|WP_Error
+ */
+function mbf_handle_doc_submission( WP_REST_Request $request ) {
+	$category_id    = $request->get_param( 'doc_category' );
+	$subcategory_id = $request->get_param( 'doc_subcategory' );
+
+	if ( $subcategory_id && ! $category_id ) {
+		return new WP_Error( 'mbf_doc_missing_category', esc_html__( 'Doc submissions with a subcategory must include a category.', 'apparel' ), array( 'status' => 400 ) );
+	}
+
+	$post_id = wp_insert_post(
+		array(
+			'post_type'    => 'doc_article',
+			'post_status'  => 'draft',
+			'post_title'   => $request->get_param( 'title' ),
+			'post_content' => $request->get_param( 'content' ),
+			'post_author'  => get_current_user_id(),
+		),
+		true
+	);
+
+	if ( is_wp_error( $post_id ) ) {
+		return $post_id;
+	}
+
+	if ( $category_id ) {
+		wp_set_post_terms( $post_id, array( absint( $category_id ) ), 'doc_category' );
+	}
+
+	if ( $subcategory_id && $category_id ) {
+		wp_set_post_terms( $post_id, array( absint( $subcategory_id ) ), 'doc_subcategory' );
+	}
+
+	update_post_meta( $post_id, 'doc_display_order', absint( $request->get_param( 'display_order' ) ) );
+	update_post_meta( $post_id, 'doc_feature_flag', (bool) $request->get_param( 'feature_flag' ) );
+	update_post_meta( $post_id, 'doc_show_hero', (bool) $request->get_param( 'show_hero' ) );
+
+	return rest_ensure_response(
+		array(
+			'id'      => $post_id,
+			'link'    => get_permalink( $post_id ),
+			'message' => esc_html__( 'Doc article submitted.', 'apparel' ),
+		)
+	);
+}
 
 /**
  * Retrieve the preferred order value for a docs term.
