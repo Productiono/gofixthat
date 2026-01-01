@@ -4,6 +4,76 @@
  */
 
 get_header();
+$doc_type_exists     = post_type_exists( 'doc_article' );
+$doc_category_exists = taxonomy_exists( 'doc_category' );
+$archive_link        = $doc_type_exists ? get_post_type_archive_link( 'doc_article' ) : '';
+
+$doc_cards = array();
+
+if ( $doc_type_exists && $doc_category_exists ) {
+	$doc_categories = get_terms(
+		array(
+			'taxonomy'   => 'doc_category',
+			'hide_empty' => false,
+			'number'     => 8,
+		)
+	);
+
+	if ( ! is_wp_error( $doc_categories ) ) {
+		foreach ( $doc_categories as $doc_category ) {
+			$term_link = get_term_link( $doc_category );
+
+			if ( is_wp_error( $term_link ) ) {
+				continue;
+			}
+
+			$doc_cards[] = array(
+				'title'       => $doc_category->name,
+				'description' => $doc_category->description,
+				'url'         => $term_link,
+			);
+		}
+	}
+}
+
+if ( empty( $doc_cards ) ) {
+	$doc_cards = array(
+		array(
+			'title'       => __( 'AI Agents', 'apparel' ),
+			'description' => __( 'Create and deploy advanced voice and chat AI agents to sell, market and support your customers', 'apparel' ),
+			'url'         => $archive_link ? $archive_link : home_url(),
+		),
+		array(
+			'title'       => __( 'Verify', 'apparel' ),
+			'description' => __( 'Securely authenticate users with multi-channel OTP delivery and Fraud Protection', 'apparel' ),
+			'url'         => $archive_link ? $archive_link : home_url(),
+		),
+		array(
+			'title'       => __( 'Programmable APIs', 'apparel' ),
+			'description' => __( 'Suite of APIs and SDKs to integrate real-time communication features into your applications', 'apparel' ),
+			'url'         => $archive_link ? $archive_link : home_url(),
+		),
+		array(
+			'title'       => __( 'Go to Plivo Platform', 'apparel' ),
+			'description' => __( 'Get started with Plivo and transform your communication and customer engagement across multiple channels.', 'apparel' ),
+			'url'         => $archive_link ? $archive_link : home_url(),
+		),
+	);
+}
+
+$docs_query = null;
+
+if ( $doc_type_exists ) {
+	$docs_query = new WP_Query(
+		array(
+			'post_type'           => 'doc_article',
+			'post_status'         => 'publish',
+			'posts_per_page'      => 6,
+			'no_found_rows'       => true,
+			'ignore_sticky_posts' => true,
+		)
+	);
+}
 ?>
 <style>
 .mbf-docs-page {
@@ -262,64 +332,64 @@ get_header();
 
 		<div class="mbf-docs-layout" aria-label="<?php esc_attr_e( 'Documentation topics', 'apparel' ); ?>">
 			<div class="mbf-docs-grid">
-				<a class="mbf-doc-card__link" href="#">
-					<article class="mbf-doc-card">
-						<div class="mbf-doc-card__header">
-							<div class="mbf-doc-card__icon">
-								<svg aria-hidden="true" viewBox="0 0 24 24" fill="none">
-									<path d="M9 13v-2h6v2H9zm0-4V7h6v2H9zm-5 8V7l3 3 3-3v10H4zm12-6h6l-2 3 2 3h-6v-6z" fill="currentColor" />
-								</svg>
+				<?php foreach ( $doc_cards as $doc_card ) : ?>
+					<a class="mbf-doc-card__link" href="<?php echo esc_url( $doc_card['url'] ); ?>">
+						<article class="mbf-doc-card">
+							<div class="mbf-doc-card__header">
+								<div class="mbf-doc-card__icon">
+									<svg aria-hidden="true" viewBox="0 0 24 24" fill="none">
+										<path d="M9 13v-2h6v2H9zm0-4V7h6v2H9zm-5 8V7l3 3 3-3v10H4zm12-6h6l-2 3 2 3h-6v-6z" fill="currentColor" />
+									</svg>
+								</div>
+								<h2 class="mbf-doc-card__title"><?php echo esc_html( $doc_card['title'] ); ?></h2>
+								<span class="mbf-doc-card__arrow" aria-hidden="true">↗</span>
 							</div>
-							<h2 class="mbf-doc-card__title"><?php esc_html_e( 'AI Agents', 'apparel' ); ?></h2>
-						</div>
-						<p class="mbf-doc-card__desc"><?php esc_html_e( 'Create and deploy advanced voice and chat AI agents to sell, market and support your customers', 'apparel' ); ?></p>
-					</article>
-				</a>
-
-				<a class="mbf-doc-card__link" href="#">
-					<article class="mbf-doc-card">
-						<div class="mbf-doc-card__header">
-							<div class="mbf-doc-card__icon">
-								<svg aria-hidden="true" viewBox="0 0 24 24" fill="none">
-									<path d="M12 3l9 5v8l-9 5-9-5V8l9-5zm0 2.18L6 8.09v7.82l6 2.91 6-2.91V8.09l-6-2.91zM11 10h2v4h-2v-4zm0 5h2v2h-2v-2z" fill="currentColor" />
-								</svg>
-							</div>
-							<h2 class="mbf-doc-card__title"><?php esc_html_e( 'Verify', 'apparel' ); ?></h2>
-						</div>
-						<p class="mbf-doc-card__desc"><?php esc_html_e( 'Securely authenticate users with multi-channel OTP delivery and Fraud Protection', 'apparel' ); ?></p>
-					</article>
-				</a>
-
-				<a class="mbf-doc-card__link" href="#">
-					<article class="mbf-doc-card">
-						<div class="mbf-doc-card__header">
-							<div class="mbf-doc-card__icon">
-								<svg aria-hidden="true" viewBox="0 0 24 24" fill="none">
-									<path d="M4 5h16v2H4V5zm0 6h10v2H4v-2zm0 6h7v2H4v-2zm13.5-2.79L20 17l1.5-2.79L24 13l-2.5-.21L20 10l-1.5 2.79L16 13l1.5 1.21z" fill="currentColor" />
-								</svg>
-							</div>
-							<h2 class="mbf-doc-card__title"><?php esc_html_e( 'Programmable APIs', 'apparel' ); ?></h2>
-						</div>
-						<p class="mbf-doc-card__desc"><?php esc_html_e( 'Suite of APIs and SDKs to integrate real-time communication features into your applications', 'apparel' ); ?></p>
-					</article>
-				</a>
-
-				<a class="mbf-doc-card__link" href="#">
-					<article class="mbf-doc-card">
-						<div class="mbf-doc-card__header">
-							<div class="mbf-doc-card__icon">
-								<svg aria-hidden="true" viewBox="0 0 24 24" fill="none">
-									<path d="M4 6h16v2H4V6zm0 4h10v2H4v-2zm0 4h7v2H4v-2zm14.5-1.59l1.09-1.09L22 13.73 18.27 17.5 16 15.23l1.41-1.41 0.86 0.86 0.23 0.23 0.23-0.23 0.77-0.77z" fill="currentColor" />
-								</svg>
-							</div>
-							<h2 class="mbf-doc-card__title"><?php esc_html_e( 'Go to Plivo Platform', 'apparel' ); ?></h2>
-							<span class="mbf-doc-card__arrow" aria-hidden="true">↗</span>
-						</div>
-						<p class="mbf-doc-card__desc"><?php esc_html_e( 'Get started with Plivo and transform your communication and customer engagement across multiple channels.', 'apparel' ); ?></p>
-					</article>
-				</a>
+							<p class="mbf-doc-card__desc"><?php echo esc_html( $doc_card['description'] ); ?></p>
+						</article>
+					</a>
+				<?php endforeach; ?>
 			</div>
 		</div>
+
+		<section class="mbf-docs-layout" aria-label="<?php esc_attr_e( 'Latest documentation', 'apparel' ); ?>">
+			<?php if ( $docs_query instanceof WP_Query && $docs_query->have_posts() ) : ?>
+				<div class="mbf-docs-header">
+					<h2 class="mbf-doc-card__title"><?php esc_html_e( 'Latest docs', 'apparel' ); ?></h2>
+					<?php if ( $archive_link ) : ?>
+						<a class="mbf-docs-actions" href="<?php echo esc_url( $archive_link ); ?>"><?php esc_html_e( 'Browse all docs', 'apparel' ); ?></a>
+					<?php endif; ?>
+				</div>
+				<div class="mbf-docs-grid">
+					<?php
+					while ( $docs_query->have_posts() ) :
+						$docs_query->the_post();
+						?>
+						<a class="mbf-doc-card__link" href="<?php the_permalink(); ?>">
+							<article class="mbf-doc-card">
+								<div class="mbf-doc-card__header">
+									<div class="mbf-doc-card__icon">
+										<svg aria-hidden="true" viewBox="0 0 24 24" fill="none">
+											<path d="M4 6h16v2H4V6zm0 4h10v2H4v-2zm0 4h7v2H4v-2zm14.5-1.59l1.09-1.09L22 13.73 18.27 17.5 16 15.23l1.41-1.41 0.86 0.86 0.23 0.23 0.23-0.23 0.77-0.77z" fill="currentColor" />
+										</svg>
+									</div>
+									<h3 class="mbf-doc-card__title"><?php the_title(); ?></h3>
+								</div>
+								<p class="mbf-doc-card__desc">
+									<?php echo wp_kses_post( get_the_excerpt() ? get_the_excerpt() : esc_html__( 'Read the full article', 'apparel' ) ); ?>
+								</p>
+							</article>
+						</a>
+						<?php
+					endwhile;
+					wp_reset_postdata();
+					?>
+				</div>
+			<?php elseif ( $doc_type_exists ) : ?>
+				<p><?php esc_html_e( 'No documentation is available yet. Check back soon.', 'apparel' ); ?></p>
+			<?php else : ?>
+				<p><?php esc_html_e( 'Documentation content is unavailable because the docs post type is not registered.', 'apparel' ); ?></p>
+			<?php endif; ?>
+		</section>
 	</div>
 </main>
 <?php
