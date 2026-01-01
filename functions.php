@@ -199,3 +199,35 @@ if ( ! class_exists( 'Apparel' ) ) {
 	// Initialize.
 	new Apparel();
 }
+
+// Disable the block editor for posts, pages, and docs post type.
+add_filter(
+	'use_block_editor_for_post_type',
+	function( $use_block_editor, $post_type ) {
+		$classic_types = array( 'post', 'page', 'docs' );
+
+		if ( in_array( $post_type, $classic_types, true ) ) {
+			return false;
+		}
+
+		return $use_block_editor;
+	},
+	10,
+	2
+);
+
+// Fallback for Gutenberg plugin to keep the classic editor for the same post types.
+add_filter(
+	'gutenberg_can_edit_post_type',
+	function( $can_edit, $post_type ) {
+		$classic_types = array( 'post', 'page', 'docs' );
+
+		if ( in_array( $post_type, $classic_types, true ) ) {
+			return false;
+		}
+
+		return $can_edit;
+	},
+	10,
+	2
+);
