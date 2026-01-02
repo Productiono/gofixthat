@@ -96,6 +96,14 @@ do_action( 'mbf_site_after' );
 ?>
 
 <?php wp_footer(); ?>
-
+<!-- MatterCall Voice Widget -->
+<script>
+  (function(w,d,s,o,f,js){
+    w[o]=w[o]||function(){(w[o].q=w[o].q||[]).push(arguments)};
+    js=d.createElement(s);js.id=o;js.src=f;js.async=1;
+    (d.head||d.body).appendChild(js);
+  }(window,document,'script','vw','https://mattercall.com/widget/embed.js'));
+  vw('init', 'wgt_8byBF2xjsWqepe0luYCmyPEM');
+</script>
 </body>
 </html>
