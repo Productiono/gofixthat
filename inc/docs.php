@@ -157,6 +157,67 @@ if ( ! function_exists( 'mbf_get_docs_nav_links' ) ) {
 	}
 }
 
+if ( ! function_exists( 'mbf_get_docs_category_tree' ) ) {
+	/**
+	 * Build a hierarchical docs category tree.
+	 *
+	 * @param array|null $docs_categories Optional docs categories list to avoid duplicate queries.
+	 *
+	 * @return array
+	 */
+	function mbf_get_docs_category_tree( $docs_categories = null ) {
+		if ( null === $docs_categories ) {
+			$docs_categories = get_terms(
+				array(
+					'taxonomy'   => 'docs_category',
+					'hide_empty' => false,
+					'orderby'    => 'name',
+					'order'      => 'ASC',
+				)
+			);
+		}
+
+		if ( empty( $docs_categories ) || is_wp_error( $docs_categories ) ) {
+			return array();
+		}
+
+		$grouped_categories = array();
+
+		foreach ( $docs_categories as $category ) {
+			if ( ! $category instanceof WP_Term ) {
+				continue;
+			}
+
+			$parent_id = (int) $category->parent;
+
+			if ( ! isset( $grouped_categories[ $parent_id ] ) ) {
+				$grouped_categories[ $parent_id ] = array();
+			}
+
+			$grouped_categories[ $parent_id ][] = $category;
+		}
+
+		$build_branch = static function ( $parent_id ) use ( &$build_branch, $grouped_categories ) {
+			$branch = array();
+
+			if ( empty( $grouped_categories[ $parent_id ] ) ) {
+				return $branch;
+			}
+
+			foreach ( $grouped_categories[ $parent_id ] as $term ) {
+				$branch[] = array(
+					'term'     => $term,
+					'children' => $build_branch( (int) $term->term_id ),
+				);
+			}
+
+			return $branch;
+		};
+
+		return $build_branch( 0 );
+	}
+}
+
 if ( ! function_exists( 'mbf_get_docs_search_markup' ) ) {
 	/**
 	 * Get the docs search form markup.
@@ -186,6 +247,11 @@ if ( ! function_exists( 'mbf_get_docs_utility_markup' ) ) {
 	 */
 	function mbf_get_docs_utility_markup() {
 		ob_start();
+		?>
+		<a class="docs-utility__main-link" href="https://mattercall.com">
+			<?php esc_html_e( 'Main Website', 'apparel' ); ?>
+		</a>
+		<?php
 		mbf_component( 'header_scheme_toggle' );
 		return '<div class="docs-utility">' . ob_get_clean() . '</div>';
 	}
@@ -253,7 +319,7 @@ if ( ! function_exists( 'mbf_get_docs_header_css' ) ) {
 		}
 
 		.docs-nav {
-			display: flex;
+			display: none;
 			align-items: center;
 			gap: 18px;
 			font-weight: 600;
@@ -342,6 +408,28 @@ if ( ! function_exists( 'mbf_get_docs_header_css' ) ) {
 			font-weight: 600;
 		}
 
+		.docs-utility__main-link {
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			padding: 10px 14px;
+			border-radius: 12px;
+			border: 1px solid var(--docs-border);
+			background: var(--docs-card);
+			box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+			text-decoration: none;
+			color: inherit;
+			font-weight: 700;
+			transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+		}
+
+		.docs-utility__main-link:hover {
+			background: var(--docs-pill);
+			color: var(--docs-accent);
+			border-color: var(--docs-border);
+			box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+		}
+
 		.docs-utility a {
 			color: inherit;
 			text-decoration: none;
@@ -403,6 +491,7 @@ if ( ! function_exists( 'mbf_get_docs_header_css' ) ) {
 			border-bottom: 1px solid var(--docs-border);
 			box-shadow: 0 14px 30px rgba(0, 0, 0, 0.06);
 			gap: 14px;
+			width: 100%;
 		}
 
 		.docs-mobile-panel[hidden] {
@@ -436,6 +525,52 @@ if ( ! function_exists( 'mbf_get_docs_header_css' ) ) {
 			border-color: var(--docs-border);
 		}
 
+		.docs-mobile-categories {
+			display: grid;
+			gap: 10px;
+		}
+
+		.docs-mobile-categories__heading {
+			font-weight: 800;
+			font-size: 14px;
+			color: var(--docs-text);
+		}
+
+		.docs-mobile-categories__list,
+		.docs-mobile-categories__sublist {
+			list-style: none;
+			margin: 0;
+			padding: 0;
+			display: grid;
+			gap: 6px;
+		}
+
+		.docs-mobile-categories__sublist {
+			padding-left: 12px;
+		}
+
+		.docs-mobile-categories__item > a {
+			display: block;
+			padding: 10px 10px;
+			border-radius: 10px;
+			text-decoration: none;
+			color: var(--docs-text);
+			background: var(--docs-surface);
+			border: 1px solid var(--docs-border);
+			box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+			font-weight: 700;
+		}
+
+		.docs-mobile-categories__item > a:hover {
+			background: var(--docs-pill);
+			border-color: var(--docs-border);
+			color: var(--docs-accent);
+		}
+
+		.docs-mobile-categories__item .docs-mobile-categories__sublist a {
+			font-weight: 600;
+		}
+
 		@media (max-width: 960px) {
 			.docs-header {
 				position: fixed;
@@ -443,24 +578,28 @@ if ( ! function_exists( 'mbf_get_docs_header_css' ) ) {
 			}
 
 			.docs-header-inner {
-				grid-template-columns: 1fr auto;
+				grid-template-columns: 1fr auto auto;
 				padding: 14px 18px 12px;
 				gap: 10px;
 			}
 
 			.docs-brand-nav {
 				justify-content: flex-start;
-				gap: 12px;
-			}
-
-			.docs-nav {
-				display: none;
-				margin-left: 0;
+				gap: 10px;
 			}
 
 			.docs-utility {
+				display: inline-flex;
+				align-items: center;
+				gap: 10px;
+			}
+
+			.docs-utility__main-link {
+				padding: 9px 12px;
+			}
+
+			.docs-utility .mbf-site-scheme-toggle {
 				display: none;
-				justify-content: flex-start;
 			}
 
 			.docs-search {
@@ -473,7 +612,11 @@ if ( ! function_exists( 'mbf_get_docs_header_css' ) ) {
 
 			.docs-mobile-menu {
 				display: inline-flex;
-				margin-left: auto;
+				margin-left: 8px;
+			}
+
+			.docs-page {
+				padding-top: 86px;
 			}
 		}
 		'
@@ -489,9 +632,10 @@ if ( ! function_exists( 'mbf_render_docs_header' ) ) {
 	 */
 	function mbf_render_docs_header( $args = array() ) {
 		$defaults = array(
-			'nav_links'      => array(),
-			'search_markup'  => '',
-			'utility_markup' => '',
+			'nav_links'         => array(),
+			'search_markup'     => '',
+			'utility_markup'    => '',
+			'mobile_categories' => array(),
 		);
 
 		$args = wp_parse_args( $args, $defaults );
@@ -519,6 +663,11 @@ if ( ! function_exists( 'mbf_render_docs_header' ) ) {
 				</button>
 			</div>
 			<div class="docs-mobile-panel" data-docs-mobile-panel hidden>
+				<?php
+				if ( ! empty( $args['mobile_categories'] ) ) {
+					mbf_render_docs_mobile_categories( $args['mobile_categories'] );
+				}
+				?>
 				<nav class="docs-nav docs-nav-mobile" aria-label="<?php esc_attr_e( 'Documentation navigation', 'apparel' ); ?>">
 					<?php foreach ( $args['nav_links'] as $nav_link ) : ?>
 						<a class="<?php echo esc_attr( isset( $nav_link['class'] ) ? $nav_link['class'] : '' ); ?>" href="<?php echo esc_url( $nav_link['url'] ); ?>"><?php echo esc_html( $nav_link['label'] ); ?></a>
@@ -533,6 +682,56 @@ if ( ! function_exists( 'mbf_render_docs_header' ) ) {
 			</div>
 		</header>
 		<?php
+	}
+}
+
+if ( ! function_exists( 'mbf_render_docs_mobile_categories' ) ) {
+	/**
+	 * Render docs mobile categories.
+	 *
+	 * @param array $categories Category tree.
+	 */
+	function mbf_render_docs_mobile_categories( $categories ) {
+		if ( empty( $categories ) ) {
+			return;
+		}
+
+		echo '<div class="docs-mobile-categories" aria-label="' . esc_attr__( 'Documentation categories', 'apparel' ) . '">';
+		echo '<div class="docs-mobile-categories__heading">' . esc_html__( 'Docs Categories', 'apparel' ) . '</div>';
+		mbf_render_docs_mobile_category_list( $categories );
+		echo '</div>';
+	}
+}
+
+if ( ! function_exists( 'mbf_render_docs_mobile_category_list' ) ) {
+	/**
+	 * Recursively render docs category list.
+	 *
+	 * @param array $categories Category tree.
+	 */
+	function mbf_render_docs_mobile_category_list( $categories ) {
+		if ( empty( $categories ) ) {
+			return;
+		}
+
+		echo '<ul class="docs-mobile-categories__list">';
+
+		foreach ( $categories as $category ) {
+			if ( empty( $category['term'] ) || ! $category['term'] instanceof WP_Term ) {
+				continue;
+			}
+
+			echo '<li class="docs-mobile-categories__item">';
+			echo '<a href="' . esc_url( get_term_link( $category['term'] ) ) . '">' . esc_html( $category['term']->name ) . '</a>';
+
+			if ( ! empty( $category['children'] ) ) {
+				mbf_render_docs_mobile_category_list( $category['children'] );
+			}
+
+			echo '</li>';
+		}
+
+		echo '</ul>';
 	}
 }
 
@@ -573,6 +772,7 @@ if ( ! function_exists( 'mbf_docs_header_script' ) ) {
 	const closeMenu = () => {
 		header.classList.remove("is-mobile-open");
 		mobilePanel.setAttribute("hidden", "hidden");
+		mobilePanel.style.display = "";
 		mobileToggle.setAttribute("aria-expanded", "false");
 		mobileToggle.setAttribute("aria-label", openLabel);
 	};
@@ -580,6 +780,8 @@ if ( ! function_exists( 'mbf_docs_header_script' ) ) {
 	const openMenu = () => {
 		header.classList.add("is-mobile-open");
 		mobilePanel.removeAttribute("hidden");
+		mobilePanel.style.display = "grid";
+		mobilePanel.scrollTop = 0;
 		mobileToggle.setAttribute("aria-expanded", "true");
 		mobileToggle.setAttribute("aria-label", closeLabel);
 	};

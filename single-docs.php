@@ -311,18 +311,7 @@ $docs_nav_links[] = array(
 	'url'   => get_permalink(),
 	'class' => 'is-active',
 );
-
-$render_docs_nav_links = static function ( $nav_links ) {
-	foreach ( $nav_links as $nav_link ) {
-		$classes = isset( $nav_link['class'] ) ? $nav_link['class'] : '';
-		printf(
-			'<a class="%1$s" href="%2$s">%3$s</a>',
-			esc_attr( trim( $classes ) ),
-			esc_url( $nav_link['url'] ),
-			esc_html( $nav_link['label'] )
-		);
-	}
-};
+$docs_category_tree = mbf_get_docs_category_tree();
 
 $docs_search_markup = '<form role="search" aria-label="' . esc_attr__( 'Search documentation', 'apparel' ) . '" action="' . esc_url( home_url( '/' ) ) . '">
 	<span class="docs-search-icon" aria-hidden="true">
@@ -336,10 +325,7 @@ $docs_search_markup = '<form role="search" aria-label="' . esc_attr__( 'Search d
 	<span class="docs-search-hint" aria-hidden="true">Ctrl K</span>
 </form>';
 
-$docs_utility_markup = '';
-ob_start();
-mbf_component( 'header_scheme_toggle' );
-$docs_utility_markup = '<div class="docs-utility">' . ob_get_clean() . '</div>';
+$docs_utility_markup = mbf_get_docs_utility_markup();
 
 ?>
 	<!doctype html>
@@ -709,20 +695,6 @@ $docs_utility_markup = '<div class="docs-utility">' . ob_get_clean() . '</div>';
 		}
 
 		@media (max-width: 1140px) {
-			.docs-header-inner {
-				grid-template-columns: auto 1fr auto;
-				padding: 16px 18px 12px;
-				gap: 12px;
-			}
-
-			.docs-brand-nav {
-				justify-content: space-between;
-			}
-
-			.docs-nav {
-				margin-left: 0;
-			}
-
 			.docs-single-shell {
 				grid-template-columns: 240px 1fr;
 				padding: 28px 22px 48px;
@@ -734,36 +706,7 @@ $docs_utility_markup = '<div class="docs-utility">' . ob_get_clean() . '</div>';
 			}
 		}
 
-		@media (max-width: 900px) {
-			.docs-header {
-				position: fixed;
-				inset: 0 0 auto 0;
-			}
-
-			.docs-page {
-				padding-top: 82px;
-			}
-
-			.docs-nav {
-				display: none;
-			}
-
-			.docs-search {
-				display: none;
-			}
-
-			.docs-utility {
-				display: none;
-			}
-
-			.docs-mobile-panel {
-				grid-template-columns: 1fr;
-			}
-
-			.docs-mobile-menu {
-				display: inline-flex;
-			}
-
+		@media (max-width: 960px) {
 			.docs-single-shell {
 				grid-template-columns: 1fr;
 				padding: 22px 18px 42px;
@@ -801,36 +744,7 @@ if ( function_exists( 'wp_body_open' ) ) {
 ?>
 
 <div class="docs-page">
-	<header class="docs-header">
-		<div class="docs-header-inner">
-			<div class="docs-brand-nav">
-				<?php mbf_component( 'header_logo' ); ?>
-				<nav class="docs-nav" aria-label="<?php esc_attr_e( 'Documentation navigation', 'apparel' ); ?>">
-					<?php $render_docs_nav_links( $docs_nav_links ); ?>
-				</nav>
-			</div>
-			<div class="docs-search">
-				<?php echo $docs_search_markup; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-			</div>
-			<?php echo $docs_utility_markup; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-			<button class="docs-mobile-menu" type="button" aria-label="<?php esc_attr_e( 'Open menu', 'apparel' ); ?>" aria-expanded="false" data-docs-mobile-toggle>
-				<svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-					<path d="M5 7h14M5 12h14M5 17h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
-				</svg>
-			</button>
-		</div>
-		<div class="docs-mobile-panel" data-docs-mobile-panel hidden>
-			<nav class="docs-nav docs-nav-mobile" aria-label="<?php esc_attr_e( 'Documentation navigation', 'apparel' ); ?>">
-				<?php $render_docs_nav_links( $docs_nav_links ); ?>
-			</nav>
-			<div class="docs-search docs-search-mobile">
-				<?php echo $docs_search_markup; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-			</div>
-			<div class="docs-utility docs-utility-mobile">
-				<?php echo $docs_utility_markup; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-			</div>
-		</div>
-	</header>
+	<?php mbf_render_docs_header( array( 'nav_links' => $docs_nav_links, 'search_markup' => $docs_search_markup, 'utility_markup' => $docs_utility_markup, 'mobile_categories' => $docs_category_tree ) ); ?>
 
 	<?php mbf_site_search(); ?>
 
@@ -930,46 +844,11 @@ if ( function_exists( 'wp_body_open' ) ) {
 	</main>
 </div>
 
+<?php mbf_docs_render_header_script(); ?>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
 	const sidebarPanel = document.querySelector('[data-docs-sidebar]');
 	const toggleButton = sidebarPanel ? sidebarPanel.querySelector('.docs-sidebar-toggle') : null;
-	const header = document.querySelector('.docs-header');
-	const mobileToggle = document.querySelector('[data-docs-mobile-toggle]');
-	const mobilePanel = document.querySelector('[data-docs-mobile-panel]');
-
-	if (header && mobileToggle && mobilePanel) {
-		const closeMenu = () => {
-			header.classList.remove('is-mobile-open');
-			mobilePanel.setAttribute('hidden', 'hidden');
-			mobileToggle.setAttribute('aria-expanded', 'false');
-			mobileToggle.setAttribute('aria-label', '<?php echo esc_js( __( 'Open menu', 'apparel' ) ); ?>');
-		};
-
-		mobileToggle.addEventListener('click', () => {
-			const isOpen = header.classList.toggle('is-mobile-open');
-			mobileToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-			mobileToggle.setAttribute('aria-label', isOpen ? '<?php echo esc_js( __( 'Close menu', 'apparel' ) ); ?>' : '<?php echo esc_js( __( 'Open menu', 'apparel' ) ); ?>');
-
-			if (isOpen) {
-				mobilePanel.removeAttribute('hidden');
-			} else {
-				mobilePanel.setAttribute('hidden', 'hidden');
-			}
-		});
-
-		window.addEventListener('resize', () => {
-			if (window.innerWidth > 900 && header.classList.contains('is-mobile-open')) {
-				closeMenu();
-			}
-		});
-
-		document.addEventListener('keyup', (event) => {
-			if (event.key === 'Escape' && header.classList.contains('is-mobile-open')) {
-				closeMenu();
-			}
-		});
-	}
 
 	if (toggleButton && sidebarPanel) {
 		toggleButton.addEventListener('click', function () {

@@ -15,6 +15,7 @@ $docs_categories = get_terms(
 );
 
 $docs_nav_links      = mbf_get_docs_nav_links( $docs_categories, get_queried_object_id() );
+$docs_category_tree  = mbf_get_docs_category_tree( $docs_categories );
 $docs_search_markup  = mbf_get_docs_search_markup();
 $docs_utility_markup = mbf_get_docs_utility_markup();
 
@@ -58,7 +59,7 @@ add_action(
 get_header(); ?>
 
 <div class="docs-page docs-category-layout">
-	<?php mbf_render_docs_header( array( 'nav_links' => $docs_nav_links, 'search_markup' => $docs_search_markup, 'utility_markup' => $docs_utility_markup ) ); ?>
+	<?php mbf_render_docs_header( array( 'nav_links' => $docs_nav_links, 'search_markup' => $docs_search_markup, 'utility_markup' => $docs_utility_markup, 'mobile_categories' => $docs_category_tree ) ); ?>
 	<?php mbf_site_search(); ?>
 
 	<div class="docs-category-shell">
