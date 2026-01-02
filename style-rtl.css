@@ -9217,3 +9217,49 @@ div[class*=" gallery-columns-"] {
         font-size: calc(2.1875rem - 2px);
     }
 }
+
+@media (max-width: 767.98px) {
+	:root {
+		--mbf-mobile-scale: 0.75;
+		--mbf-mobile-scale-inverse: calc(1 / var(--mbf-mobile-scale));
+	}
+
+	html {
+		width: 100%;
+		overflow-x: clip;
+		min-height: 100%;
+		block-size: auto;
+	}
+
+	body {
+		margin: 0;
+		width: 100%;
+		overflow-x: clip;
+		inline-size: calc(100% * var(--mbf-mobile-scale-inverse));
+		min-height: auto;
+		min-block-size: 0;
+		block-size: auto;
+		transform: scale(var(--mbf-mobile-scale));
+		transform-origin: top left;
+		margin-inline: 0;
+	}
+
+	.mbf-site,
+	.mbf-site-inner {
+		min-height: auto;
+	}
+
+	body > #page,
+	body > .docs-page {
+		position: relative;
+		inline-size: 100%;
+		max-inline-size: 100%;
+		min-height: auto;
+		min-block-size: 0;
+		block-size: auto;
+		margin-inline: 0;
+		transform: none;
+		transform-origin: top left;
+		contain: paint;
+	}
+}
