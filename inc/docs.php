@@ -252,8 +252,7 @@ if ( ! function_exists( 'mbf_get_docs_utility_markup' ) ) {
 	function mbf_get_docs_utility_markup() {
 		ob_start();
 		?>
-		mbf_component( 'header_scheme_toggle' );
-		?>
+		<?php mbf_component( 'header_scheme_toggle' ); ?>
 		<a class="docs-utility__main-link" href="https://mattercall.com">
 			<?php esc_html_e( 'Main Website', 'apparel' ); ?>
 		</a>
