@@ -10047,14 +10047,31 @@ div[class*=" gallery-columns-"] {
 }
 
 @media (max-width: 767.98px) {
+	:root {
+		--mbf-mobile-scale: 0.75;
+		--mbf-mobile-scale-inverse: calc(1 / var(--mbf-mobile-scale));
+	}
+
 	html {
-		overflow-x: hidden;
+		min-height: 100%;
+		width: 100%;
 	}
 
 	body {
-		transform: scale(0.75);
+		min-height: 100vh;
+		margin: 0;
+		width: 100%;
+	}
+
+	body > #page,
+	body > .docs-page {
+		position: relative;
+		inline-size: calc(100vw * var(--mbf-mobile-scale-inverse));
+		max-inline-size: calc(100vw * var(--mbf-mobile-scale-inverse));
+		min-block-size: calc(100vh * var(--mbf-mobile-scale-inverse));
+		margin-inline: auto;
+		transform: scale(var(--mbf-mobile-scale));
 		transform-origin: top center;
-		width: 133.333333%;
-		min-height: calc(100vh / 0.75);
+		contain: paint;
 	}
 }
