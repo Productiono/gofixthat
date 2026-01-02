@@ -10053,21 +10053,28 @@ div[class*=" gallery-columns-"] {
 	}
 
 	html {
-		min-height: 100%;
 		width: 100%;
 		overflow-x: clip;
+		min-height: 100%;
+		block-size: auto;
 	}
 
 	body {
-		min-height: 100vh;
 		margin: 0;
 		width: 100%;
 		overflow-x: clip;
 		inline-size: calc(100% * var(--mbf-mobile-scale-inverse));
-		min-block-size: calc(100vh * var(--mbf-mobile-scale-inverse));
+		min-height: auto;
+		min-block-size: 0;
+		block-size: auto;
 		transform: scale(var(--mbf-mobile-scale));
 		transform-origin: top left;
 		margin-inline: 0;
+	}
+
+	.mbf-site,
+	.mbf-site-inner {
+		min-height: auto;
 	}
 
 	body > #page,
@@ -10075,7 +10082,9 @@ div[class*=" gallery-columns-"] {
 		position: relative;
 		inline-size: 100%;
 		max-inline-size: 100%;
-		min-block-size: 100vh;
+		min-height: auto;
+		min-block-size: 0;
+		block-size: auto;
 		margin-inline: 0;
 		transform: none;
 		transform-origin: top left;
