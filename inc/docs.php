@@ -135,6 +135,7 @@ if ( ! function_exists( 'mbf_get_docs_nav_links' ) ) {
 				'label' => __( 'Docs Home', 'apparel' ),
 				'url'   => get_post_type_archive_link( 'docs' ),
 				'class' => null === $active_term_id ? 'is-active' : '',
+				'type'  => 'home',
 			),
 		);
 
@@ -144,6 +145,8 @@ if ( ! function_exists( 'mbf_get_docs_nav_links' ) ) {
 					'label' => $category->name,
 					'url'   => get_term_link( $category ),
 					'class' => ( (int) $category->term_id === (int) $active_term_id ) ? 'is-active' : '',
+					'type'  => 'category',
+					'term_id' => (int) $category->term_id,
 				);
 			}
 		}
@@ -151,6 +154,7 @@ if ( ! function_exists( 'mbf_get_docs_nav_links' ) ) {
 		$nav_links[] = array(
 			'label' => __( 'All Articles', 'apparel' ),
 			'url'   => '#docs-articles',
+			'type'  => 'anchor',
 		);
 
 		return $nav_links;
@@ -234,7 +238,7 @@ if ( ! function_exists( 'mbf_get_docs_search_markup' ) ) {
 	</span>
 	<input type="search" name="s" placeholder="' . esc_attr__( 'Search docs...', 'apparel' ) . '" aria-label="' . esc_attr__( 'Search query', 'apparel' ) . '" />
 	<input type="hidden" name="post_type" value="docs" />
-	<span class="docs-search-hint" aria-hidden="true">Ctrl K</span>
+	<span class="docs-search-hint" aria-hidden="true">' . esc_html__( 'Search', 'apparel' ) . '</span>
 </form>';
 	}
 }
@@ -248,11 +252,12 @@ if ( ! function_exists( 'mbf_get_docs_utility_markup' ) ) {
 	function mbf_get_docs_utility_markup() {
 		ob_start();
 		?>
+		mbf_component( 'header_scheme_toggle' );
+		?>
 		<a class="docs-utility__main-link" href="https://mattercall.com">
 			<?php esc_html_e( 'Main Website', 'apparel' ); ?>
 		</a>
 		<?php
-		mbf_component( 'header_scheme_toggle' );
 		return '<div class="docs-utility">' . ob_get_clean() . '</div>';
 	}
 }
@@ -414,20 +419,20 @@ if ( ! function_exists( 'mbf_get_docs_header_css' ) ) {
 			justify-content: center;
 			padding: 10px 14px;
 			border-radius: 12px;
-			border: 1px solid var(--docs-border);
-			background: var(--docs-card);
-			box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+			border: 1px solid var(--docs-accent);
+			background: var(--docs-accent);
+			box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
 			text-decoration: none;
-			color: inherit;
+			color: var(--docs-contrast);
 			font-weight: 700;
 			transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
 		}
 
 		.docs-utility__main-link:hover {
-			background: var(--docs-pill);
-			color: var(--docs-accent);
-			border-color: var(--docs-border);
-			box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+			background: color-mix(in srgb, var(--docs-accent) 84%, #000 16%);
+			color: var(--docs-contrast);
+			border-color: color-mix(in srgb, var(--docs-accent) 84%, #000 16%);
+			box-shadow: 0 10px 26px rgba(0, 0, 0, 0.22);
 		}
 
 		.docs-utility a {
@@ -598,10 +603,6 @@ if ( ! function_exists( 'mbf_get_docs_header_css' ) ) {
 				padding: 9px 12px;
 			}
 
-			.docs-utility .mbf-site-scheme-toggle {
-				display: none;
-			}
-
 			.docs-search {
 				display: none;
 			}
@@ -639,6 +640,46 @@ if ( ! function_exists( 'mbf_render_docs_header' ) ) {
 		);
 
 		$args = wp_parse_args( $args, $defaults );
+
+		$mobile_nav_links = $args['nav_links'];
+
+		if ( ! empty( $args['mobile_categories'] ) ) {
+			$mobile_category_ids   = array();
+			$collect_category_ids = static function ( $categories ) use ( &$collect_category_ids, &$mobile_category_ids ) {
+				if ( empty( $categories ) ) {
+					return;
+				}
+
+				foreach ( $categories as $category ) {
+					if ( ! empty( $category['term'] ) && $category['term'] instanceof WP_Term ) {
+						$mobile_category_ids[] = (int) $category['term']->term_id;
+					}
+
+					if ( ! empty( $category['children'] ) ) {
+						$collect_category_ids( $category['children'] );
+					}
+				}
+			};
+
+			$collect_category_ids( $args['mobile_categories'] );
+
+			$mobile_category_ids = array_unique( $mobile_category_ids );
+
+			if ( ! empty( $mobile_category_ids ) ) {
+				$mobile_nav_links = array_values(
+					array_filter(
+						$mobile_nav_links,
+						static function ( $nav_link ) use ( $mobile_category_ids ) {
+							if ( isset( $nav_link['type'] ) && 'category' === $nav_link['type'] && isset( $nav_link['term_id'] ) ) {
+								return ! in_array( (int) $nav_link['term_id'], $mobile_category_ids, true );
+							}
+
+							return true;
+						}
+					)
+				);
+			}
+		}
 		?>
 		<header class="docs-header" data-docs-header>
 			<div class="docs-header-inner">
@@ -669,7 +710,7 @@ if ( ! function_exists( 'mbf_render_docs_header' ) ) {
 				}
 				?>
 				<nav class="docs-nav docs-nav-mobile" aria-label="<?php esc_attr_e( 'Documentation navigation', 'apparel' ); ?>">
-					<?php foreach ( $args['nav_links'] as $nav_link ) : ?>
+					<?php foreach ( $mobile_nav_links as $nav_link ) : ?>
 						<a class="<?php echo esc_attr( isset( $nav_link['class'] ) ? $nav_link['class'] : '' ); ?>" href="<?php echo esc_url( $nav_link['url'] ); ?>"><?php echo esc_html( $nav_link['label'] ); ?></a>
 					<?php endforeach; ?>
 				</nav>
@@ -837,3 +878,24 @@ if ( ! function_exists( 'mbf_docs_render_header_script' ) ) {
 		printf( '<script>%s</script>', mbf_docs_header_script() );
 	}
 }
+
+if ( ! function_exists( 'mbf_docs_enforce_search_scope' ) ) {
+	/**
+	 * Restrict docs search queries to the docs post type.
+	 *
+	 * @param WP_Query $query The WP_Query instance (passed by reference).
+	 */
+	function mbf_docs_enforce_search_scope( $query ) {
+		if ( is_admin() || ! $query->is_main_query() || ! $query->is_search() ) {
+			return;
+		}
+
+		$post_type = $query->get( 'post_type' );
+
+		if ( 'docs' === $post_type || ( is_array( $post_type ) && in_array( 'docs', $post_type, true ) ) ) {
+			$query->set( 'post_type', array( 'docs' ) );
+			return;
+		}
+	}
+}
+add_action( 'pre_get_posts', 'mbf_docs_enforce_search_scope' );
