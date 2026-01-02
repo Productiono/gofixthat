@@ -96,7 +96,7 @@ do_action( 'mbf_site_after' );
 ?>
 
 <?php wp_footer(); ?>
-<!-- MatterCall Voice Widget -->
+<!-- GoFixThat Voice Widget -->
 <script>
   (function(w,d,s,o,f,js){
     w[o]=w[o]||function(){(w[o].q=w[o].q||[]).push(arguments)};
