@@ -15,6 +15,7 @@ $docs_categories = get_terms(
 );
 
 $docs_nav_links      = mbf_get_docs_nav_links( $docs_categories );
+$docs_category_tree  = mbf_get_docs_category_tree( $docs_categories );
 $docs_search_markup  = mbf_get_docs_search_markup();
 $docs_utility_markup = mbf_get_docs_utility_markup();
 ?>
@@ -281,50 +282,8 @@ $docs_utility_markup = mbf_get_docs_utility_markup();
 		}
 
 		@media (max-width: 960px) {
-			.docs-page {
-				padding-top: 82px;
-			}
-
-			.docs-header {
-				position: fixed;
-				inset: 0 0 auto 0;
-			}
-
-			.docs-header-inner {
-				grid-template-columns: auto 1fr auto;
-				padding: 14px 18px 12px;
-				gap: 10px;
-			}
-
-			.docs-brand-nav {
-				justify-content: flex-start;
-				gap: 12px;
-			}
-
-			.docs-nav {
-				display: none;
-				margin-left: 0;
-			}
-
-			.docs-utility {
-				display: none;
-				justify-content: flex-start;
-			}
-
 			.docs-articles-header {
 				align-items: flex-start;
-			}
-
-			.docs-search {
-				display: none;
-			}
-
-			.docs-mobile-panel {
-				grid-template-columns: 1fr;
-			}
-
-			.docs-mobile-menu {
-				display: inline-flex;
 			}
 		}
 
@@ -343,7 +302,7 @@ if ( function_exists( 'wp_body_open' ) ) {
 ?>
 
 <div class="docs-page">
-	<?php mbf_render_docs_header( array( 'nav_links' => $docs_nav_links, 'search_markup' => $docs_search_markup, 'utility_markup' => $docs_utility_markup ) ); ?>
+	<?php mbf_render_docs_header( array( 'nav_links' => $docs_nav_links, 'search_markup' => $docs_search_markup, 'utility_markup' => $docs_utility_markup, 'mobile_categories' => $docs_category_tree ) ); ?>
 
 	<?php mbf_site_search(); ?>
 
@@ -469,9 +428,7 @@ if ( function_exists( 'wp_body_open' ) ) {
 
 </div>
 
-<script>
-<?php echo mbf_docs_header_script(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-</script>
+<?php mbf_docs_render_header_script(); ?>
 
 <?php wp_footer(); ?>
 </body>
