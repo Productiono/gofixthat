@@ -690,7 +690,7 @@ if ( ! function_exists( 'mbf_get_docs_header_css' ) ) {
 			}
 
 			.docs-header-inner {
-				grid-template-columns: 1fr auto auto;
+				grid-template-columns: 1fr auto;
 				padding: 14px 18px 12px;
 				gap: 10px;
 			}
@@ -701,9 +701,7 @@ if ( ! function_exists( 'mbf_get_docs_header_css' ) ) {
 			}
 
 			.docs-utility {
-				display: inline-flex;
-				align-items: center;
-				gap: 10px;
+				display: none;
 			}
 
 			.docs-utility__main-link {
@@ -720,6 +718,12 @@ if ( ! function_exists( 'mbf_get_docs_header_css' ) ) {
 
 			.docs-mobile-panel {
 				grid-template-columns: 1fr;
+			}
+
+			.docs-mobile-panel .docs-utility {
+				display: inline-flex;
+				align-items: center;
+				gap: 10px;
 			}
 
 			.docs-mobile-menu {
@@ -911,65 +915,63 @@ if ( ! function_exists( 'mbf_docs_header_script' ) ) {
 	function mbf_docs_header_script() {
 		return 'document.addEventListener("DOMContentLoaded", function () {
 	const header = document.querySelector("[data-docs-header]");
-	const mobileToggle = document.querySelector("[data-docs-mobile-toggle]");
-	const mobilePanel = document.querySelector("[data-docs-mobile-panel]");
+	const mobileToggle = header ? header.querySelector("[data-docs-mobile-toggle]") : null;
+	const mobilePanel = header ? header.querySelector("[data-docs-mobile-panel]") : null;
 	const searchForms = document.querySelectorAll("[data-docs-search]");
-
-	if (!header || !mobileToggle || !mobilePanel) {
-		return;
-	}
 
 	const openLabel = "' . esc_js( __( 'Open menu', 'apparel' ) ) . '";
 	const closeLabel = "' . esc_js( __( 'Close menu', 'apparel' ) ) . '";
 
-	const closeMenu = () => {
-		header.classList.remove("is-mobile-open");
-		mobilePanel.setAttribute("hidden", "hidden");
-		mobilePanel.style.display = "";
-		mobileToggle.setAttribute("aria-expanded", "false");
-		mobileToggle.setAttribute("aria-label", openLabel);
-	};
+	if (header && mobileToggle && mobilePanel) {
+		const closeMenu = () => {
+			header.classList.remove("is-mobile-open");
+			mobilePanel.setAttribute("hidden", "hidden");
+			mobilePanel.style.display = "";
+			mobileToggle.setAttribute("aria-expanded", "false");
+			mobileToggle.setAttribute("aria-label", openLabel);
+		};
 
-	const openMenu = () => {
-		header.classList.add("is-mobile-open");
-		mobilePanel.removeAttribute("hidden");
-		mobilePanel.style.display = "grid";
-		mobilePanel.scrollTop = 0;
-		mobileToggle.setAttribute("aria-expanded", "true");
-		mobileToggle.setAttribute("aria-label", closeLabel);
-	};
+		const openMenu = () => {
+			header.classList.add("is-mobile-open");
+			mobilePanel.removeAttribute("hidden");
+			mobilePanel.style.display = "grid";
+			mobilePanel.scrollTop = 0;
+			mobileToggle.setAttribute("aria-expanded", "true");
+			mobileToggle.setAttribute("aria-label", closeLabel);
+		};
 
-	mobileToggle.addEventListener("click", () => {
-		if (header.classList.contains("is-mobile-open")) {
-			closeMenu();
-		} else {
-			openMenu();
-		}
-	});
+		mobileToggle.addEventListener("click", () => {
+			if (header.classList.contains("is-mobile-open")) {
+				closeMenu();
+			} else {
+				openMenu();
+			}
+		});
 
-	mobilePanel.addEventListener("click", (event) => {
-		if (event.target.closest("a")) {
-			closeMenu();
-		}
-	});
+		mobilePanel.addEventListener("click", (event) => {
+			if (event.target.closest("a")) {
+				closeMenu();
+			}
+		});
 
-	document.addEventListener("click", (event) => {
-		if (!header.contains(event.target) && header.classList.contains("is-mobile-open")) {
-			closeMenu();
-		}
-	});
+		document.addEventListener("click", (event) => {
+			if (!header.contains(event.target) && header.classList.contains("is-mobile-open")) {
+				closeMenu();
+			}
+		});
 
-	window.addEventListener("resize", () => {
-		if (window.innerWidth > 960 && header.classList.contains("is-mobile-open")) {
-			closeMenu();
-		}
-	});
+		window.addEventListener("resize", () => {
+			if (window.innerWidth > 960 && header.classList.contains("is-mobile-open")) {
+				closeMenu();
+			}
+		});
 
-	document.addEventListener("keyup", (event) => {
-		if (event.key === "Escape" && header.classList.contains("is-mobile-open")) {
-			closeMenu();
-		}
-	});
+		document.addEventListener("keyup", (event) => {
+			if (event.key === "Escape" && header.classList.contains("is-mobile-open")) {
+				closeMenu();
+			}
+		});
+	}
 
 	const debounce = (fn, delay = 180) => {
 		let timer;
@@ -1029,7 +1031,9 @@ if ( ! function_exists( 'mbf_docs_header_script' ) ) {
 			url.searchParams.set("search", trimmed);
 			url.searchParams.set("subtype", "docs");
 			url.searchParams.set("per_page", "5");
+			url.searchParams.set("orderby", "relevance");
 			url.searchParams.set("context", "view");
+			url.searchParams.set("_fields", "id,url,title,subtype");
 
 			const response = await fetch(url.toString(), { credentials: "same-origin" });
 

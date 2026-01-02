@@ -313,17 +313,7 @@ $docs_nav_links[] = array(
 );
 $docs_category_tree = mbf_get_docs_category_tree();
 
-$docs_search_markup = '<form role="search" aria-label="' . esc_attr__( 'Search documentation', 'apparel' ) . '" action="' . esc_url( home_url( '/' ) ) . '">
-	<span class="docs-search-icon" aria-hidden="true">
-		<svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-			<path d="m15.5 15.5 4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
-			<circle cx="11" cy="11" r="5.5" stroke="currentColor" stroke-width="1.6" />
-		</svg>
-	</span>
-	<input type="search" name="s" placeholder="' . esc_attr__( 'Search docs...', 'apparel' ) . '" aria-label="' . esc_attr__( 'Search query', 'apparel' ) . '" />
-	<input type="hidden" name="post_type" value="docs" />
-	<span class="docs-search-hint" aria-hidden="true">Ctrl K</span>
-</form>';
+$docs_search_markup = mbf_get_docs_search_markup();
 
 $docs_utility_markup = mbf_get_docs_utility_markup();
 
