@@ -913,7 +913,8 @@ if ( ! function_exists( 'mbf_docs_header_script' ) ) {
 	 * Docs header mobile toggle script.
 	 */
 	function mbf_docs_header_script() {
-		return 'document.addEventListener("DOMContentLoaded", function () {
+		return '(function() {
+	const initDocsHeader = function () {
 	const header = document.querySelector("[data-docs-header]");
 	const mobileToggle = header ? header.querySelector("[data-docs-mobile-toggle]") : null;
 	const mobilePanel = header ? header.querySelector("[data-docs-mobile-panel]") : null;
@@ -1083,7 +1084,14 @@ if ( ! function_exists( 'mbf_docs_header_script' ) ) {
 			resultsContainer.classList.remove("is-visible");
 		});
 	});
-});';
+	};
+
+	if (document.readyState === "loading") {
+		document.addEventListener("DOMContentLoaded", initDocsHeader, { once: true });
+	} else {
+		initDocsHeader();
+	}
+})();';
 	}
 }
 
