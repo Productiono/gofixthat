@@ -10066,12 +10066,12 @@ div[class*=" gallery-columns-"] {
 	body > #page,
 	body > .docs-page {
 		position: relative;
-		inline-size: calc(100vw * var(--mbf-mobile-scale-inverse));
-		max-inline-size: calc(100vw * var(--mbf-mobile-scale-inverse));
-		min-block-size: calc(100vh * var(--mbf-mobile-scale-inverse));
-		margin-inline: auto;
-		transform: scale(var(--mbf-mobile-scale));
-		transform-origin: top center;
+		inline-size: 100%;
+		max-inline-size: 100%;
+		min-block-size: 100vh;
+		margin-inline: 0;
+		transform: none;
+		transform-origin: top left;
 		contain: paint;
 	}
 }
