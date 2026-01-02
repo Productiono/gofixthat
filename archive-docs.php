@@ -29,55 +29,9 @@ $docs_utility_markup = mbf_get_docs_utility_markup();
 	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 	<?php wp_head(); ?>
 	<style>
-		body.docs-landing-page {
-			margin: 0;
-			background: var(--mbf-site-background);
-			font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-			color: var(--docs-text);
-			-webkit-font-smoothing: antialiased;
-		}
+		<?php echo mbf_get_docs_page_base_css(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 
 		<?php echo mbf_get_docs_header_css(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-
-		.docs-hero {
-			position: relative;
-			padding: 78px 24px 40px;
-			overflow: hidden;
-		}
-
-		.docs-hero::before {
-			content: '';
-			position: absolute;
-			inset: 0;
-			background: radial-gradient(1200px circle at 8% -10%, color-mix(in srgb, var(--docs-accent) 22%, transparent), transparent 45%), radial-gradient(1200px circle at 86% 4%, color-mix(in srgb, var(--docs-accent) 16%, transparent), transparent 38%);
-			opacity: 0.5;
-			filter: blur(20px);
-		}
-
-		.docs-hero-inner {
-			position: relative;
-			max-width: 1140px;
-			margin: 0 auto;
-			padding: 0 16px;
-			text-align: center;
-		}
-
-		.docs-hero h1 {
-			font-size: clamp(30px, 4vw, 42px);
-			margin: 0 0 12px;
-			font-weight: 700;
-			letter-spacing: -0.01em;
-		}
-
-		.docs-hero p {
-			font-size: 16px;
-			margin: 0;
-			color: var(--docs-muted);
-			max-width: 780px;
-			margin-left: auto;
-			margin-right: auto;
-			line-height: 1.6;
-		}
 
 		.docs-card-section {
 			padding: 18px 18px 24px;
