@@ -45,6 +45,8 @@ add_action(
 	function() {
 		?>
 		<style>
+			<?php echo mbf_get_docs_page_base_css(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+
 			body.docs-category-page .mbf-header,
 			body.docs-category-page .mbf-header-before {
 				display: none;
@@ -73,6 +75,23 @@ get_header(); ?>
 <div class="docs-page docs-category-layout">
 	<?php mbf_render_docs_header( array( 'nav_links' => $docs_nav_links, 'search_markup' => $docs_search_markup, 'utility_markup' => $docs_utility_markup, 'mobile_categories' => $docs_category_tree ) ); ?>
 	<?php mbf_site_search(); ?>
+
+	<?php
+	$current_term = get_queried_object();
+	$hero_description = '';
+
+	if ( $current_term instanceof WP_Term && ! empty( $current_term->description ) ) {
+		$hero_description = wp_trim_words( wp_strip_all_tags( $current_term->description ), 40, '…' );
+	} else {
+		$hero_description = __( 'Browse guides, references, and tutorials in this category.', 'apparel' );
+	}
+	?>
+	<section class="docs-hero" aria-labelledby="docs-category-hero-title">
+		<div class="docs-hero-inner">
+			<h1 id="docs-category-hero-title"><?php single_term_title(); ?></h1>
+			<p><?php echo esc_html( $hero_description ); ?></p>
+		</div>
+	</section>
 
 	<div class="docs-category-shell">
 		<div id="primary" class="mbf-content-area">

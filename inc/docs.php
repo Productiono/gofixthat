@@ -229,16 +229,19 @@ if ( ! function_exists( 'mbf_get_docs_search_markup' ) ) {
 	 * @return string
 	 */
 	function mbf_get_docs_search_markup() {
-		return '<form role="search" aria-label="' . esc_attr__( 'Search documentation', 'apparel' ) . '" action="' . esc_url( home_url( '/' ) ) . '">
+		$search_endpoint = rest_url( 'wp/v2/search' );
+
+		return '<form role="search" class="docs-search__form" aria-label="' . esc_attr__( 'Search documentation', 'apparel' ) . '" action="' . esc_url( home_url( '/' ) ) . '" data-docs-search data-endpoint="' . esc_url( $search_endpoint ) . '">
 	<span class="docs-search-icon" aria-hidden="true">
 		<svg width="18" height="18" viewBox="0 0 24 24" fill="none">
 			<path d="m15.5 15.5 4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
 			<circle cx="11" cy="11" r="5.5" stroke="currentColor" stroke-width="1.6" />
 		</svg>
 	</span>
-	<input type="search" name="s" placeholder="' . esc_attr__( 'Search docs...', 'apparel' ) . '" aria-label="' . esc_attr__( 'Search query', 'apparel' ) . '" />
+	<input type="search" name="s" placeholder="' . esc_attr__( 'Search docs...', 'apparel' ) . '" aria-label="' . esc_attr__( 'Search query', 'apparel' ) . '" autocomplete="off" />
 	<input type="hidden" name="post_type" value="docs" />
 	<span class="docs-search-hint" aria-hidden="true">' . esc_html__( 'Search', 'apparel' ) . '</span>
+	<div class="docs-search__results" data-docs-search-results hidden aria-live="polite"></div>
 </form>';
 	}
 }
@@ -251,7 +254,6 @@ if ( ! function_exists( 'mbf_get_docs_utility_markup' ) ) {
 	 */
 	function mbf_get_docs_utility_markup() {
 		ob_start();
-		?>
 		mbf_component( 'header_scheme_toggle' );
 		?>
 		<a class="docs-utility__main-link" href="https://mattercall.com">
@@ -259,6 +261,67 @@ if ( ! function_exists( 'mbf_get_docs_utility_markup' ) ) {
 		</a>
 		<?php
 		return '<div class="docs-utility">' . ob_get_clean() . '</div>';
+	}
+}
+
+if ( ! function_exists( 'mbf_get_docs_page_base_css' ) ) {
+	/**
+	 * Base Docs page styles shared across templates.
+	 *
+	 * @return string
+	 */
+	function mbf_get_docs_page_base_css() {
+		return trim(
+			'body.docs-landing-page,
+body.docs-category-page {
+	margin: 0;
+	background: var(--mbf-site-background);
+	font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+	color: var(--docs-text);
+	-webkit-font-smoothing: antialiased;
+}
+
+.docs-hero {
+	position: relative;
+	padding: 78px 24px 40px;
+	overflow: hidden;
+}
+
+.docs-hero::before {
+	content: "";
+	position: absolute;
+	inset: 0;
+	background: radial-gradient(1200px circle at 8% -10%, color-mix(in srgb, var(--docs-accent) 22%, transparent), transparent 45%), radial-gradient(1200px circle at 86% 4%, color-mix(in srgb, var(--docs-accent) 16%, transparent), transparent 38%);
+	opacity: 0.5;
+	filter: blur(20px);
+}
+
+.docs-hero-inner {
+	position: relative;
+	max-width: 1140px;
+	margin: 0 auto;
+	padding: 0 16px;
+	text-align: center;
+}
+
+.docs-hero h1 {
+	font-size: clamp(30px, 4vw, 42px);
+	margin: 0 0 12px;
+	font-weight: 700;
+	letter-spacing: -0.01em;
+}
+
+.docs-hero p {
+	font-size: 16px;
+	margin: 0;
+	color: var(--docs-muted);
+	max-width: 780px;
+	margin-left: auto;
+	margin-right: auto;
+	line-height: 1.6;
+}
+'
+		);
 	}
 }
 
@@ -401,6 +464,50 @@ if ( ! function_exists( 'mbf_get_docs_header_css' ) ) {
 			border-radius: 8px;
 			padding: 6px 8px;
 			font-weight: 600;
+		}
+
+		.docs-search__results {
+			position: absolute;
+			top: calc(100% + 8px);
+			left: 0;
+			right: 0;
+			background: var(--docs-card);
+			border: 1px solid var(--docs-border);
+			border-radius: 12px;
+			box-shadow: 0 18px 40px rgba(0, 0, 0, 0.08);
+			padding: 6px;
+			max-height: 360px;
+			overflow-y: auto;
+			display: none;
+			z-index: 25;
+		}
+
+		.docs-search__results.is-visible {
+			display: block;
+		}
+
+		.docs-search__item,
+		.docs-search__status {
+			display: block;
+			padding: 10px 12px;
+			border-radius: 10px;
+			text-decoration: none;
+			color: var(--docs-text);
+			font-size: 14px;
+			font-weight: 600;
+			transition: background 0.15s ease, color 0.15s ease;
+		}
+
+		.docs-search__item:hover,
+		.docs-search__item:focus-visible {
+			background: var(--docs-pill);
+			color: var(--docs-accent);
+			outline: none;
+		}
+
+		.docs-search__status {
+			color: var(--docs-muted);
+			font-weight: 500;
 		}
 
 		.docs-utility {
@@ -607,6 +714,10 @@ if ( ! function_exists( 'mbf_get_docs_header_css' ) ) {
 				display: none;
 			}
 
+			.docs-search.docs-search-mobile {
+				display: flex;
+			}
+
 			.docs-mobile-panel {
 				grid-template-columns: 1fr;
 			}
@@ -802,6 +913,7 @@ if ( ! function_exists( 'mbf_docs_header_script' ) ) {
 	const header = document.querySelector("[data-docs-header]");
 	const mobileToggle = document.querySelector("[data-docs-mobile-toggle]");
 	const mobilePanel = document.querySelector("[data-docs-mobile-panel]");
+	const searchForms = document.querySelectorAll("[data-docs-search]");
 
 	if (!header || !mobileToggle || !mobilePanel) {
 		return;
@@ -857,6 +969,115 @@ if ( ! function_exists( 'mbf_docs_header_script' ) ) {
 		if (event.key === "Escape" && header.classList.contains("is-mobile-open")) {
 			closeMenu();
 		}
+	});
+
+	const debounce = (fn, delay = 180) => {
+		let timer;
+		return (...args) => {
+			clearTimeout(timer);
+			timer = setTimeout(() => fn(...args), delay);
+		};
+	};
+
+	const renderStatus = (container, message) => {
+		container.innerHTML = "";
+		const status = document.createElement("div");
+		status.className = "docs-search__status";
+		status.textContent = message;
+		container.appendChild(status);
+	};
+
+	const renderResults = (container, results) => {
+		container.innerHTML = "";
+		if (!results.length) {
+			renderStatus(container, "' . esc_js( __( 'No results found.', 'apparel' ) ) . '");
+			return;
+		}
+
+		results.forEach((item) => {
+			const link = document.createElement("a");
+			link.className = "docs-search__item";
+			link.href = item.url;
+			link.textContent = item.title || item.url;
+			container.appendChild(link);
+		});
+	};
+
+	const performSearch = async (form, query) => {
+		const endpoint = form.getAttribute("data-endpoint");
+		const resultsContainer = form.querySelector("[data-docs-search-results]");
+
+		if (!endpoint || !resultsContainer) {
+			return;
+		}
+
+		const trimmed = query.trim();
+
+		if (!trimmed) {
+			resultsContainer.setAttribute("hidden", "hidden");
+			resultsContainer.classList.remove("is-visible");
+			resultsContainer.innerHTML = "";
+			return;
+		}
+
+		resultsContainer.removeAttribute("hidden");
+		resultsContainer.classList.add("is-visible");
+		renderStatus(resultsContainer, "' . esc_js( __( 'Searching…', 'apparel' ) ) . '");
+
+		try {
+			const url = new URL(endpoint);
+			url.searchParams.set("search", trimmed);
+			url.searchParams.set("subtype", "docs");
+			url.searchParams.set("per_page", "5");
+			url.searchParams.set("context", "view");
+
+			const response = await fetch(url.toString(), { credentials: "same-origin" });
+
+			if (!response.ok) {
+				throw new Error("Search request failed");
+			}
+
+			const data = await response.json();
+			const filtered = Array.isArray(data)
+				? data.filter((item) => item.subtype === "docs")
+				: [];
+
+			renderResults(resultsContainer, filtered.slice(0, 5));
+		} catch (error) {
+			renderStatus(resultsContainer, "' . esc_js( __( 'Unable to load results right now.', 'apparel' ) ) . '");
+		}
+	};
+
+	searchForms.forEach((form) => {
+		const input = form.querySelector("input[type=\\\"search\\\"]");
+		const resultsContainer = form.querySelector("[data-docs-search-results]");
+
+		if (!input || !resultsContainer) {
+			return;
+		}
+
+		const debouncedSearch = debounce(() => performSearch(form, input.value));
+
+		input.addEventListener("input", debouncedSearch);
+
+		input.addEventListener("focus", () => {
+			if (resultsContainer.innerHTML.trim()) {
+				resultsContainer.removeAttribute("hidden");
+				resultsContainer.classList.add("is-visible");
+			}
+		});
+
+		input.addEventListener("blur", () => {
+			setTimeout(() => {
+				resultsContainer.setAttribute("hidden", "hidden");
+				resultsContainer.classList.remove("is-visible");
+			}, 120);
+		});
+
+		form.addEventListener("submit", () => {
+			resultsContainer.setAttribute("hidden", "hidden");
+			resultsContainer.classList.remove("is-visible");
+		});
 	});
 });';
 	}
