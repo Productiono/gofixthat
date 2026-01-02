@@ -10063,8 +10063,10 @@ div[class*=" gallery-columns-"] {
 		margin: 0;
 		width: 100%;
 		overflow-x: clip;
-		inline-size: 100%;
-		min-block-size: 100vh;
+		inline-size: calc(100% * var(--mbf-mobile-scale-inverse));
+		min-block-size: calc(100vh * var(--mbf-mobile-scale-inverse));
+		transform: scale(var(--mbf-mobile-scale));
+		transform-origin: top left;
 		margin-inline: 0;
 	}
 

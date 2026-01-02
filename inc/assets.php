@@ -59,48 +59,6 @@ if ( ! function_exists( 'mbf_enqueue_scripts' ) ) {
 			wp_enqueue_script( 'mbf-blog-popup' );
 		}
 
-		$mobile_viewport_js = <<<JS
-(function () {
-	const mobileScale = 0.75;
-	const breakpoint = 767.98;
-	const viewport = document.querySelector('meta[name="viewport"]');
-	if (!viewport) {
-		return;
-	}
-
-	const defaultContent = viewport.getAttribute('content') || 'width=device-width, initial-scale=1';
-	const scaledContent = 'width=device-width, initial-scale=' + mobileScale;
-	const query = window.matchMedia('(max-width: ' + breakpoint + 'px)');
-	const root = document.documentElement;
-
-	const applyScale = () => {
-		if (query.matches) {
-			viewport.setAttribute('content', scaledContent);
-			root.style.setProperty('--mbf-mobile-scale', mobileScale);
-			root.style.setProperty('--mbf-mobile-scale-inverse', (1 / mobileScale).toString());
-			root.classList.add('mbf-mobile-scale');
-		} else {
-			viewport.setAttribute('content', defaultContent);
-			root.style.removeProperty('--mbf-mobile-scale');
-			root.style.removeProperty('--mbf-mobile-scale-inverse');
-			root.classList.remove('mbf-mobile-scale');
-		}
-	};
-
-	applyScale();
-
-	if (typeof query.addEventListener === 'function') {
-		query.addEventListener('change', applyScale);
-	} else if (typeof query.addListener === 'function') {
-		query.addListener(applyScale);
-	} else {
-		window.addEventListener('resize', applyScale);
-	}
-})();
-JS;
-
-		wp_add_inline_script( 'mbf-scripts', $mobile_viewport_js, 'before' );
-
 		$cookie_js = <<<JS
 (function () {
 	const storageKey = 'mbfCookieConsent';
