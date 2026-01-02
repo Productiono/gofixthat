@@ -10063,22 +10063,17 @@ div[class*=" gallery-columns-"] {
 		margin: 0;
 		width: 100%;
 		overflow-x: hidden;
-		inline-size: calc(100% * var(--mbf-mobile-scale-inverse));
-		min-block-size: calc(100vh * var(--mbf-mobile-scale-inverse));
-		transform: scale(var(--mbf-mobile-scale));
-		transform-origin: top center;
-		margin-inline: auto;
 	}
 
 	body > #page,
 	body > .docs-page {
 		position: relative;
-		inline-size: 100%;
-		max-inline-size: 100%;
-		min-block-size: 100vh;
-		margin-inline: 0;
-		transform: none;
-		transform-origin: top left;
+		inline-size: calc(100% * var(--mbf-mobile-scale-inverse));
+		max-inline-size: calc(100% * var(--mbf-mobile-scale-inverse));
+		min-block-size: calc(100vh * var(--mbf-mobile-scale-inverse));
+		margin-inline: auto;
+		transform: scale(var(--mbf-mobile-scale));
+		transform-origin: top center;
 		contain: paint;
 	}
 }
