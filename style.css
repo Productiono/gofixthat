@@ -10045,3 +10045,16 @@ div[class*=" gallery-columns-"] {
 	gap: 1rem;
 	flex-wrap: wrap;
 }
+
+@media (max-width: 767.98px) {
+	html {
+		overflow-x: hidden;
+	}
+
+	body {
+		transform: scale(0.75);
+		transform-origin: top center;
+		width: 133.333333%;
+		min-height: calc(100vh / 0.75);
+	}
+}
