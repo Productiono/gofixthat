@@ -9236,12 +9236,9 @@ div[class*=" gallery-columns-"] {
 		margin: 0;
 		width: 100%;
 		overflow-x: clip;
-		inline-size: calc(100% * var(--mbf-mobile-scale-inverse));
 		min-height: auto;
 		min-block-size: 0;
 		block-size: auto;
-		transform: scale(var(--mbf-mobile-scale));
-		transform-origin: top left;
 		margin-inline: 0;
 	}
 
@@ -9259,8 +9256,31 @@ div[class*=" gallery-columns-"] {
 		min-block-size: 0;
 		block-size: auto;
 		margin-inline: 0;
-		transform: none;
 		transform-origin: top left;
 		contain: paint;
+	}
+
+	@supports (zoom: 1) {
+		html {
+			zoom: var(--mbf-mobile-scale);
+		}
+
+		body {
+			inline-size: 100%;
+			transform: none;
+		}
+
+		body > #page,
+		body > .docs-page {
+			transform: none;
+		}
+	}
+
+	@supports not (zoom: 1) {
+		body {
+			inline-size: calc(100% * var(--mbf-mobile-scale-inverse));
+			transform: scale(var(--mbf-mobile-scale));
+			transform-origin: top left;
+		}
 	}
 }
