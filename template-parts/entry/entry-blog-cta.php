@@ -1,37 +1,64 @@
 <?php
 /**
- * Blog static promotional section.
+ * Blog category-based CTA section.
  *
  * @package Apparel
  */
 
-$primary_cta_label      = esc_html__( 'Kostenlos starten', 'apparel' );
-$secondary_cta_label    = esc_html__( 'So funktioniert Shopify', 'apparel' );
-$primary_cta_url        = apply_filters( 'mbf_blog_cta_primary_url', home_url( '/' ) );
-$posts_page_id          = get_option( 'page_for_posts' );
-$secondary_default_url  = $posts_page_id ? get_permalink( $posts_page_id ) : home_url( '/' );
-$secondary_cta_url      = apply_filters( 'mbf_blog_cta_secondary_url', $secondary_default_url );
+$cta_data = mbf_get_active_category_cta_data();
+
+if ( empty( $cta_data ) ) {
+	return;
+}
+
+$headline         = isset( $cta_data['headline'] ) ? $cta_data['headline'] : '';
+$subheadline      = isset( $cta_data['subheadline'] ) ? $cta_data['subheadline'] : '';
+$description      = isset( $cta_data['description'] ) ? $cta_data['description'] : '';
+$primary_label    = isset( $cta_data['primary_label'] ) ? $cta_data['primary_label'] : '';
+$primary_url      = isset( $cta_data['primary_url'] ) ? $cta_data['primary_url'] : '';
+$secondary_label  = isset( $cta_data['secondary_label'] ) ? $cta_data['secondary_label'] : '';
+$secondary_url    = isset( $cta_data['secondary_url'] ) ? $cta_data['secondary_url'] : '';
+
+if ( ! $headline && ! $subheadline && ! $description ) {
+	return;
+}
 ?>
 
 <section class="mbf-blog-cta" aria-labelledby="mbf-blog-cta-title">
 	<div class="mbf-blog-cta__inner">
 		<div class="mbf-blog-cta__content">
-			<p class="mbf-blog-cta__eyebrow"><?php esc_html_e( 'Guided resources for your next launch', 'apparel' ); ?></p>
-			<h2 id="mbf-blog-cta-title" class="mbf-blog-cta__title">
-				<?php esc_html_e( 'Noch heute mit Shopify verkaufen', 'apparel' ); ?>
-			</h2>
-			<p class="mbf-blog-cta__description">
-				<?php esc_html_e( 'Teste Shopify kostenlos und nutze die Ressourcen, die dich Schritt für Schritt auf deinem Weg begleiten.', 'apparel' ); ?>
-			</p>
-			<div class="mbf-blog-cta__actions">
-				<a class="mbf-button mbf-button--solid" href="<?php echo esc_url( $primary_cta_url ); ?>">
-					<?php echo esc_html( $primary_cta_label ); ?>
-				</a>
-				<a class="mbf-button mbf-button--ghost" href="<?php echo esc_url( $secondary_cta_url ); ?>">
-					<span class="mbf-blog-cta__icon" aria-hidden="true">►</span>
-					<?php echo esc_html( $secondary_cta_label ); ?>
-				</a>
-			</div>
+			<?php if ( $headline ) : ?>
+				<p class="mbf-blog-cta__eyebrow"><?php echo esc_html( $headline ); ?></p>
+			<?php endif; ?>
+
+			<?php if ( $subheadline ) : ?>
+				<h2 id="mbf-blog-cta-title" class="mbf-blog-cta__title">
+					<?php echo esc_html( $subheadline ); ?>
+				</h2>
+			<?php endif; ?>
+
+			<?php if ( $description ) : ?>
+				<p class="mbf-blog-cta__description">
+					<?php echo esc_html( $description ); ?>
+				</p>
+			<?php endif; ?>
+
+			<?php if ( $primary_label || $secondary_label ) : ?>
+				<div class="mbf-blog-cta__actions">
+					<?php if ( $primary_label && $primary_url ) : ?>
+						<a class="mbf-button mbf-button--solid" href="<?php echo esc_url( $primary_url ); ?>">
+							<?php echo esc_html( $primary_label ); ?>
+						</a>
+					<?php endif; ?>
+
+					<?php if ( $secondary_label && $secondary_url ) : ?>
+						<a class="mbf-button mbf-button--ghost" href="<?php echo esc_url( $secondary_url ); ?>">
+							<span class="mbf-blog-cta__icon" aria-hidden="true">►</span>
+							<?php echo esc_html( $secondary_label ); ?>
+						</a>
+					<?php endif; ?>
+				</div>
+			<?php endif; ?>
 		</div>
 	</div>
 </section>
