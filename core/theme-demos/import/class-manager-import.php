@@ -58,6 +58,7 @@ class MBF_Manager_Import {
 		add_filter( 'wp_check_filetype_and_ext', array( $this, 'real_mime_type_for_xml' ), 10, 4 );
 		add_filter( 'admin_init', array( $this, 'ajax_runtime_hide_errors' ), 0 );
 		add_filter( 'query', array( $this, 'ajax_wpdb_hide_errors' ), 0 );
+		add_action( 'admin_notices', array( $this, 'maybe_show_missing_plugin_notice' ) );
 		add_action( 'wp_ajax_mbf_import_plugin', array( $this, 'ajax_import_plugin' ) );
 		add_action( 'wp_ajax_mbf_import_contents', array( $this, 'ajax_import_contents' ) );
 		add_action( 'wp_ajax_mbf_import_customizer', array( $this, 'ajax_import_customizer' ) );
@@ -783,6 +784,34 @@ class MBF_Manager_Import {
 
 		$this->ajax_import_start();
 
+		$demo_id = isset( $_POST['demo_id'] ) ? sanitize_text_field( wp_unslash( $_POST['demo_id'] ) ) : null;
+
+		if ( $demo_id ) {
+			$demos = apply_filters( 'mbf_register_demos_list', array() );
+
+			if ( isset( $demos[ $demo_id ]['plugins'] ) && is_array( $demos[ $demo_id ]['plugins'] ) ) {
+				$missing_plugins = array();
+
+				foreach ( $demos[ $demo_id ]['plugins'] as $plugin ) {
+					$path        = isset( $plugin['path'] ) ? $plugin['path'] : null;
+					$name        = isset( $plugin['name'] ) ? $plugin['name'] : null;
+					$recommended = isset( $plugin['recommended'] ) ? (bool) $plugin['recommended'] : false;
+
+					if ( ! $recommended || ! $path || ! $name ) {
+						continue;
+					}
+
+					if ( 'active' !== $this->get_plugin_status( $path ) ) {
+						$missing_plugins[] = $name;
+					}
+				}
+
+				if ( $missing_plugins ) {
+					set_transient( 'mbf_import_missing_plugins', $missing_plugins, 30 * MINUTE_IN_SECONDS );
+				}
+			}
+		}
+
 		/**
 		 * The mbf_finish_import hook.
 		 *
@@ -796,6 +825,26 @@ class MBF_Manager_Import {
 		$this->send_json_success();
 
 		$this->ajax_import_end();
+	}
+
+	/**
+	 * Show notice after import if recommended plugins are missing.
+	 */
+	public function maybe_show_missing_plugin_notice() {
+		$missing_plugins = get_transient( 'mbf_import_missing_plugins' );
+
+		if ( ! $missing_plugins || ! current_user_can( 'install_plugins' ) ) {
+			return;
+		}
+
+		delete_transient( 'mbf_import_missing_plugins' );
+
+		$plugins_list = implode( ', ', array_map( 'esc_html', $missing_plugins ) );
+		?>
+		<div class="notice notice-warning is-dismissible">
+			<p><?php echo wp_kses_post( sprintf( esc_html__( 'Demo imported. The following recommended plugins are inactive or missing: %s. You can install or activate them later.', 'apparel' ), $plugins_list ) ); ?></p>
+		</div>
+		<?php
 	}
 }
 

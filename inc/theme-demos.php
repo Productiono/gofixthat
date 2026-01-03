@@ -15,7 +15,8 @@ function mbf_demos_list() {
 			'name'     => 'WooCommerce',
 			'slug'     => 'woocommerce',
 			'path'     => 'woocommerce/woocommerce.php',
-			'required' => true,
+			'required' => false,
+			'recommended' => true,
 			'desc'     => esc_html__( 'An eCommerce toolkit that helps you sell anything. Beautifully.', 'apparel' ),
 		),
 		array(
@@ -23,6 +24,7 @@ function mbf_demos_list() {
 			'slug'     => 'woo-variation-swatches',
 			'path'     => 'woo-variation-swatches/woo-variation-swatches.php',
 			'required' => false,
+			'recommended' => true,
 			'desc'     => esc_html__( 'Beautiful Color, Image and Buttons Variation Swatches For WooCommerce Product Attributes', 'apparel' ),
 		),
 	);
