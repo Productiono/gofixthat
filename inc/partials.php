@@ -233,10 +233,16 @@ if ( ! function_exists( 'mbf_entry_header' ) ) {
 
 if ( ! function_exists( 'mbf_blog_post_cta' ) ) {
 	/**
-	 * Static CTA for blog posts.
+	 * Category-based CTA for blog posts.
 	 */
 	function mbf_blog_post_cta() {
 		if ( ! is_singular( 'post' ) ) {
+			return;
+		}
+
+		$cta_data = mbf_get_active_category_cta_data();
+
+		if ( empty( $cta_data ) ) {
 			return;
 		}
 
