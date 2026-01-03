@@ -125,9 +125,10 @@ add_action( 'category_edit_form_fields', 'mbf_category_cta_edit_fields', 10, 2 )
  * Save CTA data for categories.
  *
  * @param int    $term_id  Term ID.
+ * @param int    $tt_id    Term taxonomy ID.
  * @param string $taxonomy Taxonomy slug.
  */
-function mbf_category_cta_save_fields( $term_id, $taxonomy ) {
+function mbf_category_cta_save_fields( $term_id, $tt_id, $taxonomy ) {
 	if ( 'category' !== $taxonomy ) {
 		return;
 	}
@@ -156,8 +157,8 @@ function mbf_category_cta_save_fields( $term_id, $taxonomy ) {
 		update_term_meta( $term_id, $key, $value );
 	}
 }
-add_action( 'created_category', 'mbf_category_cta_save_fields', 10, 2 );
-add_action( 'edited_category', 'mbf_category_cta_save_fields', 10, 2 );
+add_action( 'created_term', 'mbf_category_cta_save_fields', 10, 3 );
+add_action( 'edited_term', 'mbf_category_cta_save_fields', 10, 3 );
 
 /**
  * Get CTA data for a category.
@@ -246,4 +247,3 @@ function mbf_get_active_category_cta_data( $post_id = null ) {
 
 	return mbf_get_category_cta_data( $category_id );
 }
-
