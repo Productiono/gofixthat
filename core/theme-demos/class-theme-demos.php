@@ -146,13 +146,21 @@ if ( ! class_exists( 'MBF_Theme_Demos' ) ) {
 								<?php esc_html_e( 'Install Plugins', 'apparel' ); ?>
 							</div>
 
+							<div class="mbf-msg-warning">
+								<?php esc_html_e( 'Plugins are optional. You can import the demo now and install recommended plugins later.', 'apparel' ); ?>
+							</div>
+
 							<?php
 							foreach ( $demo_plugins as $plugin ) {
-								$required = isset( $plugin['required'] ) ? $plugin['required'] : false;
+								$recommended = isset( $plugin['recommended'] ) ? $plugin['recommended'] : false;
 								?>
 								<form>
 									<div class="mbf-switcher">
-										<?php echo esc_html( $plugin['name'] ); ?> <input class="mbf-checkbox" type="checkbox" name="<?php echo esc_attr( $plugin['slug'] ); ?>" value="1" <?php echo wp_kses( $required ? 'readony onclick="return false;"' : null, 'content' ); ?> checked>
+										<?php echo esc_html( $plugin['name'] ); ?> <input class="mbf-checkbox" type="checkbox" name="<?php echo esc_attr( $plugin['slug'] ); ?>" value="1">
+
+										<?php if ( $recommended ) { ?>
+											<span class="mbf-badge"><?php esc_html_e( 'Recommended', 'apparel' ); ?></span>
+										<?php } ?>
 
 										<?php if ( isset( $plugin['desc'] ) && $plugin['desc'] ) { ?>
 											<div class="mbf-tooltip-help"><i class="dashicons dashicons-editor-help"></i></div>
@@ -162,7 +170,7 @@ if ( ! class_exists( 'MBF_Theme_Demos' ) ) {
 
 										<div class="mbf-switch"><span class="mbf-switch-slider"></span></div>
 
-										<div class="mbf-tooltip"><?php esc_html_e( 'Required plugin will be installed', 'apparel' ); ?></div>
+										<div class="mbf-tooltip"><?php esc_html_e( 'Optional plugin installation (recommended but not required).', 'apparel' ); ?></div>
 									</div>
 
 									<input type="hidden" name="plugin_slug" value="<?php echo esc_attr( $plugin['slug'] ); ?>">
@@ -273,6 +281,8 @@ if ( ! class_exists( 'MBF_Theme_Demos' ) ) {
 							<input type="hidden" name="step_name" value="<?php esc_attr_e( 'Finishing setup...', 'apparel' ); ?>">
 
 							<input type="hidden" name="nonce" value="<?php echo esc_attr( wp_create_nonce( 'nonce' ) ); ?>">
+
+							<input type="hidden" name="demo_id" value="<?php echo esc_attr( $demo_id ); ?>">
 
 							<input type="hidden" name="action" value="mbf_import_finish">
 						</form>
