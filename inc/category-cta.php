@@ -265,6 +265,11 @@ function mbf_get_category_promo_fields() {
 			'key'      => 'mbf_promo_left_subtext',
 			'sanitize' => 'sanitize_text_field',
 		),
+		'left_form_id'       => array(
+			'label'    => __( 'Left form ID', 'apparel' ),
+			'key'      => 'mbf_promo_left_form_id',
+			'sanitize' => 'absint',
+		),
 		'right_title'        => array(
 			'label'    => __( 'Right title', 'apparel' ),
 			'key'      => 'mbf_promo_right_title',
@@ -333,6 +338,9 @@ function mbf_category_promo_edit_fields( $term, $taxonomy ) {
 						<button type="button" class="button mbf-category-promo-image-remove" <?php echo $image_html ? '' : 'style="display:none;"'; ?>><?php esc_html_e( 'Remove image', 'apparel' ); ?></button>
 					</p>
 				</div>
+			<?php elseif ( 'left_form_id' === $name ) : ?>
+				<input name="<?php echo esc_attr( $field['key'] ); ?>" id="<?php echo esc_attr( $field['key'] ); ?>" type="number" min="1" step="1" value="<?php echo esc_attr( $value ); ?>" class="small-text" />
+				<p class="description"><?php esc_html_e( 'Fluent Form ID for the left column form. Leave empty to use the default form.', 'apparel' ); ?></p>
 			<?php else : ?>
 				<input name="<?php echo esc_attr( $field['key'] ); ?>" id="<?php echo esc_attr( $field['key'] ); ?>" type="text" value="<?php echo esc_attr( $value ); ?>" class="regular-text" />
 			<?php endif; ?>
@@ -372,6 +380,11 @@ function mbf_category_promo_save_fields( $term_id, $tt_id, $taxonomy ) {
 		$value = call_user_func( $sanitizer, wp_unslash( $_POST[ $key ] ) );
 
 		if ( '' === $value || null === $value ) {
+			delete_term_meta( $term_id, $key );
+			continue;
+		}
+
+		if ( 'mbf_promo_left_form_id' === $key && ! $value ) {
 			delete_term_meta( $term_id, $key );
 			continue;
 		}
@@ -469,8 +482,11 @@ function mbf_get_category_promo_data( $term_id ) {
 			continue;
 		}
 
-		if ( 'right_image_id' === $key ) {
+		if ( 'right_image_id' === $key || 'left_form_id' === $key ) {
 			$value = absint( $value );
+			if ( ! $value ) {
+				continue;
+			}
 		}
 
 		$promo_data[ $key ] = $value;
