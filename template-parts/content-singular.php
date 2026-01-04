@@ -12,8 +12,29 @@ $is_blog_post       = is_singular( 'post' );
 $primary_media_html = '';
 $entry_content_html = '';
 $video_caption_html = '';
+$promo_data         = array();
+$promo_has_content  = false;
+$promo_image_html   = '';
+$promo_description  = '';
 
 if ( $is_blog_post ) {
+	$promo_data        = mbf_get_active_category_promo_data();
+	$promo_has_content = ! empty( $promo_data );
+	$promo_description = isset( $promo_data['right_description'] ) ? wp_kses_post( wpautop( $promo_data['right_description'] ) ) : '';
+
+	if ( ! empty( $promo_data['right_image_id'] ) ) {
+		$promo_image_alt  = ! empty( $promo_data['right_title'] ) ? $promo_data['right_title'] : get_the_title();
+		$promo_image_html = wp_get_attachment_image(
+			absint( $promo_data['right_image_id'] ),
+			'mbf-thumbnail',
+			false,
+			array(
+				'alt'     => $promo_image_alt,
+				'loading' => 'lazy',
+			)
+		);
+	}
+
 	$raw_content       = get_the_content();
 	$formatted_content = apply_filters( 'the_content', $raw_content );
 	$formatted_content = str_replace( ']]>', ']]&gt;', $formatted_content );
@@ -95,18 +116,25 @@ if ( $is_blog_post ) {
 		?>
 
 		<?php if ( $is_blog_post ) : ?>
-			<div class="mbf-entry__content-layout">
-				<div class="mbf-entry__left-rail">
-					<aside class="mbf-entry__lead-form" aria-label="<?php esc_attr_e( 'Start your online business form', 'apparel' ); ?>">
-						<div class="mbf-entry__lead-form-card">
-							<div class="mbf-entry__lead-form-heading">
-								<p><?php esc_html_e( 'Start your online business today.', 'apparel' ); ?></p>
-								<p><?php esc_html_e( 'For free.', 'apparel' ); ?></p>
+			<?php $layout_class = $promo_has_content ? 'mbf-entry__content-layout mbf-entry__content-layout--promo' : 'mbf-entry__content-layout mbf-entry__content-layout--no-promo'; ?>
+			<div class="<?php echo esc_attr( $layout_class ); ?>">
+				<?php if ( $promo_has_content ) : ?>
+					<div class="mbf-entry__left-rail">
+						<aside class="mbf-entry__lead-form" aria-label="<?php esc_attr_e( 'Start your online business form', 'apparel' ); ?>">
+							<div class="mbf-entry__lead-form-card">
+								<div class="mbf-entry__lead-form-heading">
+									<?php if ( ! empty( $promo_data['left_headline'] ) ) : ?>
+										<p><?php echo esc_html( $promo_data['left_headline'] ); ?></p>
+									<?php endif; ?>
+									<?php if ( ! empty( $promo_data['left_subtext'] ) ) : ?>
+										<p><?php echo esc_html( $promo_data['left_subtext'] ); ?></p>
+									<?php endif; ?>
+								</div>
+								<?php echo do_shortcode( '[fluentform id="3"]' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 							</div>
-							<?php echo do_shortcode( '[fluentform id="3"]' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-						</div>
-					</aside>
-				</div>
+						</aside>
+					</div>
+				<?php endif; ?>
 
 				<div class="mbf-entry__content-wrap">
 					<?php
@@ -171,19 +199,30 @@ if ( $is_blog_post ) {
 					?>
 				</div>
 
-				<div class="mbf-entry__sidebar">
-					<aside class="mbf-entry__ad" aria-label="<?php esc_attr_e( 'Advertisement', 'apparel' ); ?>">
-						<div class="mbf-entry__sidebar-cta">
-							<figure class="mbf-entry__sidebar-cta-media">
-								<img src="<?php echo esc_url( $sidebar_cta_image ); ?>" alt="<?php esc_attr_e( 'Point of sale checkout display', 'apparel' ); ?>" loading="lazy" />
-							</figure>
-							<h3 class="mbf-entry__sidebar-cta-title"><?php echo esc_html( $sidebar_cta_title ); ?></h3>
-							<a class="mbf-entry__sidebar-cta-button" href="<?php echo esc_url( $sidebar_cta_url ); ?>">
-								<?php echo esc_html( $sidebar_cta_label ); ?>
-							</a>
-						</div>
-					</aside>
-				</div>
+				<?php if ( $promo_has_content ) : ?>
+					<div class="mbf-entry__sidebar">
+						<aside class="mbf-entry__ad" aria-label="<?php esc_attr_e( 'Advertisement', 'apparel' ); ?>">
+							<div class="mbf-entry__sidebar-cta">
+								<?php if ( $promo_image_html ) : ?>
+									<figure class="mbf-entry__sidebar-cta-media">
+										<?php echo $promo_image_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+									</figure>
+								<?php endif; ?>
+								<?php if ( ! empty( $promo_data['right_title'] ) ) : ?>
+									<h3 class="mbf-entry__sidebar-cta-title"><?php echo esc_html( $promo_data['right_title'] ); ?></h3>
+								<?php endif; ?>
+								<?php if ( $promo_description ) : ?>
+									<div class="mbf-entry__sidebar-cta-description"><?php echo $promo_description; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></div>
+								<?php endif; ?>
+								<?php if ( ! empty( $promo_data['button_text'] ) && ! empty( $promo_data['button_url'] ) ) : ?>
+									<a class="mbf-entry__sidebar-cta-button" href="<?php echo esc_url( $promo_data['button_url'] ); ?>">
+										<?php echo esc_html( $promo_data['button_text'] ); ?>
+									</a>
+								<?php endif; ?>
+							</div>
+						</aside>
+					</div>
+				<?php endif; ?>
 			</div>
 		<?php else : ?>
 			<div class="mbf-entry__content-wrap">
