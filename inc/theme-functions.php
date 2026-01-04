@@ -793,6 +793,94 @@ if ( ! function_exists( 'mbf_breadcrumbs' ) ) {
 	}
 }
 
+if ( ! function_exists( 'mbf_category_canonical_url' ) ) {
+	/**
+	 * Ensure canonical URLs point to the active category archive.
+	 *
+	 * @param string $canonical Current canonical URL.
+	 */
+	function mbf_category_canonical_url( $canonical ) {
+		if ( ! is_category() ) {
+			return $canonical;
+		}
+
+		$paged          = max( 1, get_query_var( 'paged' ) );
+		$canonical_link = get_pagenum_link( $paged );
+
+		if ( $canonical_link ) {
+			return $canonical_link;
+		}
+
+		return $canonical;
+	}
+}
+add_filter( 'rel_canonical', 'mbf_category_canonical_url' );
+
+if ( ! function_exists( 'mbf_category_breadcrumb_json_ld' ) ) {
+	/**
+	 * Output BreadcrumbList JSON-LD for category archives.
+	 */
+	function mbf_category_breadcrumb_json_ld() {
+		if ( ! is_category() || is_feed() || mbf_doing_request() ) {
+			return;
+		}
+
+		$category = get_queried_object();
+
+		if ( ! ( $category instanceof WP_Term ) ) {
+			return;
+		}
+
+		$items     = array();
+		$position  = 1;
+		$home_name = get_bloginfo( 'name' );
+
+		$items[] = array(
+			'@type'    => 'ListItem',
+			'position' => $position++,
+			'name'     => wp_strip_all_tags( $home_name ),
+			'item'     => home_url( '/' ),
+		);
+
+		$posts_page_id = (int) get_option( 'page_for_posts' );
+
+		if ( $posts_page_id ) {
+			$items[] = array(
+				'@type'    => 'ListItem',
+				'position' => $position++,
+				'name'     => wp_strip_all_tags( get_the_title( $posts_page_id ) ),
+				'item'     => get_permalink( $posts_page_id ),
+			);
+		}
+
+		$category_link = get_term_link( $category );
+
+		if ( is_wp_error( $category_link ) ) {
+			return;
+		}
+
+		$items[] = array(
+			'@type'    => 'ListItem',
+			'position' => $position++,
+			'name'     => wp_strip_all_tags( $category->name ),
+			'item'     => $category_link,
+		);
+
+		if ( count( $items ) < 2 ) {
+			return;
+		}
+
+		$schema = array(
+			'@context'        => 'https://schema.org',
+			'@type'           => 'BreadcrumbList',
+			'itemListElement' => $items,
+		);
+
+		echo '<script type="application/ld+json">' . wp_json_encode( $schema ) . '</script>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+	}
+}
+add_action( 'wp_head', 'mbf_category_breadcrumb_json_ld', 5 );
+
 if ( ! function_exists( 'mbf_get_available_image_sizes' ) ) {
 	/**
 	 * Get the available image sizes

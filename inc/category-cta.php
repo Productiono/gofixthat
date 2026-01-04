@@ -51,6 +51,79 @@ function mbf_get_category_cta_fields() {
 }
 
 /**
+ * Display featured post field on category add form.
+ *
+ * @param string $taxonomy The taxonomy slug.
+ */
+function mbf_category_featured_add_fields( $taxonomy ) {
+	wp_nonce_field( 'mbf_category_featured_fields', 'mbf_category_featured_nonce' );
+	?>
+	<div class="form-field">
+		<label for="hubs_featured_post_id"><?php esc_html_e( '"Start here" featured post ID', 'apparel' ); ?></label>
+		<input name="hubs_featured_post_id" id="hubs_featured_post_id" type="number" min="0" step="1" />
+		<p class="description"><?php esc_html_e( 'Choose a post ID to highlight at the top of this category archive.', 'apparel' ); ?></p>
+	</div>
+	<?php
+}
+add_action( 'category_add_form_fields', 'mbf_category_featured_add_fields' );
+
+/**
+ * Display featured post field on category edit form.
+ *
+ * @param WP_Term $term     Current term object.
+ * @param string  $taxonomy Current taxonomy slug.
+ */
+function mbf_category_featured_edit_fields( $term, $taxonomy ) {
+	wp_nonce_field( 'mbf_category_featured_fields', 'mbf_category_featured_nonce' );
+	$featured_post_id = mbf_get_category_featured_post_id( $term->term_id );
+	?>
+	<tr class="form-field">
+		<th colspan="2"><h3><?php esc_html_e( 'Category Hub', 'apparel' ); ?></h3></th>
+	</tr>
+	<tr class="form-field">
+		<th scope="row"><label for="hubs_featured_post_id"><?php esc_html_e( '"Start here" featured post ID', 'apparel' ); ?></label></th>
+		<td>
+			<input name="hubs_featured_post_id" id="hubs_featured_post_id" type="number" min="0" step="1" value="<?php echo esc_attr( $featured_post_id ); ?>" class="regular-text" />
+			<p class="description"><?php esc_html_e( 'Enter the ID of a published post to feature above the list.', 'apparel' ); ?></p>
+		</td>
+	</tr>
+	<?php
+}
+add_action( 'category_edit_form_fields', 'mbf_category_featured_edit_fields', 9, 2 );
+
+/**
+ * Save featured post data for categories.
+ *
+ * @param int    $term_id  Term ID.
+ * @param int    $tt_id    Term taxonomy ID.
+ * @param string $taxonomy Taxonomy slug.
+ */
+function mbf_category_featured_save_fields( $term_id, $tt_id, $taxonomy ) {
+	if ( 'category' !== $taxonomy ) {
+		return;
+	}
+
+	if ( ! isset( $_POST['mbf_category_featured_nonce'] ) || ! wp_verify_nonce( sanitize_key( $_POST['mbf_category_featured_nonce'] ), 'mbf_category_featured_fields' ) ) {
+		return;
+	}
+
+	if ( ! isset( $_POST['hubs_featured_post_id'] ) ) {
+		return;
+	}
+
+	$featured_post_id = absint( wp_unslash( $_POST['hubs_featured_post_id'] ) );
+
+	if ( ! $featured_post_id ) {
+		delete_term_meta( $term_id, 'hubs_featured_post_id' );
+		return;
+	}
+
+	update_term_meta( $term_id, 'hubs_featured_post_id', $featured_post_id );
+}
+add_action( 'created_term', 'mbf_category_featured_save_fields', 10, 3 );
+add_action( 'edited_term', 'mbf_category_featured_save_fields', 10, 3 );
+
+/**
  * Display CTA fields on category add form.
  *
  * @param string $taxonomy The taxonomy slug.
@@ -519,4 +592,50 @@ function mbf_get_active_category_promo_data( $post_id = null ) {
 	}
 
 	return mbf_get_category_promo_data( $category_id );
+}
+
+/**
+ * Get featured post ID for a category.
+ *
+ * @param int $term_id Category term ID.
+ *
+ * @return int
+ */
+function mbf_get_category_featured_post_id( $term_id ) {
+	return absint( get_term_meta( $term_id, 'hubs_featured_post_id', true ) );
+}
+
+/**
+ * Get featured post object for a category if valid.
+ *
+ * @param int $term_id Category term ID.
+ *
+ * @return WP_Post|null
+ */
+function mbf_get_category_featured_post( $term_id ) {
+	$post_id = mbf_get_category_featured_post_id( $term_id );
+
+	if ( ! $post_id ) {
+		return null;
+	}
+
+	$post = get_post( $post_id );
+
+	if ( ! $post instanceof WP_Post ) {
+		return null;
+	}
+
+	if ( 'post' !== $post->post_type ) {
+		return null;
+	}
+
+	if ( 'publish' !== get_post_status( $post_id ) ) {
+		return null;
+	}
+
+	if ( ! has_category( $term_id, $post ) ) {
+		return null;
+	}
+
+	return $post;
 }
