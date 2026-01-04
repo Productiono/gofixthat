@@ -16,11 +16,16 @@ $promo_data         = array();
 $promo_has_content  = false;
 $promo_image_html   = '';
 $promo_description  = '';
+$promo_form_id      = 3;
 
 if ( $is_blog_post ) {
 	$promo_data        = mbf_get_active_category_promo_data();
 	$promo_has_content = ! empty( $promo_data );
 	$promo_description = isset( $promo_data['right_description'] ) ? wp_kses_post( wpautop( $promo_data['right_description'] ) ) : '';
+
+	if ( ! empty( $promo_data['left_form_id'] ) ) {
+		$promo_form_id = absint( $promo_data['left_form_id'] );
+	}
 
 	if ( ! empty( $promo_data['right_image_id'] ) ) {
 		$promo_image_alt  = ! empty( $promo_data['right_title'] ) ? $promo_data['right_title'] : get_the_title();
@@ -130,7 +135,7 @@ if ( $is_blog_post ) {
 										<p><?php echo esc_html( $promo_data['left_subtext'] ); ?></p>
 									<?php endif; ?>
 								</div>
-								<?php echo do_shortcode( '[fluentform id="3"]' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+								<?php echo do_shortcode( sprintf( '[fluentform id="%d"]', $promo_form_id ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 							</div>
 						</aside>
 					</div>
