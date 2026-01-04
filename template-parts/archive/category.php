@@ -52,7 +52,25 @@ $layout_class = $promo_has_content ? 'mbf-entry__content-layout mbf-entry__conte
 ?>
 
 <div class="mbf-entry__wrap mbf-entry__wrap--post mbf-category-archive">
+	<?php
+	/**
+	 * The mbf_entry_wrap_start hook.
+	 *
+	 * @since 1.0.0
+	 */
+	do_action( 'mbf_entry_wrap_start' );
+	?>
+
 	<div class="mbf-entry__container mbf-entry__container--with-toc">
+		<?php
+		/**
+		 * The mbf_entry_container_start hook.
+		 *
+		 * @since 1.0.0
+		 */
+		do_action( 'mbf_entry_container_start' );
+		?>
+
 		<div class="<?php echo esc_attr( $layout_class ); ?>">
 			<?php if ( $promo_has_content ) : ?>
 				<div class="mbf-entry__left-rail">
@@ -73,79 +91,99 @@ $layout_class = $promo_has_content ? 'mbf-entry__content-layout mbf-entry__conte
 			<?php endif; ?>
 
 			<div class="mbf-entry__content-wrap">
+				<?php
+				/**
+				 * The mbf_entry_content_before hook.
+				 *
+				 * @since 1.0.0
+				 */
+				do_action( 'mbf_entry_content_before' );
+				?>
+
 				<div class="mbf-entry__article-header">
 					<h1 class="mbf-entry__title entry-title"><?php echo esc_html( single_cat_title( '', false ) ); ?></h1>
 				</div>
 
-				<?php if ( $category_description ) : ?>
-					<div class="entry-content mbf-category__description">
-						<?php echo wp_kses_post( $category_description ); ?>
-					</div>
-				<?php endif; ?>
-
-				<?php mbf_list_categories(); ?>
-
-				<?php if ( $featured_post ) : ?>
-					<section class="mbf-category__featured">
-						<div class="mbf-category__featured-header">
-							<h2 class="mbf-entry__subtitle"><?php esc_html_e( 'Start here', 'apparel' ); ?></h2>
+				<div class="entry-content">
+					<?php if ( $category_description ) : ?>
+						<div class="mbf-category__description">
+							<?php echo wp_kses_post( $category_description ); ?>
 						</div>
-						<div class="mbf-category__featured-card">
-							<?php
-							set_query_var( 'options', $options );
-							setup_postdata( $featured_post );
-							get_template_part( 'template-parts/archive/entry' );
-							wp_reset_postdata();
-							?>
-						</div>
-					</section>
-				<?php endif; ?>
+					<?php endif; ?>
 
-				<?php if ( have_posts() ) : ?>
-					<section class="mbf-category__posts">
-						<div class="mbf-posts-area mbf-posts-area-posts mbf-posts-area__archive">
-							<div class="mbf-posts-area__outer">
+					<?php mbf_list_categories(); ?>
 
-								<div class="mbf-posts-area__main mbf-archive-<?php echo esc_attr( $options['layout'] ); ?> <?php echo esc_attr( $main_classes ); ?>">
-									<?php
-									while ( have_posts() ) {
-										the_post();
+					<?php if ( $featured_post ) : ?>
+						<section class="mbf-category__featured">
+							<div class="mbf-category__featured-header">
+								<h2 class="mbf-entry__subtitle"><?php esc_html_e( 'Start here', 'apparel' ); ?></h2>
+							</div>
+							<div class="mbf-category__featured-card">
+								<?php
+								set_query_var( 'options', $options );
+								setup_postdata( $featured_post );
+								get_template_part( 'template-parts/archive/entry' );
+								wp_reset_postdata();
+								?>
+							</div>
+						</section>
+					<?php endif; ?>
 
-										set_query_var( 'options', $options );
+					<?php if ( have_posts() ) : ?>
+						<section class="mbf-category__posts">
+							<div class="mbf-posts-area mbf-posts-area-posts mbf-posts-area__archive">
+								<div class="mbf-posts-area__outer">
 
-										if ( 'full' === $options['layout'] ) {
-											get_template_part( 'template-parts/archive/content-full' );
-										} else {
-											get_template_part( 'template-parts/archive/entry' );
+									<div class="mbf-posts-area__main mbf-archive-<?php echo esc_attr( $options['layout'] ); ?> <?php echo esc_attr( $main_classes ); ?>">
+										<?php
+										while ( have_posts() ) {
+											the_post();
+
+											set_query_var( 'options', $options );
+
+											if ( 'full' === $options['layout'] ) {
+												get_template_part( 'template-parts/archive/content-full' );
+											} else {
+												get_template_part( 'template-parts/archive/entry' );
+											}
 										}
-									}
-									?>
+										?>
+									</div>
 								</div>
+
+								<?php if ( 'standard' === get_theme_mod( mbf_get_archive_option( 'pagination_type' ), 'load-more' ) ) : ?>
+									<div class="mbf-posts-area__pagination">
+										<?php
+											the_posts_pagination(
+												array(
+													'prev_text' => '',
+													'next_text' => '',
+												)
+											);
+										?>
+									</div>
+								<?php endif; ?>
+							</div>
+						</section>
+					<?php else : ?>
+						<div class="mbf-content-not-found">
+							<div class="mbf-content-not-found-content">
+								<?php esc_html_e( 'There are no posts in this category yet.', 'apparel' ); ?>
 							</div>
 
-							<?php if ( 'standard' === get_theme_mod( mbf_get_archive_option( 'pagination_type' ), 'load-more' ) ) : ?>
-								<div class="mbf-posts-area__pagination">
-									<?php
-										the_posts_pagination(
-											array(
-												'prev_text' => '',
-												'next_text' => '',
-											)
-										);
-									?>
-								</div>
-							<?php endif; ?>
+							<?php get_search_form(); ?>
 						</div>
-					</section>
-				<?php else : ?>
-					<div class="entry-content mbf-content-not-found">
-						<div class="mbf-content-not-found-content">
-							<?php esc_html_e( 'There are no posts in this category yet.', 'apparel' ); ?>
-						</div>
+					<?php endif; ?>
+				</div>
 
-						<?php get_search_form(); ?>
-					</div>
-				<?php endif; ?>
+				<?php
+				/**
+				 * The mbf_entry_content_after hook.
+				 *
+				 * @since 1.0.0
+				 */
+				do_action( 'mbf_entry_content_after' );
+				?>
 			</div>
 
 			<?php if ( $promo_has_content ) : ?>
@@ -173,5 +211,23 @@ $layout_class = $promo_has_content ? 'mbf-entry__content-layout mbf-entry__conte
 				</div>
 			<?php endif; ?>
 		</div>
+
+		<?php
+		/**
+		 * The mbf_entry_container_end hook.
+		 *
+		 * @since 1.0.0
+		 */
+		do_action( 'mbf_entry_container_end' );
+		?>
 	</div>
+
+	<?php
+	/**
+	 * The mbf_entry_wrap_end hook.
+	 *
+	 * @since 1.0.0
+	 */
+	do_action( 'mbf_entry_wrap_end' );
+	?>
 </div>
