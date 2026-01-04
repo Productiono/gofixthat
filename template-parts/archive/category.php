@@ -104,6 +104,17 @@ $layout_class = $promo_has_content ? 'mbf-entry__content-layout mbf-entry__conte
 					<h1 class="mbf-entry__title entry-title"><?php echo esc_html( single_cat_title( '', false ) ); ?></h1>
 				</div>
 
+				<nav class="mbf-entry__toc is-collapsed" aria-label="<?php esc_attr_e( 'Table of contents', 'apparel' ); ?>" aria-expanded="false">
+					<div class="mbf-entry__toc-header">
+						<span class="mbf-entry__toc-title"><?php esc_html_e( 'Table of contents', 'apparel' ); ?></span>
+						<span class="mbf-entry__toc-toggle" aria-hidden="true">+</span>
+					</div>
+					<div class="mbf-entry__toc-divider" aria-hidden="true"></div>
+					<div class="mbf-entry__toc-inner" hidden>
+						<ol class="mbf-entry__toc-list"></ol>
+					</div>
+				</nav>
+
 				<div class="entry-content">
 					<?php if ( $category_description ) : ?>
 						<div class="mbf-category__description">
