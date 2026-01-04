@@ -25,22 +25,22 @@ get_header(); ?>
 
 		<?php
 		/**
-		 * The mbf_page_before hook.
+		 * The mbf_post_before hook.
 		 *
 		 * @since 1.0.0
 		 */
-		do_action( 'mbf_page_before' );
+		do_action( 'mbf_post_before' );
 		?>
 
 			<?php get_template_part( 'template-parts/content-singular' ); ?>
 
 		<?php
 		/**
-		 * The mbf_page_after hook.
+		 * The mbf_post_after hook.
 		 *
 		 * @since 1.0.0
 		 */
-		do_action( 'mbf_page_after' );
+		do_action( 'mbf_post_after' );
 		?>
 
 	<?php endwhile; ?>
