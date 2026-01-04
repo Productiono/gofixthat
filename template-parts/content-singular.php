@@ -8,7 +8,9 @@
 ?>
 
 <?php
-$is_blog_post       = is_singular( 'post' );
+$is_blog_post             = is_singular( 'post' );
+$is_default_page_template = is_page() && ! is_page_template();
+$uses_blog_layout         = $is_blog_post || $is_default_page_template;
 $primary_media_html = '';
 $entry_content_html = '';
 $video_caption_html = '';
@@ -18,7 +20,7 @@ $promo_image_html   = '';
 $promo_description  = '';
 $promo_form_id      = 3;
 
-if ( $is_blog_post ) {
+if ( $uses_blog_layout ) {
 	$promo_data        = mbf_get_active_category_promo_data();
 	$promo_has_content = ! empty( $promo_data );
 	$promo_description = isset( $promo_data['right_description'] ) ? wp_kses_post( wpautop( $promo_data['right_description'] ) ) : '';
@@ -89,7 +91,7 @@ if ( $is_blog_post ) {
 }
 ?>
 
-<div class="mbf-entry__wrap <?php echo $is_blog_post ? 'mbf-entry__wrap--post' : ''; ?>">
+<div class="mbf-entry__wrap <?php echo $uses_blog_layout ? 'mbf-entry__wrap--post' : ''; ?>">
 
 	<?php
 	/**
@@ -100,10 +102,10 @@ if ( $is_blog_post ) {
 		do_action( 'mbf_entry_wrap_start' );
 	?>
 
-	<div class="mbf-entry__container <?php echo $is_blog_post ? 'mbf-entry__container--with-toc' : ''; ?>">
+	<div class="mbf-entry__container <?php echo $uses_blog_layout ? 'mbf-entry__container--with-toc' : ''; ?>">
 
 	<?php
-	if ( $is_blog_post ) {
+	if ( $uses_blog_layout ) {
 		$sidebar_cta_url   = apply_filters( 'mbf_single_post_sidebar_cta_url', home_url( '/' ) );
 		$sidebar_cta_image = apply_filters( 'mbf_single_post_sidebar_cta_image', 'https://images.unsplash.com/photo-1545239351-1141bd82e8a6?auto=format&fit=crop&w=640&q=80' );
 		$sidebar_cta_title = apply_filters( 'mbf_single_post_sidebar_cta_title', __( 'The point of sale for all your sales.', 'apparel' ) );
@@ -120,7 +122,7 @@ if ( $is_blog_post ) {
 		do_action( 'mbf_entry_container_start' );
 		?>
 
-		<?php if ( $is_blog_post ) : ?>
+		<?php if ( $uses_blog_layout ) : ?>
 			<?php $layout_class = $promo_has_content ? 'mbf-entry__content-layout mbf-entry__content-layout--promo' : 'mbf-entry__content-layout mbf-entry__content-layout--no-promo'; ?>
 			<div class="<?php echo esc_attr( $layout_class ); ?>">
 				<?php if ( $promo_has_content ) : ?>
@@ -168,7 +170,7 @@ if ( $is_blog_post ) {
 							</div>
 						<?php endif; ?>
 
-						<?php if ( $is_blog_post && $primary_media_html ) : ?>
+						<?php if ( $uses_blog_layout && $primary_media_html ) : ?>
 							<?php echo $primary_media_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 						<?php elseif ( has_post_thumbnail() ) : ?>
 							<figure class="mbf-entry__article-media">
@@ -177,7 +179,7 @@ if ( $is_blog_post ) {
 						<?php endif; ?>
 					</div>
 
-					<?php if ( $is_blog_post ) : ?>
+					<?php if ( $uses_blog_layout ) : ?>
 						<nav class="mbf-entry__toc is-collapsed" aria-label="<?php esc_attr_e( 'Table of contents', 'apparel' ); ?>" aria-expanded="false">
 							<div class="mbf-entry__toc-header">
 								<span class="mbf-entry__toc-title"><?php esc_html_e( 'Table of contents', 'apparel' ); ?></span>
