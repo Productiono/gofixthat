@@ -1,708 +1,620 @@
 <?php
-/**
- * Template Name: App AiBoot
- * Template Post Type: page
- *
- * Custom landing page that mirrors the App AiBoot marketing layout.
- *
- * @package Apparel
- */
-
-global $post;
+/* Template Name: App AiBoot */
 
 get_header();
 ?>
-<main id="primary" class="app-aibot">
-	<style>
-		:root {
-			--aib-background: #f7f5f2;
-			--aib-text: #1a1a1a;
-			--aib-muted: #6f6f73;
-			--aib-strong: #0f0f10;
-			--aib-accent: #ff5c8d;
-			--aib-primary: #1a1a1a;
-			--aib-card: #111111;
-			--aib-border: #e5e0dc;
-			--aib-gradient: linear-gradient(90deg, #ff80b5 0%, #7857ff 50%, #35c9ff 100%);
-			--aib-radius-lg: 24px;
-			--aib-radius-md: 18px;
-			--aib-radius-sm: 12px;
-			--aib-shadow: 0 30px 80px rgba(15, 15, 16, 0.12);
-			--aib-font: "Inter", "Helvetica Neue", Arial, sans-serif;
-		}
-
-		.app-aibot {
-			background: var(--aib-background);
-			color: var(--aib-text);
-			font-family: var(--aib-font);
-			line-height: 1.7;
-		}
-
-		.app-aibot a {
-			color: inherit;
-			text-decoration: none;
-		}
-
-		.app-aibot .aib-container {
-			width: min(1280px, 92vw);
-			margin: 0 auto;
-		}
-
-		.app-aibot .aib-topbar {
-			display: flex;
-			align-items: center;
-			justify-content: space-between;
-			padding: 28px 0 16px;
-			font-size: 15px;
-			gap: 18px;
-		}
-
-		.app-aibot .aib-brand {
-			display: flex;
-			align-items: center;
-			gap: 12px;
-			font-weight: 600;
-			letter-spacing: 0.01em;
-		}
-
-		.app-aibot .aib-dot {
-			width: 38px;
-			height: 38px;
-			border-radius: 12px;
-			background: #1d1c1a;
-			color: #fff;
-			display: grid;
-			place-items: center;
-			font-weight: 700;
-			font-size: 14px;
-			box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
-		}
-
-		.app-aibot .aib-nav-links {
-			display: flex;
-			align-items: center;
-			gap: 26px;
-			color: var(--aib-muted);
-		}
-
-		.app-aibot .aib-nav-links span {
-			display: inline-flex;
-			align-items: center;
-			gap: 6px;
-		}
-
-		.app-aibot .aib-cta-group {
-			display: flex;
-			align-items: center;
-			gap: 12px;
-		}
-
-		.app-aibot .aib-pill {
-			padding: 9px 16px;
-			border-radius: 999px;
-			border: 1px solid var(--aib-border);
-			background: #fff;
-			font-weight: 600;
-			box-shadow: 0 12px 26px rgba(0, 0, 0, 0.06);
-		}
-
-		.app-aibot .aib-pill.secondary {
-			background: #0f0f10;
-			color: #fff;
-			border-color: #0f0f10;
-		}
-
-		.app-aibot .aib-hero {
-			padding: 20px 0 40px;
-		}
-
-		.app-aibot .aib-hero-inner {
-			background: #fff;
-			border: 1px solid #e7e2dd;
-			border-radius: var(--aib-radius-lg);
-			padding: 48px 52px 32px;
-			box-shadow: var(--aib-shadow);
-			display: grid;
-			grid-template-columns: 1.15fr 1fr;
-			gap: 40px;
-			align-items: center;
-		}
-
-		.app-aibot .aib-tagline {
-			display: flex;
-			align-items: center;
-			gap: 10px;
-			font-weight: 600;
-			font-size: 13px;
-			color: var(--aib-muted);
-			text-transform: uppercase;
-			letter-spacing: 0.04em;
-		}
-
-		.app-aibot .aib-title {
-			font-size: 42px;
-			line-height: 1.2;
-			margin: 12px 0 18px;
-			font-weight: 700;
-			color: var(--aib-strong);
-		}
-
-		.app-aibot .aib-lead {
-			font-size: 18px;
-			color: var(--aib-muted);
-			margin-bottom: 22px;
-			max-width: 560px;
-		}
-
-		.app-aibot .aib-actions {
-			display: flex;
-			gap: 14px;
-			margin-top: 8px;
-		}
-
-		.app-aibot .aib-btn {
-			padding: 14px 18px;
-			border-radius: 14px;
-			font-weight: 700;
-			border: 1px solid #0f0f10;
-			background: #0f0f10;
-			color: #fff;
-			box-shadow: 0 14px 30px rgba(0, 0, 0, 0.16);
-		}
-
-		.app-aibot .aib-btn.secondary {
-			background: #fff;
-			color: #0f0f10;
-		}
-
-		.app-aibot .aib-window {
-			background: linear-gradient(180deg, #fdfbf9 0%, #f5f1ed 100%);
-			border: 1px solid #ebe6e0;
-			border-radius: 20px;
-			padding: 18px;
-			box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 18px 50px rgba(0, 0, 0, 0.08);
-		}
-
-		.app-aibot .aib-window-header {
-			display: flex;
-			align-items: center;
-			justify-content: space-between;
-			margin-bottom: 14px;
-			font-weight: 600;
-			color: var(--aib-muted);
-		}
-
-		.app-aibot .aib-window-dots {
-			display: flex;
-			gap: 6px;
-		}
-
-		.app-aibot .aib-window-dots span {
-			width: 10px;
-			height: 10px;
-			border-radius: 50%;
-		}
-
-		.app-aibot .dot-red { background: #ff5f57; }
-		.app-aibot .dot-yellow { background: #ffbd2e; }
-		.app-aibot .dot-green { background: #28c840; }
-
-		.app-aibot .aib-window-body {
-			background: #fff;
-			border: 1px solid #ebe6e0;
-			border-radius: 14px;
-			padding: 20px;
-			font-size: 14px;
-			color: #2a2a2d;
-			line-height: 1.6;
-		}
-
-		.app-aibot .aib-caption {
-			margin-top: 16px;
-			font-size: 13px;
-			color: var(--aib-muted);
-			text-align: center;
-		}
-
-		.app-aibot .aib-quote {
-			text-align: center;
-			padding: 36px 0 24px;
-			font-size: 26px;
-			color: #222;
-			font-weight: 700;
-		}
-
-		.app-aibot .aib-quote cite {
-			display: block;
-			margin-top: 12px;
-			font-weight: 600;
-			color: var(--aib-muted);
-			font-size: 14px;
-			letter-spacing: 0.02em;
-		}
-
-		.app-aibot .aib-dark-section {
-			background: #0b0b0f;
-			color: #f6f6f8;
-			padding: 84px 0 74px;
-			position: relative;
-			overflow: hidden;
-		}
-
-		.app-aibot .aib-dark-section::before,
-		.app-aibot .aib-dark-section::after {
-			content: "";
-			position: absolute;
-			width: 520px;
-			height: 520px;
-			background: radial-gradient(circle at center, rgba(255, 255, 255, 0.07), transparent 60%);
-			filter: blur(60px);
-			z-index: 0;
-		}
-
-		.app-aibot .aib-dark-section::before { top: -200px; left: -120px; }
-		.app-aibot .aib-dark-section::after { bottom: -260px; right: -120px; }
-
-		.app-aibot .aib-dark-inner { position: relative; z-index: 1; }
-
-		.app-aibot .aib-section-title {
-			text-align: center;
-			font-size: 32px;
-			margin-bottom: 14px;
-			font-weight: 700;
-		}
-
-		.app-aibot .aib-section-lead {
-			text-align: center;
-			color: #a5a5ad;
-			margin-bottom: 48px;
-			font-size: 16px;
-		}
-
-		.app-aibot .aib-grid {
-			display: grid;
-			gap: 18px;
-			grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-		}
-
-		.app-aibot .aib-card {
-			background: #151519;
-			border: 1px solid rgba(255, 255, 255, 0.04);
-			border-radius: var(--aib-radius-md);
-			padding: 22px 20px;
-			box-shadow: 0 22px 50px rgba(0, 0, 0, 0.25);
-		}
-
-		.app-aibot .aib-card-header {
-			display: flex;
-			align-items: center;
-			gap: 12px;
-			margin-bottom: 12px;
-		}
-
-		.app-aibot .aib-icon {
-			width: 40px;
-			height: 40px;
-			border-radius: 12px;
-			background: rgba(255, 255, 255, 0.04);
-			display: grid;
-			place-items: center;
-			color: #fff;
-			font-weight: 700;
-		}
-
-		.app-aibot .aib-card h3 {
-			margin: 0;
-			font-size: 18px;
-		}
-
-		.app-aibot .aib-card p {
-			margin: 0;
-			color: #b6b6bf;
-			font-size: 14px;
-			line-height: 1.6;
-		}
-
-		.app-aibot .aib-demos {
-			padding: 82px 0;
-			background: #f5f2ef;
-		}
-
-		.app-aibot .aib-demo-grid {
-			display: grid;
-			grid-template-columns: repeat(auto-fit, minmax(520px, 1fr));
-			gap: 28px;
-		}
-
-		.app-aibot .aib-demo-card {
-			background: #fff;
-			border-radius: var(--aib-radius-lg);
-			padding: 18px;
-			box-shadow: var(--aib-shadow);
-			border: 1px solid #ece7e3;
-			position: relative;
-			overflow: hidden;
-		}
-
-		.app-aibot .aib-demo-card::before {
-			content: "";
-			position: absolute;
-			inset: 0;
-			padding: 10px;
-			border-radius: inherit;
-			background: var(--aib-gradient);
-			z-index: 0;
-		}
-
-		.app-aibot .aib-demo-inner {
-			position: relative;
-			z-index: 1;
-			background: #fff;
-			border-radius: calc(var(--aib-radius-lg) - 10px);
-			padding: 16px;
-			min-height: 320px;
-			border: 1px solid #ebe6e0;
-			box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
-		}
-
-		.app-aibot .aib-demo-meta {
-			margin-top: 16px;
-			color: var(--aib-muted);
-			font-size: 14px;
-		}
-
-		.app-aibot .aib-latest {
-			padding: 64px 0 32px;
-			text-align: center;
-		}
-
-		.app-aibot .aib-post-grid {
-			display: grid;
-			grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-			gap: 18px;
-			margin-top: 24px;
-		}
-
-		.app-aibot .aib-post {
-			background: #fff;
-			border: 1px solid #ece7e3;
-			border-radius: 18px;
-			overflow: hidden;
-			text-align: left;
-			box-shadow: 0 18px 40px rgba(0, 0, 0, 0.08);
-		}
-
-		.app-aibot .aib-post img {
-			width: 100%;
-			height: 180px;
-			object-fit: cover;
-		}
-
-		.app-aibot .aib-post-body {
-			padding: 16px 16px 18px;
-		}
-
-		.app-aibot .aib-post-title {
-			font-weight: 700;
-			margin: 0 0 6px;
-		}
-
-		.app-aibot .aib-post-date {
-			color: var(--aib-muted);
-			font-size: 13px;
-		}
-
-		.app-aibot .aib-faq {
-			padding: 10px 0 64px;
-		}
-
-		.app-aibot .aib-faq-list {
-			max-width: 860px;
-			margin: 0 auto;
-			border-top: 1px solid var(--aib-border);
-		}
-
-		.app-aibot details {
-			padding: 16px 0;
-			border-bottom: 1px solid var(--aib-border);
-		}
-
-		.app-aibot summary {
-			cursor: pointer;
-			font-weight: 700;
-			display: flex;
-			align-items: center;
-			gap: 8px;
-			font-size: 15px;
-		}
-
-		.app-aibot details p {
-			margin: 10px 0 0;
-			color: var(--aib-muted);
-		}
-
-		.app-aibot .aib-cta {
-			background: #0e0d11;
-			color: #f6f6f8;
-			padding: 82px 0 76px;
-			text-align: center;
-		}
-
-		.app-aibot .aib-cta .aib-section-title { color: #f6f6f8; }
-		.app-aibot .aib-cta .aib-section-lead { color: #9a99a4; margin-bottom: 22px; }
-		
-		@media (max-width: 960px) {
-			.app-aibot .aib-hero-inner {
-				grid-template-columns: 1fr;
-				padding: 36px 32px;
-			}
-
-			.app-aibot .aib-demo-grid {
-				grid-template-columns: 1fr;
-			}
-		}
-
-		@media (max-width: 720px) {
-			.app-aibot .aib-topbar { flex-direction: column; align-items: flex-start; }
-			.app-aibot .aib-nav-links { flex-wrap: wrap; }
-			.app-aibot .aib-hero-inner { padding: 30px 24px; }
-			.app-aibot .aib-title { font-size: 34px; }
-		}
-	</style>
-
-	<section class="aib-container aib-topbar" aria-label="Top navigation">
-		<div class="aib-brand">
-			<span class="aib-dot">ai</span>
-			<span>App AiBoot</span>
-		</div>
-		<div class="aib-nav-links">
-			<span>Products</span>
-			<span>Documentation</span>
-			<span>Pricing</span>
-			<span>Blog</span>
-		</div>
-		<div class="aib-cta-group">
-			<button class="aib-pill secondary">Start free</button>
-			<button class="aib-pill">Sign in</button>
-		</div>
-	</section>
-
-	<section class="aib-container aib-hero">
-		<div class="aib-hero-inner">
-			<div>
-				<div class="aib-tagline"><span>Desktop agents</span><span>Cloud scale</span></div>
-				<h1 class="aib-title">Desktop agents that use computers like a human — at cloud scale.</h1>
-				<p class="aib-lead">Desktop tasks feel like bespoke bots with sandboxed computer use and complex workflows that operate in the browser. Save time by bridging the gap to your desktop applications.</p>
-				<div class="aib-actions">
-					<button class="aib-btn">Get started</button>
-					<button class="aib-btn secondary">Book a live demo</button>
-				</div>
-			</div>
-			<div class="aib-window" aria-label="Preview panel">
-				<div class="aib-window-header">
-					<div class="aib-window-dots"><span class="dot-red"></span><span class="dot-yellow"></span><span class="dot-green"></span></div>
-					<span>Preview (v0.9)</span>
-				</div>
-				<div class="aib-window-body">
-					<p><strong>Prompt</strong><br>Checkout page scraped using Browser use.<br><br><strong>Observation</strong><br>This appears to be the payment step for the Checkout page, which requests card details. It lists the price breakdown and total amount in USD.<br><br><strong>Actions</strong><br>Proceed to the payment step by clicking Continue.<br><br><strong>Completion</strong><br>Demonstrated Browser-Use Desktop Agent in action.</p>
-				</div>
-				<p class="aib-caption">Browser Use running on a Mac data center</p>
-			</div>
-		</div>
-	</section>
-
-	<section class="aib-container aib-quote">
-		<p>“Desktop agents are the missing link between LLMs and real work.”</p>
-		<cite>— The Age of Use Desktop Agents blog</cite>
-	</section>
-
-	<section class="aib-dark-section">
-		<div class="aib-container aib-dark-inner">
-			<h2 class="aib-section-title">Why a Desktop Agent</h2>
-			<p class="aib-section-lead">A desktop agent is the ideal automation solution because it works just like an employee, making it universally compatible with any software.</p>
-			<div class="aib-grid">
-				<div class="aib-card">
-					<div class="aib-card-header">
-						<span class="aib-icon">Fx</span>
-						<h3>Firefox</h3>
-					</div>
-					<p>Need rich browser support for filling forms, loading complex apps, and managing tabs? Desktop agents handle multi-step browsing without custom builds.</p>
-				</div>
-				<div class="aib-card">
-					<div class="aib-card-header">
-						<span class="aib-icon">Kb</span>
-						<h3>Fine-grained control</h3>
-					</div>
-					<p>Mouse movements and keystrokes let agents mimic how real users work with software on any OS, keeping compliance simple.</p>
-				</div>
-				<div class="aib-card">
-					<div class="aib-card-header">
-						<span class="aib-icon">Tx</span>
-						<h3>Tasks &amp; routing</h3>
-					</div>
-					<p>Chain together complex actions: login sequences, file uploads, report extraction, and data-entry workflows across browser windows.</p>
-				</div>
-				<div class="aib-card">
-					<div class="aib-card-header">
-						<span class="aib-icon">Cr</span>
-						<h3>History and logs</h3>
-					</div>
-					<p>Review every keystroke and screenshot to keep teams confident in how agents operate when processing sensitive workloads.</p>
-				</div>
-				<div class="aib-card">
-					<div class="aib-card-header">
-						<span class="aib-icon">Sec</span>
-						<h3>Secure &amp; trackable</h3>
-					</div>
-					<p>Sandboxing, audit logs, and one-click approval flows make it easy to comply with SOC 2/GDPR without limiting productivity.</p>
-				</div>
-				<div class="aib-card">
-					<div class="aib-card-header">
-						<span class="aib-icon">🏢</span>
-						<h3>Works with your stack</h3>
-					</div>
-					<p>Integrates with Google Cloud, AWS, Azure, and private data centers so agents run where you already operate.</p>
-				</div>
-			</div>
-		</div>
-	</section>
-
-	<section class="aib-container aib-demos">
-		<h2 class="aib-section-title">Live Demos</h2>
-		<p class="aib-section-lead">Watch how desktop agents automate complex flows.</p>
-		<div class="aib-demo-grid">
-			<div class="aib-demo-card">
-				<div class="aib-demo-inner">
-					<div class="aib-window-header"><span class="aib-window-dots"><span class="dot-red"></span><span class="dot-yellow"></span><span class="dot-green"></span></span><span>Browser</span></div>
-					<div class="aib-window-body" style="min-height:200px">Automating software downloads, filling forms, and navigating portals with real mouse interactions.</div>
-				</div>
-				<p class="aib-demo-meta">Building Engineering Development Workflows</p>
-			</div>
-			<div class="aib-demo-card">
-				<div class="aib-demo-inner">
-					<div class="aib-window-header"><span class="aib-window-dots"><span class="dot-red"></span><span class="dot-yellow"></span><span class="dot-green"></span></span><span>Secure Login</span></div>
-					<div class="aib-window-body" style="min-height:200px">Handling secure logins with 2FA, OTP copying, and session verification while preserving compliance.</div>
-				</div>
-				<p class="aib-demo-meta">Work chat + Secure browsing to login with 2FA</p>
-			</div>
-			<div class="aib-demo-card">
-				<div class="aib-demo-inner">
-					<div class="aib-window-header"><span class="aib-window-dots"><span class="dot-red"></span><span class="dot-yellow"></span><span class="dot-green"></span></span><span>Docs</span></div>
-					<div class="aib-window-body" style="min-height:200px">Use natural language to orchestrate complex scripts, compile code, and generate reports inside virtual desktops.</div>
-				</div>
-				<p class="aib-demo-meta">The Eyeboat core — Free Linux Container for Agent Control Runtime</p>
-			</div>
-			<div class="aib-demo-card">
-				<div class="aib-demo-inner">
-					<div class="aib-window-header"><span class="aib-window-dots"><span class="dot-red"></span><span class="dot-yellow"></span><span class="dot-green"></span></span><span>Research</span></div>
-					<div class="aib-window-body" style="min-height:200px">Technical research &amp; summarization powered by desktop-grade browsers and accurate copy/paste capture.</div>
-				</div>
-				<p class="aib-demo-meta">Technical Research &amp; Summarization</p>
-			</div>
-		</div>
-	</section>
-
-	<section class="aib-container aib-latest">
-		<h2 class="aib-section-title">Latest posts</h2>
-		<p class="aib-section-lead">Feature and updates from the team.</p>
-		<div class="aib-post-grid">
-			<div class="aib-post">
-				<img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=900&q=80" alt="Robot illustration">
-				<div class="aib-post-body">
-					<h3 class="aib-post-title">The Eyeboat core — Free Linux Container for Agent Control Runtime</h3>
-					<p class="aib-post-date">Jan 14, 2025</p>
-				</div>
-			</div>
-			<div class="aib-post">
-				<img src="https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=900&q=80" alt="Agent avatar">
-				<div class="aib-post-body">
-					<h3 class="aib-post-title">Why the Simplest Desktop Agent Abstraction Wins</h3>
-					<p class="aib-post-date">Jan 12, 2025</p>
-				</div>
-			</div>
-			<div class="aib-post">
-				<img src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=900&q=80" alt="Laptop desk">
-				<div class="aib-post-body">
-					<h3 class="aib-post-title">The Age of the Desktop Agent Is Nearing</h3>
-					<p class="aib-post-date">Aug 17, 2024</p>
-				</div>
-			</div>
-		</div>
-	</section>
-
-	<section class="aib-container aib-faq">
-		<h2 class="aib-section-title">Frequently Asked Questions</h2>
-		<div class="aib-faq-list">
-			<details open>
-				<summary>What is Eyeboat?</summary>
-				<p>Eyeboat is a desktop agent that uses computer interfaces like a human. It works across browsers, desktop apps, and sandboxed environments to automate complex workflows.</p>
-			</details>
-			<details>
-				<summary>How is Eyeboat different from traditional RPA tools like UiPath?</summary>
-				<p>Eyeboat relies on real browser control, keystrokes, and mouse actions, making it more adaptable than brittle DOM-based automation.</p>
-			</details>
-			<details>
-				<summary>What can Eyeboat actually do?</summary>
-				<p>Automate web portals, enterprise logins, form submissions, file uploads, data entry, and complex multi-step business workflows.</p>
-			</details>
-			<details>
-				<summary>Do my agents scale with Eyeboat?</summary>
-				<p>Yes. Run agents across cloud browsers or dedicated desktop instances with resource isolation.</p>
-			</details>
-			<details>
-				<summary>How quickly can I get started?</summary>
-				<p>Provision a desktop agent in minutes. Use our starter templates or import your own prompts to begin testing quickly.</p>
-			</details>
-			<details>
-				<summary>Do I need coding skills to use Eyeboat?</summary>
-				<p>No coding is required for basic automation. Advanced users can add custom scripts or API calls if needed.</p>
-			</details>
-			<details>
-				<summary>What if I need offline desktop support?</summary>
-				<p>Agents can run in isolated networks with strict ingress controls while still providing full audit logs.</p>
-			</details>
-			<details>
-				<summary>Can Eyeboat handle authentication and 2FA?</summary>
-				<p>Yes. Agents securely capture OTPs, handle authenticator apps, and keep credentials vaulted.</p>
-			</details>
-			<details>
-				<summary>What applications can Eyeboat use?</summary>
-				<p>Any software accessible through a browser or desktop UI, including VDI environments.</p>
-			</details>
-			<details>
-				<summary>How much does Eyeboat cost?</summary>
-				<p>Transparent pricing based on seats and runtime hours. Contact sales for enterprise discounts.</p>
-			</details>
-			<details>
-				<summary>Does Eyeboat handle website changes?</summary>
-				<p>Agents rely on real UI cues, so minor DOM changes won't break flows. Update prompts or actions as needed.</p>
-			</details>
-			<details>
-				<summary>What if I already have automation infrastructure?</summary>
-				<p>Eyeboat plugs into your existing orchestration via webhooks, APIs, and message queues.</p>
-			</details>
-			<details>
-				<summary>Have does Eyeboat compare to other AI agents?</summary>
-				<p>It focuses on reliability with human-like interaction, rather than code generation alone.</p>
-			</details>
-			<details>
-				<summary>Is Eyeboat suitable for enterprise use?</summary>
-				<p>Yes. SOC 2-ready logging, SSO, and RBAC are built-in for enterprise security.</p>
-			</details>
-			<details>
-				<summary>What kind of support is available?</summary>
-				<p>Hands-on onboarding, live chat, and dedicated success managers for qualified plans.</p>
-			</details>
-		</div>
-	</section>
-
-	<section class="aib-cta">
-		<div class="aib-container">
-			<h2 class="aib-section-title">Ready to Hire Your First Desktop Agent?</h2>
-			<p class="aib-section-lead">Start automating while staying secure—workflows in minutes, not months.</p>
-			<button class="aib-btn" style="box-shadow: 0 18px 42px rgba(0,0,0,0.25);">Get started →</button>
-		</div>
-	</section>
+
+<style>
+.app-aibot-page {
+    font-family: "Inter", "Helvetica Neue", Arial, sans-serif;
+    color: #1f1f22;
+    background: #f7f6f3;
+}
+
+.app-aibot-page .section-wrap {
+    background: #f7f6f3;
+}
+
+.app-aibot-page .inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 72px 24px;
+}
+
+.app-aibot-page .hero {
+    padding-top: 48px;
+    background: linear-gradient(180deg, #f7f6f3 0%, #f3f1ee 100%);
+}
+
+.app-aibot-page .hero-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 32px;
+    align-items: center;
+}
+
+.app-aibot-page .badge-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.app-aibot-page .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: #e4e1dc;
+    color: #44414c;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    font-weight: 600;
+}
+
+.app-aibot-page .badge svg,
+.app-aibot-page .badge img {
+    width: 16px;
+    height: 16px;
+}
+
+.app-aibot-page h1 {
+    font-size: 32px;
+    line-height: 1.28;
+    margin: 10px 0 16px;
+    color: #221f23;
+    letter-spacing: -0.01em;
+}
+
+.app-aibot-page .hero p.lead {
+    font-size: 16px;
+    line-height: 1.7;
+    color: #4c4b52;
+    margin-bottom: 18px;
+}
+
+.app-aibot-page .hero .small-label {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #8f8c96;
+}
+
+.app-aibot-page .hero .cta-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.app-aibot-page .btn-primary {
+    background: #18191d;
+    color: #fdfbf7;
+    padding: 14px 22px;
+    border-radius: 10px;
+    border: none;
+    text-decoration: none;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 12px 28px rgba(0,0,0,0.12);
+}
+
+.app-aibot-page .btn-link {
+    color: #343037;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+}
+
+.app-aibot-page .hero-illustration {
+    background: #ffffff;
+    border-radius: 18px;
+    padding: 24px;
+    border: 1px solid #e3e0da;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.08);
+}
+
+.app-aibot-page .hero-illustration img {
+    width: 100%;
+    border-radius: 12px;
+    display: block;
+}
+
+.app-aibot-page .quote {
+    text-align: center;
+    padding: 52px 24px 60px;
+    background: #f2f0ec;
+    font-size: 18px;
+    color: #1e1c22;
+    line-height: 1.7;
+    font-weight: 600;
+    border-top: 1px solid #e6e1db;
+    border-bottom: 1px solid #e6e1db;
+}
+
+.app-aibot-page .quote span {
+    display: block;
+    margin-top: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #7b7781;
+}
+
+.app-aibot-page .dark-section {
+    background: radial-gradient(circle at 20% 20%, rgba(255,255,255,0.06), transparent 35%),
+                radial-gradient(circle at 80% 10%, rgba(255,255,255,0.04), transparent 35%),
+                #0f1115;
+    color: #f7f6f3;
+}
+
+.app-aibot-page .dark-section .inner {
+    padding: 80px 24px 90px;
+}
+
+.app-aibot-page .section-title {
+    text-align: center;
+    font-size: 22px;
+    letter-spacing: 0.02em;
+    color: #f5f3ef;
+    margin-bottom: 12px;
+}
+
+.app-aibot-page .section-subtitle {
+    text-align: center;
+    color: #b5b2bc;
+    font-size: 15px;
+    max-width: 720px;
+    margin: 0 auto 42px;
+    line-height: 1.7;
+}
+
+.app-aibot-page .feature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 18px;
+}
+
+.app-aibot-page .feature-card {
+    border-radius: 18px;
+    padding: 22px;
+    background: linear-gradient(145deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+    border: 1px solid rgba(255,255,255,0.06);
+    box-shadow: 0 14px 36px rgba(0,0,0,0.35);
+}
+
+.app-aibot-page .feature-card img.icon {
+    width: 48px;
+    height: 48px;
+    margin-bottom: 14px;
+}
+
+.app-aibot-page .feature-card h3 {
+    font-size: 16px;
+    margin: 0 0 8px;
+    color: #f9f7f3;
+}
+
+.app-aibot-page .feature-card p {
+    margin: 0 0 10px;
+    color: #b7b4be;
+    line-height: 1.6;
+    font-size: 14px;
+}
+
+.app-aibot-page .tag-list {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+}
+
+.app-aibot-page .tag {
+    padding: 8px 12px;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.06);
+    color: #d8d6de;
+    font-size: 13px;
+}
+
+.app-aibot-page .live-demos {
+    background: #f7f6f3;
+}
+
+.app-aibot-page .demos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 22px;
+    align-items: start;
+}
+
+.app-aibot-page .demo-card {
+    background: #fff;
+    border-radius: 18px;
+    padding: 18px;
+    box-shadow: 0 16px 44px rgba(0,0,0,0.08);
+    border: 1px solid #e3e0da;
+}
+
+.app-aibot-page .demo-card .chrome-bar {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 12px;
+}
+
+.app-aibot-page .demo-card .dot {
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    background: #d05c56;
+}
+
+.app-aibot-page .demo-card .dot.yellow { background: #e2b04a; }
+.app-aibot-page .demo-card .dot.green { background: #5aa565; }
+
+.app-aibot-page .demo-card img {
+    width: 100%;
+    border-radius: 14px;
+}
+
+.app-aibot-page .demo-text {
+    background: #fff;
+    border-radius: 18px;
+    padding: 22px;
+    border: 1px solid #e5e0da;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.07);
+}
+
+.app-aibot-page .demo-text h4 {
+    font-size: 15px;
+    color: #a0a4ae;
+    margin: 0 0 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.app-aibot-page .demo-text h3 {
+    margin: 0 0 10px;
+    font-size: 18px;
+    color: #1f1e23;
+}
+
+.app-aibot-page .demo-text p {
+    margin: 0;
+    color: #5b5960;
+    line-height: 1.6;
+    font-size: 14px;
+}
+
+.app-aibot-page .demos-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 20px;
+    margin-top: 22px;
+}
+
+.app-aibot-page .demo-card.gradient {
+    background: linear-gradient(135deg, #f9b3c5, #f1c0d7, #b6f3be);
+    padding: 20px;
+}
+
+.app-aibot-page .demo-card.gradient .demo-inner {
+    background: #fff;
+    border-radius: 16px;
+    padding: 16px;
+}
+
+.app-aibot-page .latest-posts {
+    background: #f7f6f3;
+    text-align: center;
+}
+
+.app-aibot-page .post-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 18px;
+    margin-top: 22px;
+}
+
+.app-aibot-page .post-card {
+    background: #fff;
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid #e3e0da;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.06);
+    text-align: left;
+}
+
+.app-aibot-page .post-card img {
+    width: 100%;
+    display: block;
+}
+
+.app-aibot-page .post-card .body {
+    padding: 14px 16px 16px;
+}
+
+.app-aibot-page .post-card .tag-line {
+    font-size: 13px;
+    color: #a5a2ab;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+}
+
+.app-aibot-page .post-card h5 {
+    margin: 0 0 6px;
+    font-size: 16px;
+    color: #27252b;
+}
+
+.app-aibot-page .post-card .date {
+    font-size: 13px;
+    color: #8e8b95;
+}
+
+.app-aibot-page .faq {
+    background: #f7f6f3;
+}
+
+.app-aibot-page .faq-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 24px;
+}
+
+.app-aibot-page .faq-item {
+    background: #fff;
+    padding: 18px 20px;
+    border-radius: 14px;
+    border: 1px solid #e3e0da;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.05);
+}
+
+.app-aibot-page .faq-item summary {
+    font-weight: 700;
+    font-size: 15px;
+    color: #25232a;
+    cursor: pointer;
+}
+
+.app-aibot-page .faq-item p {
+    color: #5d5a64;
+    line-height: 1.6;
+    margin: 10px 0 0;
+    font-size: 14px;
+}
+
+.app-aibot-page .cta-dark {
+    background: #0f1115;
+    color: #f7f6f3;
+    text-align: center;
+    padding: 72px 24px 64px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+}
+
+.app-aibot-page .cta-dark h2 {
+    font-size: 24px;
+    margin-bottom: 10px;
+    letter-spacing: -0.01em;
+}
+
+.app-aibot-page .cta-dark p {
+    color: #b7b5be;
+    max-width: 620px;
+    margin: 0 auto 20px;
+    line-height: 1.7;
+}
+
+@media (max-width: 768px) {
+    .app-aibot-page .inner {
+        padding: 60px 18px;
+    }
+
+    .app-aibot-page h1 {
+        font-size: 28px;
+    }
+
+    .app-aibot-page .hero-illustration {
+        padding: 16px;
+    }
+}
+</style>
+
+<main class="app-aibot-page">
+    <section class="hero section-wrap">
+        <div class="inner hero-grid">
+            <div>
+                <div class="badge-row">
+                    <span class="badge">Welcome</span>
+                </div>
+                <h1>Desktop agents that use computers like a human — at cloud scale.</h1>
+                <p class="lead">Desktop bots that inhabit both the web, sandboxed container and computers. They are multiple agents in the swarm, these clicking and typing things for you.</p>
+                <p class="small-label">Roles</p>
+                <p class="lead">Code editor, Data Entry</p>
+                <div class="cta-row">
+                    <a class="btn-primary" href="#">Get Started</a>
+                    <a class="btn-link" href="#">Demo Video →</a>
+                </div>
+            </div>
+            <div class="hero-illustration">
+                <img src="https://via.placeholder.com/800x520" alt="App AiBoot hero placeholder" />
+            </div>
+        </div>
+    </section>
+
+    <section class="quote section-wrap">
+        <div class="inner">
+            <div>“Desktop agents are the missing link between LLMs and real work.”</div>
+            <span>— The Age of UX Desktop Agents, blog</span>
+        </div>
+    </section>
+
+    <section class="dark-section">
+        <div class="inner">
+            <div class="section-title">Why a Desktop Agent</div>
+            <div class="section-subtitle">A desktop agent is the ideal automation solution because it works just like a person, making it universally compatible with any software.</div>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <img class="icon" src="https://via.placeholder.com/48" alt="Firefox icon" />
+                    <h3>Firefox</h3>
+                    <p>A complete computer</p>
+                    <p>Desktop agents work like a human. They understand images, enter text, click, copy, and paste. They can use any software.</p>
+                </div>
+                <div class="feature-card">
+                    <img class="icon" src="https://via.placeholder.com/48" alt="Control icon" />
+                    <h3>Fine-grained control</h3>
+                    <p>Desktop agents understand user interfaces and can control software, using the same keyboard and mouse operations as humans.</p>
+                </div>
+                <div class="feature-card">
+                    <img class="icon" src="https://via.placeholder.com/48" alt="Tasks icon" />
+                    <h3>Tasks in minutes</h3>
+                    <p>Once an employee is logged in, a desktop agent that automates it can be set up in minutes.</p>
+                </div>
+                <div class="feature-card">
+                    <img class="icon" src="https://via.placeholder.com/48" alt="History icon" />
+                    <h3>History and replays</h3>
+                    <p>Session replays make it easy to review interactions and understand how the agent works.</p>
+                </div>
+                <div class="feature-card">
+                    <img class="icon" src="https://via.placeholder.com/48" alt="Cloud icon" />
+                    <h3>Secure to private clouds</h3>
+                    <p>Desktop agents live in fully isolated sandboxes, with access only to the applications needed for each workflow.</p>
+                    <div class="tag-list">
+                        <span class="tag">AWS</span>
+                        <span class="tag">Google Cloud</span>
+                        <span class="tag">Azure</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="live-demos section-wrap">
+        <div class="inner">
+            <div class="section-title" style="color:#1f1e23;">Live Demos</div>
+            <div class="section-subtitle" style="color:#6a6871;">Watch how desktop agents automate complex tasks from booking to security.</div>
+            <div class="demos-grid">
+                <div class="demo-card gradient">
+                    <div class="demo-inner">
+                        <img src="https://via.placeholder.com/800x460" alt="Live demo placeholder" />
+                    </div>
+                </div>
+                <div class="demo-text">
+                    <h4>Live demo #1</h4>
+                    <h3>Booking and checking into a flight</h3>
+                    <p>A desktop agent books a flight, checks the traveler into the flight, and even finds the refund policy and submits it to the company’s system for future reference.</p>
+                </div>
+            </div>
+            <div class="demos-row">
+                <div class="demo-card gradient">
+                    <div class="demo-inner">
+                        <img src="https://via.placeholder.com/800x460" alt="2FA login placeholder" />
+                    </div>
+                </div>
+                <div class="demo-text">
+                    <h4>Live demo #2</h4>
+                    <h3>Making secure logins with 2FA</h3>
+                    <p>A desktop agent uses an authenticator app, sends the two-factor code to the user by email and securely logs into the target system.</p>
+                </div>
+            </div>
+            <div class="demos-row" style="margin-top:26px;">
+                <div class="demo-card gradient">
+                    <div class="demo-inner">
+                        <img src="https://via.placeholder.com/800x460" alt="Development workflows placeholder" />
+                    </div>
+                </div>
+                <div class="demo-text">
+                    <h4>Live demo #3</h4>
+                    <h3>Extending Development Workflows</h3>
+                    <p>A desktop agent can refactor code, search documentation, review code, and enforce style guidelines across repositories.</p>
+                </div>
+            </div>
+            <div class="demos-row" style="margin-top:26px;">
+                <div class="demo-card gradient">
+                    <div class="demo-inner">
+                        <img src="https://via.placeholder.com/800x460" alt="Technical research placeholder" />
+                    </div>
+                </div>
+                <div class="demo-text">
+                    <h4>Live demo #4</h4>
+                    <h3>Technical Research &amp; Summarization</h3>
+                    <p>By reading docs, synthesizing content, and writing a report, a desktop agent can summarize any workflow and provide a clean handoff to the entire company.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="latest-posts section-wrap">
+        <div class="inner">
+            <div class="section-title" style="color:#1f1e23;">Latest posts</div>
+            <div class="section-subtitle" style="color:#6a6871;">News and updates from the team.</div>
+            <div class="post-grid">
+                <div class="post-card">
+                    <img src="https://via.placeholder.com/360x200" alt="Latest post 1" />
+                    <div class="body">
+                        <div class="tag-line">News</div>
+                        <h5>The AiBoot core — Free Linux GUI template for agent Outlook runtime.</h5>
+                        <div class="date">Jul 27, 2023</div>
+                    </div>
+                </div>
+                <div class="post-card">
+                    <img src="https://via.placeholder.com/360x200" alt="Latest post 2" />
+                    <div class="body">
+                        <div class="tag-line">News</div>
+                        <h5>Why the simplest Desktop Agent Automation wins</h5>
+                        <div class="date">Jul 27, 2023</div>
+                    </div>
+                </div>
+                <div class="post-card">
+                    <img src="https://via.placeholder.com/360x200" alt="Latest post 3" />
+                    <div class="body">
+                        <div class="tag-line">News</div>
+                        <h5>The Age of the Desktop Agents is here</h5>
+                        <div class="date">May 12, 2023</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="faq section-wrap">
+        <div class="inner">
+            <div class="section-title" style="color:#1f1e23;">Frequently Asked Questions</div>
+            <div class="section-subtitle" style="color:#6a6871;">Get answers to common questions about using desktop agents.</div>
+            <div class="faq-grid">
+                <details class="faq-item">
+                    <summary>What is a desktop agent?</summary>
+                    <p>Desktop agents can understand interfaces, execute clicks and keystrokes, and access multiple tools to complete tasks end-to-end.</p>
+                </details>
+                <details class="faq-item">
+                    <summary>How are desktop agents different?</summary>
+                    <p>They operate exactly like a human within your computer, making them compatible with any software.</p>
+                </details>
+                <details class="faq-item">
+                    <summary>Can desktop agents handle authentication?</summary>
+                    <p>Yes, they can interact with login prompts, authenticator apps, and secure environments.</p>
+                </details>
+                <details class="faq-item">
+                    <summary>How much do desktop agents cost?</summary>
+                    <p>Pricing can be customized to each workflow and usage profile.</p>
+                </details>
+            </div>
+        </div>
+    </section>
+
+    <section class="cta-dark">
+        <div class="section-title" style="color:#f7f6f3;">Ready to Hire Your First Desktop Agent?</div>
+        <p>Start automating all the high-value workflows in minutes — no coding required.</p>
+        <a class="btn-primary" href="#">Get started</a>
+    </section>
 </main>
+
 <?php
 get_footer();
