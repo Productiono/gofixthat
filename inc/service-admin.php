@@ -9,11 +9,6 @@
  * Register Service custom post type.
  */
 function apparel_register_service_cpt() {
-	if ( post_type_exists( 'service' ) ) {
-		add_post_type_support( 'service', array( 'title', 'editor' ) );
-		return;
-	}
-
 	$labels = array(
 		'name'               => __( 'Services', 'apparel' ),
 		'singular_name'      => __( 'Service', 'apparel' ),
@@ -30,15 +25,24 @@ function apparel_register_service_cpt() {
 
 	$args = array(
 		'labels'             => $labels,
-		'public'             => false,
+		'public'             => true,
+		'publicly_queryable' => true,
 		'show_ui'            => true,
 		'show_in_menu'       => true,
+		'exclude_from_search' => false,
+		'show_in_admin_bar'  => true,
+		'show_in_nav_menus'  => true,
 		'capability_type'    => 'post',
 		'map_meta_cap'       => true,
 		'supports'           => array( 'title', 'editor', 'thumbnail', 'comments' ),
 		'menu_position'      => 20,
 		'menu_icon'          => 'dashicons-admin-generic',
-		'has_archive'        => false,
+		'has_archive'        => true,
+		'rewrite'            => array(
+			'slug'       => 'service',
+			'with_front' => false,
+		),
+		'query_var'          => true,
 		'show_in_rest'       => false,
 	);
 
@@ -753,10 +757,12 @@ function apparel_service_admin_enqueue_scripts( $hook ) {
 	wp_enqueue_media();
 	wp_enqueue_script( 'jquery-ui-sortable' );
 	wp_enqueue_script( 'jquery' );
+	wp_enqueue_script( 'wp-util' );
 
 	ob_start();
 	?>
 	(function($){
+		$(function(){
 		function updateScreenshotInput(container) {
 			var ids = [];
 			container.find('.apparel-service-screenshot-item').each(function(){
@@ -765,7 +771,7 @@ function apparel_service_admin_enqueue_scripts( $hook ) {
 			container.find('.apparel-service-screenshot-ids').val(ids.join(','));
 		}
 
-		$('.apparel-service-add-screenshot').on('click', function(e){
+		$(document).on('click', '.apparel-service-add-screenshot', function(e){
 			e.preventDefault();
 			var container = $(this).closest('.apparel-service-screenshots');
 			var frame = wp.media({
@@ -803,7 +809,7 @@ function apparel_service_admin_enqueue_scripts( $hook ) {
 			}
 		});
 
-		$('.apparel-service-add-variation').on('click', function(e){
+		$(document).on('click', '.apparel-service-add-variation', function(e){
 			e.preventDefault();
 			var table = $(this).closest('.apparel-service-variations').find('.apparel-service-variations-table tbody');
 			var index = table.find('tr').length;
@@ -814,6 +820,7 @@ function apparel_service_admin_enqueue_scripts( $hook ) {
 		$(document).on('click', '.apparel-service-remove-variation', function(e){
 			e.preventDefault();
 			$(this).closest('.apparel-service-variation-row').remove();
+		});
 		});
 	})(jQuery);
 	<?php
