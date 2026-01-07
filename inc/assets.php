@@ -40,6 +40,7 @@ if ( ! function_exists( 'mbf_enqueue_scripts' ) ) {
 		wp_register_script( 'mbf-scripts', get_template_directory_uri() . '/assets/js/scripts.js', array( 'jquery', 'imagesloaded', 'jarallax', 'flickity' ), $version, true );
 		wp_register_script( 'mbf-blog-toc', get_template_directory_uri() . '/assets/js/blog-toc.js', array(), $version, true );
 		wp_register_script( 'mbf-blog-popup', get_template_directory_uri() . '/assets/js/blog-popup.js', array( 'jquery' ), $version, true );
+		wp_register_script( 'apparel-service', get_template_directory_uri() . '/assets/js/service.js', array(), $version, true );
 
 		// Localization array.
 		$localize = array(
@@ -115,12 +116,18 @@ JS;
 
 		// Register theme styles.
 		wp_register_style( 'mbf-styles', mbf_style( get_template_directory_uri() . '/style.css' ), array(), $version );
+		wp_register_style( 'apparel-service', get_template_directory_uri() . '/assets/css/service.css', array(), $version );
 
 		// Enqueue theme styles.
 		wp_enqueue_style( 'mbf-styles' );
 
 		// Add RTL support.
 		wp_style_add_data( 'mbf-styles', 'rtl', 'replace' );
+
+		if ( is_singular( 'service' ) || is_post_type_archive( 'service' ) ) {
+			wp_enqueue_script( 'apparel-service' );
+			wp_enqueue_style( 'apparel-service' );
+		}
 
 		if ( is_singular( 'post' ) || is_category() ) {
 			$popup_css = <<<CSS
