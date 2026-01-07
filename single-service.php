@@ -128,10 +128,20 @@ while ( have_posts() ) :
 				<div class="service-actions">
 					<?php if ( $live_preview_url ) : ?>
 						<a class="service-button service-button-primary" href="<?php echo esc_url( $live_preview_url ); ?>" target="_blank" rel="noopener noreferrer">
+							<span class="service-button-icon" aria-hidden="true">
+								<svg viewBox="0 0 24 24" role="presentation" focusable="false">
+									<path d="M3 5h18a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1h-7v2h3a1 1 0 1 1 0 2H7a1 1 0 1 1 0-2h3v-2H3a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1zm1 2v8h16V7H4z"/>
+								</svg>
+							</span>
 							<?php esc_html_e( 'Live Preview', 'apparel' ); ?>
 						</a>
 					<?php endif; ?>
 					<button class="service-button service-button-secondary" type="button" data-service-screenshots <?php echo empty( $gallery_images ) ? 'disabled' : ''; ?>>
+						<span class="service-button-icon" aria-hidden="true">
+							<svg viewBox="0 0 24 24" role="presentation" focusable="false">
+								<path d="M4 5h4l1.2 2H20a1 1 0 0 1 1 1v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a1 1 0 0 1 1-1zm1 4v8h14V9H5zm3 6l2-2 2 2 3-3 3 3H8z"/>
+							</svg>
+						</span>
 						<?php esc_html_e( 'Screenshots', 'apparel' ); ?>
 					</button>
 				</div>
@@ -141,6 +151,11 @@ while ( have_posts() ) :
 				<div class="service-pricing-card" <?php foreach ( $pricing_data_attrs as $attr => $value ) : ?><?php echo esc_attr( $attr ); ?>="<?php echo esc_attr( $value ); ?>" <?php endforeach; ?>>
 					<div class="service-license">
 						<span><?php esc_html_e( 'Regular License', 'apparel' ); ?></span>
+						<span class="service-license-icon" aria-hidden="true">
+							<svg viewBox="0 0 24 24" role="presentation" focusable="false">
+								<path d="M7 10l5 5 5-5H7z"/>
+							</svg>
+						</span>
 					</div>
 					<div class="service-price">
 						<span class="service-price-original<?php echo $has_sale ? '' : ' is-hidden'; ?>">
@@ -162,6 +177,11 @@ while ( have_posts() ) :
 						</div>
 					</div>
 					<button class="service-button service-button-cta" type="button" data-service-buy <?php echo empty( $checkout_url ) ? 'disabled' : ''; ?>>
+						<span class="service-button-icon" aria-hidden="true">
+							<svg viewBox="0 0 24 24" role="presentation" focusable="false">
+								<path d="M7 6h-2l-1 2v2h2l2.7 8.4a2 2 0 0 0 1.9 1.4h7.8a2 2 0 0 0 1.9-1.4L22 10H8.4L7 6zm3 14a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm9 0a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/>
+							</svg>
+						</span>
 						<?php esc_html_e( 'Buy Now', 'apparel' ); ?>
 					</button>
 					<?php if ( empty( $checkout_url ) ) : ?>

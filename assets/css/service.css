@@ -1,19 +1,19 @@
 .service-page,
 .service-archive {
-	max-width: 1200px;
+	max-width: 1180px;
 	margin: 0 auto;
-	padding: 32px 20px 80px;
-	color: #1f1f1f;
+	padding: 28px 24px 80px;
+	color: #1f2933;
 	font-family: "Inter", "Helvetica Neue", Arial, sans-serif;
 }
 
 .service-breadcrumbs {
 	display: flex;
 	gap: 8px;
-	font-size: 13px;
-	color: #6b7280;
+	font-size: 12px;
+	color: #8b95a7;
 	align-items: center;
-	margin-bottom: 18px;
+	margin-bottom: 14px;
 }
 
 .service-breadcrumbs a {
@@ -26,23 +26,24 @@
 }
 
 .service-header {
-	border-bottom: 1px solid #e5e7eb;
-	padding-bottom: 16px;
-	margin-bottom: 24px;
+	border-bottom: 1px solid #e2e8f0;
+	padding-bottom: 18px;
+	margin-bottom: 22px;
 }
 
 .service-title {
-	font-size: clamp(28px, 3vw, 38px);
-	margin: 0 0 10px;
+	font-size: clamp(26px, 2.7vw, 36px);
+	margin: 0 0 8px;
 	font-weight: 700;
+	color: #1f2937;
 }
 
 .service-meta {
 	display: flex;
 	flex-wrap: wrap;
-	gap: 10px;
-	font-size: 14px;
-	color: #4b5563;
+	gap: 12px;
+	font-size: 13px;
+	color: #5b6678;
 	align-items: center;
 }
 
@@ -60,19 +61,19 @@
 	display: inline-flex;
 	align-items: center;
 	gap: 6px;
-	color: #22a06b;
+	color: #5caa2a;
 	font-weight: 600;
 }
 
 .service-meta-icon {
 	display: inline-flex;
-	width: 18px;
-	height: 18px;
+	width: 16px;
+	height: 16px;
 	border-radius: 50%;
 	align-items: center;
 	justify-content: center;
-	background: rgba(34, 160, 107, 0.15);
-	font-size: 11px;
+	background: rgba(92, 170, 42, 0.18);
+	font-size: 10px;
 }
 
 .service-meta-date {
@@ -82,20 +83,31 @@
 
 .service-main {
 	display: grid;
-	grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
-	gap: 28px;
+	grid-template-columns: minmax(0, 2fr) minmax(300px, 1fr);
+	gap: 32px;
 	align-items: start;
 }
 
+.service-main-left {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+.service-main-right {
+	align-self: start;
+}
+
 .service-preview {
-	background: #f9fafb;
-	border: 1px solid #e5e7eb;
-	border-radius: 12px;
-	padding: 16px;
+	background: #fff;
+	border: 1px solid #e2e8f0;
+	border-radius: 10px;
+	padding: 18px;
 	display: flex;
 	justify-content: center;
 	align-items: center;
-	min-height: 360px;
+	min-height: 340px;
+	box-shadow: 0 10px 26px rgba(15, 23, 42, 0.08);
 }
 
 .service-preview-image {
@@ -118,22 +130,37 @@
 
 .service-actions {
 	display: flex;
-	gap: 12px;
-	margin-top: 16px;
+	gap: 10px;
+	margin-top: 6px;
+	justify-content: center;
 }
 
 .service-button {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	padding: 10px 18px;
-	border-radius: 6px;
+	gap: 8px;
+	padding: 8px 16px;
+	border-radius: 4px;
 	font-weight: 600;
-	font-size: 14px;
+	font-size: 13px;
 	text-decoration: none;
 	border: 1px solid transparent;
 	cursor: pointer;
 	transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, color 0.2s ease;
+}
+
+.service-button-icon {
+	display: inline-flex;
+	width: 16px;
+	height: 16px;
+	color: currentColor;
+}
+
+.service-button-icon svg {
+	width: 16px;
+	height: 16px;
+	fill: currentColor;
 }
 
 .service-button-primary {
@@ -147,19 +174,23 @@
 }
 
 .service-button-secondary {
-	background: #e5e7eb;
+	background: #f1f5f9;
 	color: #1f2937;
-	border-color: #d1d5db;
+	border-color: #d7dde5;
 }
 
 .service-button-secondary:hover {
-	background: #d1d5db;
+	background: #e2e8f0;
 }
 
 .service-button-cta {
-	background: #85b742;
+	background: #83b53c;
 	color: #fff;
-	border-color: #75a63b;
+	border-color: #79a93a;
+	width: 100%;
+	padding: 12px 18px;
+	font-size: 14px;
+	border-radius: 6px;
 }
 
 .service-button-cta:hover {
@@ -170,7 +201,7 @@
 .service-button-ghost {
 	background: #fff;
 	color: #0f6cb6;
-	border-color: #d1d5db;
+	border-color: #d7dde5;
 }
 
 .service-button-ghost.is-selected {
@@ -188,33 +219,51 @@
 }
 
 .service-pricing-card {
-	border: 1px solid #e5e7eb;
-	border-radius: 12px;
-	padding: 20px;
+	border: 1px solid #e2e8f0;
+	border-radius: 10px;
+	padding: 18px 18px 20px;
 	background: #fff;
-	box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+	box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+	position: sticky;
+	top: 120px;
 }
 
 .service-license {
 	font-weight: 600;
-	font-size: 15px;
+	font-size: 14px;
 	color: #374151;
-	margin-bottom: 12px;
+	margin-bottom: 10px;
+	display: flex;
+	align-items: center;
+	gap: 6px;
+}
+
+.service-license-icon {
+	display: inline-flex;
+	width: 14px;
+	height: 14px;
+	color: #6b7280;
+}
+
+.service-license-icon svg {
+	width: 14px;
+	height: 14px;
+	fill: currentColor;
 }
 
 .service-price {
 	display: flex;
-	gap: 12px;
+	gap: 10px;
 	align-items: baseline;
-	font-size: 28px;
+	font-size: 30px;
 	font-weight: 700;
-	margin-bottom: 16px;
+	margin-bottom: 14px;
 }
 
 .service-price-original {
 	text-decoration: line-through;
-	color: #9ca3af;
-	font-size: 18px;
+	color: #a0a7b5;
+	font-size: 16px;
 }
 
 .service-price-original.is-hidden {
@@ -222,83 +271,114 @@
 }
 
 .service-price-current {
-	color: #1f2937;
+	color: #5caa2a;
 }
 
 .service-checklist {
 	list-style: none;
 	padding: 0;
-	margin: 0 0 18px;
+	margin: 0 0 16px;
 	color: #4b5563;
-	font-size: 14px;
+	font-size: 13px;
 }
 
 .service-checklist li {
 	position: relative;
-	padding-left: 22px;
-	margin-bottom: 8px;
+	padding-left: 20px;
+	margin-bottom: 6px;
 }
 
 .service-checklist li::before {
-	content: "✔";
+	content: "✓";
 	position: absolute;
 	left: 0;
-	color: #22a06b;
-	font-size: 13px;
+	color: #fff;
+	font-size: 10px;
+	font-weight: 700;
+	width: 14px;
+	height: 14px;
+	border-radius: 50%;
+	background: #5caa2a;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	top: 2px;
 }
 
 .service-quantity label {
-	font-size: 14px;
+	font-size: 13px;
 	font-weight: 600;
 	color: #374151;
 }
 
 .service-quantity-control {
 	display: flex;
-	gap: 8px;
+	gap: 6px;
 	align-items: center;
-	margin: 8px 0 16px;
+	margin: 8px 0 14px;
 }
 
 .service-quantity-control input {
-	width: 80px;
+	width: 100%;
+	min-width: 120px;
 	border-radius: 6px;
-	border: 1px solid #d1d5db;
+	border: 1px solid #d7dde5;
 	padding: 6px 10px;
 	text-align: center;
 }
 
 .service-quantity-btn {
-	width: 32px;
-	height: 32px;
-	border-radius: 50%;
-	border: 1px solid #d1d5db;
-	background: #fff;
+	width: 30px;
+	height: 30px;
+	border-radius: 6px;
+	border: 1px solid #d7dde5;
+	background: #f8fafc;
 	font-size: 18px;
 	color: #4b5563;
 	cursor: pointer;
 }
 
 .service-checkout-note {
-	font-size: 13px;
-	color: #b91c1c;
-	margin-top: 8px;
+	font-size: 12px;
+	color: #6b7280;
+	margin-top: 10px;
+	text-align: center;
 }
 
 .service-vendor-card {
-	margin-top: 20px;
-	border: 1px solid #e5e7eb;
-	border-radius: 12px;
-	padding: 16px;
-	background: #f9fafb;
+	margin-top: 18px;
+	border: 1px solid #e2e8f0;
+	border-radius: 10px;
+	padding: 18px;
+	background: #fff;
 	display: flex;
+	flex-direction: column;
 	gap: 12px;
 	align-items: center;
+	text-align: center;
+	box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
+}
+
+.service-vendor-avatar img {
+	width: 72px;
+	height: 72px;
+	border-radius: 12px;
 }
 
 .service-vendor-info h3 {
-	margin: 0 0 8px;
+	margin: 0;
 	font-size: 16px;
+}
+
+.service-vendor-info {
+	display: grid;
+	gap: 10px;
+	width: 100%;
+}
+
+.service-vendor-info .service-button {
+	width: 100%;
+	justify-content: center;
 }
 
 .service-variations {
@@ -332,25 +412,27 @@
 }
 
 .service-tabs {
-	margin-top: 32px;
-	border-top: 1px solid #e5e7eb;
+	margin-top: 28px;
+	border-top: 1px solid #e2e8f0;
 }
 
 .service-tab-list {
 	display: flex;
-	gap: 12px;
-	padding: 16px 0;
+	gap: 8px;
+	padding: 16px 0 10px;
 	flex-wrap: wrap;
+	border-bottom: 1px solid #e2e8f0;
 }
 
 .service-tab {
-	border: 1px solid #e5e7eb;
-	background: #fff;
-	padding: 8px 14px;
-	border-radius: 6px;
+	border: 1px solid #d7dde5;
+	background: #f8fafc;
+	padding: 6px 12px;
+	border-radius: 4px;
 	cursor: pointer;
 	font-weight: 600;
 	color: #4b5563;
+	font-size: 13px;
 }
 
 .service-tab.is-active {
@@ -381,9 +463,9 @@
 }
 
 .service-support-tile {
-	border: 1px solid #e5e7eb;
-	border-radius: 12px;
-	padding: 16px;
+	border: 1px solid #e2e8f0;
+	border-radius: 10px;
+	padding: 14px;
 	background: #fff;
 	text-decoration: none;
 	color: inherit;
@@ -532,6 +614,10 @@
 @media (max-width: 960px) {
 	.service-main {
 		grid-template-columns: 1fr;
+	}
+
+	.service-pricing-card {
+		position: static;
 	}
 
 	.service-actions {
