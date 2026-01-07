@@ -179,27 +179,31 @@ while ( have_posts() ) :
 					),
 				);
 
-				$visible_tiles = array_filter(
-					$support_tiles,
-					static function ( $tile ) {
-						return ! empty( $tile['url'] );
-					}
-				);
 				?>
 
-				<?php if ( ! empty( $visible_tiles ) ) : ?>
-					<div class="service-support-tiles" aria-label="<?php esc_attr_e( 'Support links', 'apparel' ); ?>">
-						<?php foreach ( $visible_tiles as $tile ) : ?>
-							<?php $tile_class = isset( $tile['class'] ) ? $tile['class'] : ''; ?>
-							<a class="service-support-tile <?php echo esc_attr( $tile_class ); ?>" href="<?php echo esc_url( $tile['url'] ); ?>" target="_blank" rel="noopener noreferrer">
-								<span class="service-support-icon" aria-hidden="true">
-									<?php echo $tile['icon']; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-								</span>
-								<span class="service-support-label"><?php echo esc_html( $tile['label'] ); ?></span>
-							</a>
-						<?php endforeach; ?>
-					</div>
-				<?php endif; ?>
+				<div class="service-support-tiles" aria-label="<?php esc_attr_e( 'Support links', 'apparel' ); ?>">
+					<?php foreach ( $support_tiles as $tile ) : ?>
+						<?php
+						$tile_class   = isset( $tile['class'] ) ? $tile['class'] : '';
+						$tile_url     = isset( $tile['url'] ) ? $tile['url'] : '';
+						$tile_has_url = ! empty( $tile_url );
+						$tile_tag     = $tile_has_url ? 'a' : 'div';
+						?>
+						<<?php echo esc_html( $tile_tag ); ?>
+							class="service-support-tile <?php echo esc_attr( $tile_class ); ?><?php echo $tile_has_url ? '' : ' is-disabled'; ?>"
+							<?php if ( $tile_has_url ) : ?>
+								href="<?php echo esc_url( $tile_url ); ?>" target="_blank" rel="noopener noreferrer"
+							<?php else : ?>
+								aria-disabled="true"
+							<?php endif; ?>
+						>
+							<span class="service-support-icon" aria-hidden="true">
+								<?php echo $tile['icon']; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+							</span>
+							<span class="service-support-label"><?php echo esc_html( $tile['label'] ); ?></span>
+						</<?php echo esc_html( $tile_tag ); ?>>
+					<?php endforeach; ?>
+				</div>
 			</div>
 
 			<aside class="service-main-right">
