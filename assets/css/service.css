@@ -552,6 +552,28 @@
 	transform: translateY(-1px);
 }
 
+.service-sticky-buy {
+	position: fixed;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	padding: 10px 12px 14px;
+	background: rgba(255, 255, 255, 0.98);
+	border-top: 1px solid #e2e8f0;
+	box-shadow: 0 -8px 18px rgba(15, 23, 42, 0.12);
+	z-index: 999;
+	display: none;
+}
+
+.service-sticky-buy .service-button {
+	width: 100%;
+	justify-content: center;
+}
+
+.service-sticky-buy.is-visible {
+	display: block;
+}
+
 .service-gallery {
 	position: fixed;
 	inset: 0;
@@ -705,6 +727,10 @@
 }
 
 @media (max-width: 600px) {
+	.service-page {
+		padding: 20px 3px 120px;
+	}
+
 	.service-tab-list {
 		gap: 8px;
 	}
@@ -712,4 +738,27 @@
 	.service-quantity-control {
 		flex-wrap: wrap;
 	}
+
+	.service-support-tiles-compact {
+		display: flex;
+		flex-wrap: nowrap;
+		overflow-x: auto;
+		gap: 10px;
+		padding-bottom: 4px;
+	}
+
+	.service-support-tiles-compact::-webkit-scrollbar {
+		height: 6px;
+	}
+
+	.service-support-tiles-compact::-webkit-scrollbar-thumb {
+		background: rgba(148, 163, 184, 0.6);
+		border-radius: 999px;
+	}
+
+	.service-support-tiles-compact .service-support-tile {
+		flex: 0 0 120px;
+		min-height: 92px;
+	}
+
 }
