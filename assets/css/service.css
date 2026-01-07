@@ -729,10 +729,38 @@
 @media (max-width: 600px) {
 	.service-page {
 		padding: 20px 3px 120px;
+		width: 100%;
+		max-width: 100%;
 	}
 
 	.service-tab-list {
 		gap: 8px;
+	}
+
+	.service-main {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	.service-main-left,
+	.service-main-right {
+		min-width: 0;
+	}
+
+	.service-preview,
+	.service-pricing-card,
+	.service-vendor-card,
+	.service-variation {
+		max-width: 100%;
+	}
+
+	.service-variation {
+		flex-wrap: wrap;
+	}
+
+	.service-preview-actions,
+	.service-button,
+	.service-quantity-control input {
+		max-width: 100%;
 	}
 
 	.service-quantity-control {

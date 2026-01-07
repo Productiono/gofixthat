@@ -155,46 +155,22 @@
 		stickyWrapper.setAttribute('aria-hidden', isVisible ? 'true' : 'false');
 	};
 
-	const setupStickyObserver = () => {
-		if (!buyButton || !stickyWrapper) {
+	const setupStickyVisibility = () => {
+		if (!stickyWrapper) {
 			return null;
 		}
 		const mediaQuery = window.matchMedia('(max-width: 600px)');
-		let observer;
 		const handleUpdate = () => {
-			if (!mediaQuery.matches) {
-				toggleStickyVisibility(true);
-				if (observer) {
-					observer.disconnect();
-					observer = null;
-				}
-				return;
-			}
-			if (!observer && 'IntersectionObserver' in window) {
-				observer = new IntersectionObserver(
-					(entries) => {
-						entries.forEach((entry) => {
-							toggleStickyVisibility(entry.isIntersecting);
-						});
-					},
-					{
-						threshold: 0.1,
-					}
-				);
-				observer.observe(buyButton);
-			}
+			toggleStickyVisibility(!mediaQuery.matches);
 		};
 		handleUpdate();
 		mediaQuery.addEventListener('change', handleUpdate);
 		return () => {
 			mediaQuery.removeEventListener('change', handleUpdate);
-			if (observer) {
-				observer.disconnect();
-			}
 		};
 	};
 
-	setupStickyObserver();
+	setupStickyVisibility();
 
 	const gallery = document.querySelector('[data-service-gallery]');
 	const galleryTrigger = document.querySelector('[data-service-screenshots]');
