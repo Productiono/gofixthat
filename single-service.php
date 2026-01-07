@@ -204,6 +204,106 @@ while ( have_posts() ) :
 						</<?php echo esc_html( $tile_tag ); ?>>
 					<?php endforeach; ?>
 				</div>
+
+				<?php if ( ! empty( $variations ) ) : ?>
+					<section class="service-variations">
+						<h2><?php esc_html_e( 'Variations', 'apparel' ); ?></h2>
+						<div class="service-variations-list">
+							<?php foreach ( $variations as $variation ) : ?>
+								<?php
+									$name       = isset( $variation['name'] ) ? $variation['name'] : '';
+									$price      = isset( $variation['price'] ) ? $variation['price'] : '';
+									$sale_price = isset( $variation['sale_price'] ) ? $variation['sale_price'] : '';
+									$var_id     = isset( $variation['variation_id'] ) ? $variation['variation_id'] : '';
+									$has_sale   = '' !== $sale_price && '' !== $price && (float) $sale_price < (float) $price;
+									?>
+									<div class="service-variation">
+										<div class="service-variation-info">
+											<h3><?php echo esc_html( $name ); ?></h3>
+											<div class="service-variation-price">
+												<?php if ( $has_sale ) : ?>
+													<span class="service-price-original"><?php echo esc_html( apparel_service_format_price( $price ) ); ?></span>
+													<span class="service-price-current"><?php echo esc_html( apparel_service_format_price( $sale_price ) ); ?></span>
+												<?php else : ?>
+													<span class="service-price-current"><?php echo esc_html( apparel_service_format_price( $price ) ); ?></span>
+												<?php endif; ?>
+											</div>
+										</div>
+										<button class="service-button service-button-ghost" type="button" data-variation-select data-variation-id="<?php echo esc_attr( $var_id ); ?>" data-variation-price="<?php echo esc_attr( $price ); ?>" data-variation-sale="<?php echo esc_attr( $sale_price ); ?>">
+											<?php esc_html_e( 'Select', 'apparel' ); ?>
+										</button>
+									</div>
+							<?php endforeach; ?>
+						</div>
+					</section>
+				<?php endif; ?>
+
+				<section class="service-tabs">
+					<div class="service-tab-list" role="tablist">
+						<button class="service-tab is-active" type="button" data-tab="details" role="tab" aria-selected="true"><?php esc_html_e( 'Item Details', 'apparel' ); ?></button>
+						<button class="service-tab" type="button" data-tab="reviews" role="tab" aria-selected="false"><?php esc_html_e( 'Reviews', 'apparel' ); ?></button>
+						<button class="service-tab" type="button" data-tab="comments" role="tab" aria-selected="false"><?php esc_html_e( 'Comments', 'apparel' ); ?></button>
+						<button class="service-tab" type="button" data-tab="support" role="tab" aria-selected="false"><?php esc_html_e( 'Support', 'apparel' ); ?></button>
+					</div>
+					<div class="service-tab-panel is-active" data-tab-panel="details" role="tabpanel">
+						<?php if ( ! $has_h2 ) : ?>
+							<h2><?php esc_html_e( 'New Features & Improvements', 'apparel' ); ?></h2>
+						<?php endif; ?>
+						<div class="service-content">
+							<?php echo $content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+						</div>
+					</div>
+					<div class="service-tab-panel" data-tab-panel="reviews" role="tabpanel">
+						<?php if ( '' !== $service_rating ) : ?>
+							<div class="service-rating">
+								<strong><?php echo esc_html( $service_rating ); ?>/5</strong>
+								<?php if ( '' !== $service_reviews ) : ?>
+									<span><?php echo esc_html( $service_reviews ); ?> <?php esc_html_e( 'reviews', 'apparel' ); ?></span>
+								<?php endif; ?>
+							</div>
+						<?php else : ?>
+							<p><?php esc_html_e( 'Reviews not available.', 'apparel' ); ?></p>
+						<?php endif; ?>
+					</div>
+					<div class="service-tab-panel" data-tab-panel="comments" role="tabpanel">
+						<?php if ( $comments_open ) : ?>
+							<?php comments_template(); ?>
+						<?php else : ?>
+							<p><?php esc_html_e( 'Comments are closed.', 'apparel' ); ?></p>
+						<?php endif; ?>
+					</div>
+					<div class="service-tab-panel" data-tab-panel="support" role="tabpanel">
+						<div class="service-support-tiles">
+							<?php if ( $support_url ) : ?>
+								<a class="service-support-tile" href="<?php echo esc_url( $support_url ); ?>" target="_blank" rel="noopener noreferrer">
+									<h3><?php esc_html_e( 'Get Support', 'apparel' ); ?></h3>
+									<p><?php esc_html_e( 'Reach out for help with setup and troubleshooting.', 'apparel' ); ?></p>
+								</a>
+							<?php endif; ?>
+							<?php if ( $docs_url ) : ?>
+								<a class="service-support-tile" href="<?php echo esc_url( $docs_url ); ?>" target="_blank" rel="noopener noreferrer">
+									<h3><?php esc_html_e( 'Documentation', 'apparel' ); ?></h3>
+									<p><?php esc_html_e( 'Browse guides, FAQs, and helpful resources.', 'apparel' ); ?></p>
+								</a>
+							<?php endif; ?>
+							<?php if ( $presales_url ) : ?>
+								<a class="service-support-tile" href="<?php echo esc_url( $presales_url ); ?>" target="_blank" rel="noopener noreferrer">
+									<h3><?php esc_html_e( 'Pre-Sales Questions', 'apparel' ); ?></h3>
+									<p><?php esc_html_e( 'Ask about features, licensing, or delivery.', 'apparel' ); ?></p>
+								</a>
+							<?php endif; ?>
+							<?php if ( $hire_url ) : ?>
+								<a class="service-support-tile" href="<?php echo esc_url( $hire_url ); ?>" target="_blank" rel="noopener noreferrer">
+									<h3><?php esc_html_e( 'Hire Us', 'apparel' ); ?></h3>
+									<p><?php esc_html_e( 'Schedule custom work or ongoing support.', 'apparel' ); ?></p>
+								</a>
+							<?php endif; ?>
+							<?php if ( ! $support_url && ! $docs_url && ! $presales_url && ! $hire_url ) : ?>
+								<p><?php esc_html_e( 'Support resources are not available.', 'apparel' ); ?></p>
+							<?php endif; ?>
+						</div>
+					</div>
+				</section>
 			</div>
 
 			<aside class="service-main-right">
@@ -262,105 +362,6 @@ while ( have_posts() ) :
 			</aside>
 		</section>
 
-		<?php if ( ! empty( $variations ) ) : ?>
-			<section class="service-variations">
-				<h2><?php esc_html_e( 'Variations', 'apparel' ); ?></h2>
-				<div class="service-variations-list">
-					<?php foreach ( $variations as $variation ) : ?>
-						<?php
-							$name       = isset( $variation['name'] ) ? $variation['name'] : '';
-							$price      = isset( $variation['price'] ) ? $variation['price'] : '';
-							$sale_price = isset( $variation['sale_price'] ) ? $variation['sale_price'] : '';
-							$var_id     = isset( $variation['variation_id'] ) ? $variation['variation_id'] : '';
-							$has_sale   = '' !== $sale_price && '' !== $price && (float) $sale_price < (float) $price;
-							?>
-							<div class="service-variation">
-								<div class="service-variation-info">
-									<h3><?php echo esc_html( $name ); ?></h3>
-									<div class="service-variation-price">
-										<?php if ( $has_sale ) : ?>
-											<span class="service-price-original"><?php echo esc_html( apparel_service_format_price( $price ) ); ?></span>
-											<span class="service-price-current"><?php echo esc_html( apparel_service_format_price( $sale_price ) ); ?></span>
-										<?php else : ?>
-											<span class="service-price-current"><?php echo esc_html( apparel_service_format_price( $price ) ); ?></span>
-										<?php endif; ?>
-									</div>
-								</div>
-								<button class="service-button service-button-ghost" type="button" data-variation-select data-variation-id="<?php echo esc_attr( $var_id ); ?>" data-variation-price="<?php echo esc_attr( $price ); ?>" data-variation-sale="<?php echo esc_attr( $sale_price ); ?>">
-									<?php esc_html_e( 'Select', 'apparel' ); ?>
-								</button>
-							</div>
-					<?php endforeach; ?>
-				</div>
-			</section>
-		<?php endif; ?>
-
-		<section class="service-tabs">
-			<div class="service-tab-list" role="tablist">
-				<button class="service-tab is-active" type="button" data-tab="details" role="tab" aria-selected="true"><?php esc_html_e( 'Item Details', 'apparel' ); ?></button>
-				<button class="service-tab" type="button" data-tab="reviews" role="tab" aria-selected="false"><?php esc_html_e( 'Reviews', 'apparel' ); ?></button>
-				<button class="service-tab" type="button" data-tab="comments" role="tab" aria-selected="false"><?php esc_html_e( 'Comments', 'apparel' ); ?></button>
-				<button class="service-tab" type="button" data-tab="support" role="tab" aria-selected="false"><?php esc_html_e( 'Support', 'apparel' ); ?></button>
-			</div>
-			<div class="service-tab-panel is-active" data-tab-panel="details" role="tabpanel">
-				<?php if ( ! $has_h2 ) : ?>
-					<h2><?php esc_html_e( 'New Features & Improvements', 'apparel' ); ?></h2>
-				<?php endif; ?>
-				<div class="service-content">
-					<?php echo $content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-				</div>
-			</div>
-			<div class="service-tab-panel" data-tab-panel="reviews" role="tabpanel">
-				<?php if ( '' !== $service_rating ) : ?>
-					<div class="service-rating">
-						<strong><?php echo esc_html( $service_rating ); ?>/5</strong>
-						<?php if ( '' !== $service_reviews ) : ?>
-							<span><?php echo esc_html( $service_reviews ); ?> <?php esc_html_e( 'reviews', 'apparel' ); ?></span>
-						<?php endif; ?>
-					</div>
-				<?php else : ?>
-					<p><?php esc_html_e( 'Reviews not available.', 'apparel' ); ?></p>
-				<?php endif; ?>
-			</div>
-			<div class="service-tab-panel" data-tab-panel="comments" role="tabpanel">
-				<?php if ( $comments_open ) : ?>
-					<?php comments_template(); ?>
-				<?php else : ?>
-					<p><?php esc_html_e( 'Comments are closed.', 'apparel' ); ?></p>
-				<?php endif; ?>
-			</div>
-			<div class="service-tab-panel" data-tab-panel="support" role="tabpanel">
-				<div class="service-support-tiles">
-					<?php if ( $support_url ) : ?>
-						<a class="service-support-tile" href="<?php echo esc_url( $support_url ); ?>" target="_blank" rel="noopener noreferrer">
-							<h3><?php esc_html_e( 'Get Support', 'apparel' ); ?></h3>
-							<p><?php esc_html_e( 'Reach out for help with setup and troubleshooting.', 'apparel' ); ?></p>
-						</a>
-					<?php endif; ?>
-					<?php if ( $docs_url ) : ?>
-						<a class="service-support-tile" href="<?php echo esc_url( $docs_url ); ?>" target="_blank" rel="noopener noreferrer">
-							<h3><?php esc_html_e( 'Documentation', 'apparel' ); ?></h3>
-							<p><?php esc_html_e( 'Browse guides, FAQs, and helpful resources.', 'apparel' ); ?></p>
-						</a>
-					<?php endif; ?>
-					<?php if ( $presales_url ) : ?>
-						<a class="service-support-tile" href="<?php echo esc_url( $presales_url ); ?>" target="_blank" rel="noopener noreferrer">
-							<h3><?php esc_html_e( 'Pre-Sales Questions', 'apparel' ); ?></h3>
-							<p><?php esc_html_e( 'Ask about features, licensing, or delivery.', 'apparel' ); ?></p>
-						</a>
-					<?php endif; ?>
-					<?php if ( $hire_url ) : ?>
-						<a class="service-support-tile" href="<?php echo esc_url( $hire_url ); ?>" target="_blank" rel="noopener noreferrer">
-							<h3><?php esc_html_e( 'Hire Us', 'apparel' ); ?></h3>
-							<p><?php esc_html_e( 'Schedule custom work or ongoing support.', 'apparel' ); ?></p>
-						</a>
-					<?php endif; ?>
-					<?php if ( ! $support_url && ! $docs_url && ! $presales_url && ! $hire_url ) : ?>
-						<p><?php esc_html_e( 'Support resources are not available.', 'apparel' ); ?></p>
-					<?php endif; ?>
-				</div>
-			</div>
-		</section>
 	</div>
 
 	<div class="service-sticky-buy" data-service-sticky aria-hidden="true">
