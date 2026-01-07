@@ -30,7 +30,7 @@ function apparel_register_service_cpt() {
 		'show_in_menu'       => true,
 		'capability_type'    => 'post',
 		'map_meta_cap'       => true,
-		'supports'           => array( 'title', 'editor', 'thumbnail', 'comments' ),
+		'supports'           => array( 'title', 'editor' ),
 		'menu_position'      => 20,
 		'menu_icon'          => 'dashicons-admin-generic',
 		'has_archive'        => false,
@@ -55,11 +55,11 @@ function apparel_service_add_metaboxes() {
 	);
 
 	add_meta_box(
-		'apparel-service-live-preview',
-		__( 'Live Preview Link', 'apparel' ),
-		'apparel_service_live_preview_metabox',
+		'apparel-service-details',
+		__( 'Service Details', 'apparel' ),
+		'apparel_service_details_metabox',
 		'service',
-		'side',
+		'normal',
 		'default'
 	);
 
@@ -113,18 +113,28 @@ function apparel_service_support_metabox( $post ) {
 }
 
 /**
- * Live preview link metabox.
+ * Service details metabox.
  *
  * @param WP_Post $post Current post.
  */
-function apparel_service_live_preview_metabox( $post ) {
+function apparel_service_details_metabox( $post ) {
 	wp_nonce_field( 'apparel_service_save_meta', 'apparel_service_meta_nonce' );
 
-	$live_preview_url = get_post_meta( $post->ID, '_service_live_preview_url', true );
+	$service_price      = get_post_meta( $post->ID, '_service_price', true );
+	$service_sale_price = get_post_meta( $post->ID, '_service_sale_price', true );
+	$checkout_url       = get_post_meta( $post->ID, '_service_checkout_url', true );
 	?>
 	<p>
-		<label for="apparel-service-live-preview-url"><strong><?php esc_html_e( 'Live Preview URL', 'apparel' ); ?></strong></label>
-		<input type="url" id="apparel-service-live-preview-url" name="apparel_service_live_preview_url" class="widefat" value="<?php echo esc_url( $live_preview_url ); ?>" placeholder="https://example.com" />
+		<label for="apparel-service-price"><strong><?php esc_html_e( 'Service Price', 'apparel' ); ?></strong></label>
+		<input type="number" id="apparel-service-price" name="apparel_service_price" class="widefat" min="0" step="0.01" value="<?php echo esc_attr( $service_price ); ?>" />
+	</p>
+	<p>
+		<label for="apparel-service-sale-price"><strong><?php esc_html_e( 'Service Sale Price (optional)', 'apparel' ); ?></strong></label>
+		<input type="number" id="apparel-service-sale-price" name="apparel_service_sale_price" class="widefat" min="0" step="0.01" value="<?php echo esc_attr( $service_sale_price ); ?>" />
+	</p>
+	<p>
+		<label for="apparel-service-checkout-url"><strong><?php esc_html_e( 'Checkout Link', 'apparel' ); ?></strong></label>
+		<input type="url" id="apparel-service-checkout-url" name="apparel_service_checkout_url" class="widefat" value="<?php echo esc_url( $checkout_url ); ?>" placeholder="https://example.com/checkout" />
 	</p>
 	<?php
 }
@@ -183,12 +193,8 @@ function apparel_service_variations_metabox( $post ) {
 			<thead>
 				<tr>
 					<th><?php esc_html_e( 'Name', 'apparel' ); ?></th>
-					<th><?php esc_html_e( 'Price (cents)', 'apparel' ); ?></th>
-					<th><?php esc_html_e( 'Currency', 'apparel' ); ?></th>
-					<th><?php esc_html_e( 'Stripe Product ID', 'apparel' ); ?></th>
-					<th><?php esc_html_e( 'Stripe Price ID', 'apparel' ); ?></th>
-					<th><?php esc_html_e( 'Stripe Payment Link', 'apparel' ); ?></th>
-					<th><?php esc_html_e( 'Active', 'apparel' ); ?></th>
+					<th><?php esc_html_e( 'Price', 'apparel' ); ?></th>
+					<th><?php esc_html_e( 'Sale Price', 'apparel' ); ?></th>
 					<th><?php esc_html_e( 'Actions', 'apparel' ); ?></th>
 				</tr>
 			</thead>
@@ -197,12 +203,8 @@ function apparel_service_variations_metabox( $post ) {
 					<?php
 					$variation_id       = isset( $variation['variation_id'] ) ? $variation['variation_id'] : '';
 					$name               = isset( $variation['name'] ) ? $variation['name'] : '';
-					$price_amount       = isset( $variation['price_amount'] ) ? $variation['price_amount'] : '';
-					$currency           = isset( $variation['currency'] ) ? $variation['currency'] : '';
-					$stripe_product_id  = isset( $variation['stripe_product_id'] ) ? $variation['stripe_product_id'] : '';
-					$stripe_price_id    = isset( $variation['stripe_price_id'] ) ? $variation['stripe_price_id'] : '';
-					$stripe_payment_link = isset( $variation['stripe_payment_link'] ) ? $variation['stripe_payment_link'] : '';
-					$active             = ! empty( $variation['active'] );
+					$price              = isset( $variation['price'] ) ? $variation['price'] : '';
+					$sale_price         = isset( $variation['sale_price'] ) ? $variation['sale_price'] : '';
 					?>
 					<tr class="apparel-service-variation-row">
 						<td>
@@ -210,24 +212,10 @@ function apparel_service_variations_metabox( $post ) {
 							<input type="text" class="widefat" name="apparel_service_variations[<?php echo esc_attr( $index ); ?>][name]" value="<?php echo esc_attr( $name ); ?>" />
 						</td>
 						<td>
-							<input type="number" class="small-text" min="0" step="1" name="apparel_service_variations[<?php echo esc_attr( $index ); ?>][price_amount]" value="<?php echo esc_attr( $price_amount ); ?>" />
+							<input type="number" class="small-text" min="0" step="0.01" name="apparel_service_variations[<?php echo esc_attr( $index ); ?>][price]" value="<?php echo esc_attr( $price ); ?>" />
 						</td>
 						<td>
-							<input type="text" class="small-text" name="apparel_service_variations[<?php echo esc_attr( $index ); ?>][currency]" value="<?php echo esc_attr( $currency ); ?>" />
-						</td>
-						<td>
-							<input type="text" class="widefat" name="apparel_service_variations[<?php echo esc_attr( $index ); ?>][stripe_product_id]" value="<?php echo esc_attr( $stripe_product_id ); ?>" />
-						</td>
-						<td>
-							<input type="text" class="widefat" name="apparel_service_variations[<?php echo esc_attr( $index ); ?>][stripe_price_id]" value="<?php echo esc_attr( $stripe_price_id ); ?>" />
-						</td>
-						<td>
-							<input type="url" class="widefat" name="apparel_service_variations[<?php echo esc_attr( $index ); ?>][stripe_payment_link]" value="<?php echo esc_url( $stripe_payment_link ); ?>" />
-						</td>
-						<td>
-							<label>
-								<input type="checkbox" name="apparel_service_variations[<?php echo esc_attr( $index ); ?>][active]" value="1" <?php checked( $active ); ?> />
-							</label>
+							<input type="number" class="small-text" min="0" step="0.01" name="apparel_service_variations[<?php echo esc_attr( $index ); ?>][sale_price]" value="<?php echo esc_attr( $sale_price ); ?>" />
 						</td>
 						<td>
 							<button type="button" class="button-link delete apparel-service-remove-variation"><?php esc_html_e( 'Remove', 'apparel' ); ?></button>
@@ -244,24 +232,10 @@ function apparel_service_variations_metabox( $post ) {
 				<input type="text" class="widefat" name="apparel_service_variations[{{data.index}}][name]" value="" />
 			</td>
 			<td>
-				<input type="number" class="small-text" min="0" step="1" name="apparel_service_variations[{{data.index}}][price_amount]" value="" />
+				<input type="number" class="small-text" min="0" step="0.01" name="apparel_service_variations[{{data.index}}][price]" value="" />
 			</td>
 			<td>
-				<input type="text" class="small-text" name="apparel_service_variations[{{data.index}}][currency]" value="" />
-			</td>
-			<td>
-				<input type="text" class="widefat" name="apparel_service_variations[{{data.index}}][stripe_product_id]" value="" />
-			</td>
-			<td>
-				<input type="text" class="widefat" name="apparel_service_variations[{{data.index}}][stripe_price_id]" value="" />
-			</td>
-			<td>
-				<input type="url" class="widefat" name="apparel_service_variations[{{data.index}}][stripe_payment_link]" value="" />
-			</td>
-			<td>
-				<label>
-					<input type="checkbox" name="apparel_service_variations[{{data.index}}][active]" value="1" />
-				</label>
+				<input type="number" class="small-text" min="0" step="0.01" name="apparel_service_variations[{{data.index}}][sale_price]" value="" />
 			</td>
 			<td>
 				<button type="button" class="button-link delete apparel-service-remove-variation"><?php esc_html_e( 'Remove', 'apparel' ); ?></button>
@@ -294,18 +268,40 @@ function apparel_service_save_meta( $post_id, $post ) {
 		return;
 	}
 
+	$service_price = isset( $_POST['apparel_service_price'] ) ? apparel_service_sanitize_decimal( wp_unslash( $_POST['apparel_service_price'] ) ) : '';
+	if ( '' !== $service_price ) {
+		update_post_meta( $post_id, '_service_price', $service_price );
+	} else {
+		delete_post_meta( $post_id, '_service_price' );
+	}
+
+	$service_sale_price = isset( $_POST['apparel_service_sale_price'] ) ? apparel_service_sanitize_decimal( wp_unslash( $_POST['apparel_service_sale_price'] ) ) : '';
+	if ( '' === $service_price || ( '' !== $service_sale_price && (float) $service_sale_price > (float) $service_price ) ) {
+		$service_sale_price = '';
+	}
+
+	if ( '' !== $service_sale_price ) {
+		update_post_meta( $post_id, '_service_sale_price', $service_sale_price );
+	} else {
+		delete_post_meta( $post_id, '_service_sale_price' );
+	}
+
+	$checkout_url = isset( $_POST['apparel_service_checkout_url'] ) ? esc_url_raw( wp_unslash( $_POST['apparel_service_checkout_url'] ) ) : '';
+	if ( $checkout_url && ! wp_http_validate_url( $checkout_url ) ) {
+		$checkout_url = '';
+	}
+
+	if ( $checkout_url ) {
+		update_post_meta( $post_id, '_service_checkout_url', $checkout_url );
+	} else {
+		delete_post_meta( $post_id, '_service_checkout_url' );
+	}
+
 	$support_title = isset( $_POST['apparel_service_support_title'] ) ? sanitize_text_field( wp_unslash( $_POST['apparel_service_support_title'] ) ) : '';
 	update_post_meta( $post_id, '_service_support_title', $support_title );
 
 	$support_content = isset( $_POST['apparel_service_support_content'] ) ? wp_kses_post( wp_unslash( $_POST['apparel_service_support_content'] ) ) : '';
 	update_post_meta( $post_id, '_service_support_content', $support_content );
-
-	$live_preview_url = isset( $_POST['apparel_service_live_preview_url'] ) ? esc_url_raw( wp_unslash( $_POST['apparel_service_live_preview_url'] ) ) : '';
-	if ( $live_preview_url ) {
-		update_post_meta( $post_id, '_service_live_preview_url', $live_preview_url );
-	} else {
-		delete_post_meta( $post_id, '_service_live_preview_url' );
-	}
 
 	$screenshot_ids = array();
 	if ( isset( $_POST['apparel_service_screenshot_ids'] ) ) {
@@ -320,17 +316,31 @@ function apparel_service_save_meta( $post_id, $post ) {
 	update_post_meta( $post_id, '_service_screenshot_ids', $screenshot_ids );
 
 	$variations_input = isset( $_POST['apparel_service_variations'] ) ? (array) wp_unslash( $_POST['apparel_service_variations'] ) : array();
-	$existing_variations = get_post_meta( $post_id, '_service_variations', true );
-	if ( ! is_array( $existing_variations ) ) {
-		$existing_variations = array();
-	}
 
 	$variations = apparel_service_sanitize_variations( $variations_input );
-	$variations = apparel_service_sync_variations_with_stripe( $variations, $existing_variations, $post_id );
 
 	update_post_meta( $post_id, '_service_variations', $variations );
 }
 add_action( 'save_post_service', 'apparel_service_save_meta', 10, 2 );
+
+/**
+ * Sanitize decimal input.
+ *
+ * @param string $value Raw decimal input.
+ * @return string
+ */
+function apparel_service_sanitize_decimal( $value ) {
+	$value = trim( sanitize_text_field( $value ) );
+	if ( '' === $value ) {
+		return '';
+	}
+
+	if ( ! is_numeric( $value ) ) {
+		return '';
+	}
+
+	return (string) ( 0 + $value );
+}
 
 /**
  * Sanitize variations input.
@@ -341,10 +351,9 @@ add_action( 'save_post_service', 'apparel_service_save_meta', 10, 2 );
 function apparel_service_sanitize_variations( $variations_input ) {
 	$variations = array();
 	$index      = 0;
-	$default_currency = get_option( 'default_currency', '' );
 
 	foreach ( $variations_input as $variation ) {
-		if ( empty( $variation['name'] ) && empty( $variation['price_amount'] ) ) {
+		if ( empty( $variation['name'] ) && empty( $variation['price'] ) ) {
 			continue;
 		}
 
@@ -353,15 +362,18 @@ function apparel_service_sanitize_variations( $variations_input ) {
 			$variation_id = wp_generate_uuid4();
 		}
 
+		$price = isset( $variation['price'] ) ? apparel_service_sanitize_decimal( $variation['price'] ) : '';
+		$sale_price = isset( $variation['sale_price'] ) ? apparel_service_sanitize_decimal( $variation['sale_price'] ) : '';
+
+		if ( '' === $price || ( '' !== $sale_price && (float) $sale_price > (float) $price ) ) {
+			$sale_price = '';
+		}
+
 		$variations[ $index ] = array(
-			'variation_id'        => $variation_id,
-			'name'                => isset( $variation['name'] ) ? sanitize_text_field( $variation['name'] ) : '',
-			'price_amount'        => isset( $variation['price_amount'] ) ? absint( $variation['price_amount'] ) : 0,
-			'currency'            => isset( $variation['currency'] ) && $variation['currency'] ? strtolower( sanitize_text_field( $variation['currency'] ) ) : strtolower( sanitize_text_field( $default_currency ) ),
-			'stripe_product_id'   => isset( $variation['stripe_product_id'] ) ? sanitize_text_field( $variation['stripe_product_id'] ) : '',
-			'stripe_price_id'     => isset( $variation['stripe_price_id'] ) ? sanitize_text_field( $variation['stripe_price_id'] ) : '',
-			'stripe_payment_link' => isset( $variation['stripe_payment_link'] ) ? esc_url_raw( $variation['stripe_payment_link'] ) : '',
-			'active'              => ! empty( $variation['active'] ) ? 1 : 0,
+			'variation_id' => $variation_id,
+			'name'         => isset( $variation['name'] ) ? sanitize_text_field( $variation['name'] ) : '',
+			'price'        => $price,
+			'sale_price'   => $sale_price,
 		);
 
 		$index++;
