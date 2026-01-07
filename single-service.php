@@ -181,7 +181,7 @@ while ( have_posts() ) :
 
 				?>
 
-				<div class="service-support-tiles" aria-label="<?php esc_attr_e( 'Support links', 'apparel' ); ?>">
+				<div class="service-support-tiles service-support-tiles-compact" aria-label="<?php esc_attr_e( 'Support links', 'apparel' ); ?>">
 					<?php foreach ( $support_tiles as $tile ) : ?>
 						<?php
 						$tile_class   = isset( $tile['class'] ) ? $tile['class'] : '';
@@ -361,6 +361,17 @@ while ( have_posts() ) :
 				</div>
 			</div>
 		</section>
+	</div>
+
+	<div class="service-sticky-buy" data-service-sticky aria-hidden="true">
+		<button class="service-button service-button-cta" type="button" data-service-buy-sticky <?php echo empty( $checkout_url ) ? 'disabled' : ''; ?>>
+			<span class="service-button-icon" aria-hidden="true">
+				<svg viewBox="0 0 24 24" role="presentation" focusable="false">
+					<path d="M7 6h-2l-1 2v2h2l2.7 8.4a2 2 0 0 0 1.9 1.4h7.8a2 2 0 0 0 1.9-1.4L22 10H8.4L7 6zm3 14a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm9 0a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/>
+				</svg>
+			</span>
+			<?php esc_html_e( 'Buy Now', 'apparel' ); ?>
+		</button>
 	</div>
 
 	<div class="service-gallery" data-service-gallery data-images="<?php echo esc_attr( $gallery_json ); ?>" aria-hidden="true">

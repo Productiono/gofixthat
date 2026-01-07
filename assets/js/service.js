@@ -41,6 +41,8 @@
 
 	const pricingCard = document.querySelector('.service-pricing-card');
 	const buyButton = document.querySelector('[data-service-buy]');
+	const stickyWrapper = document.querySelector('[data-service-sticky]');
+	const stickyButton = document.querySelector('[data-service-buy-sticky]');
 	const priceCurrent = document.querySelector('.service-price-current');
 	const priceOriginal = document.querySelector('.service-price-original');
 
@@ -93,6 +95,9 @@
 			url.searchParams.set('variation_id', variationId);
 		}
 		buyButton.dataset.checkoutUrl = url.toString();
+		if (stickyButton) {
+			stickyButton.dataset.checkoutUrl = url.toString();
+		}
 	};
 
 	if (pricingCard) {
@@ -132,6 +137,64 @@
 			}
 		});
 	}
+
+	if (stickyButton) {
+		stickyButton.addEventListener('click', () => {
+			const url = stickyButton.dataset.checkoutUrl || '';
+			if (url) {
+				window.location.href = url;
+			}
+		});
+	}
+
+	const toggleStickyVisibility = (isVisible) => {
+		if (!stickyWrapper) {
+			return;
+		}
+		stickyWrapper.classList.toggle('is-visible', !isVisible);
+		stickyWrapper.setAttribute('aria-hidden', isVisible ? 'true' : 'false');
+	};
+
+	const setupStickyObserver = () => {
+		if (!buyButton || !stickyWrapper) {
+			return null;
+		}
+		const mediaQuery = window.matchMedia('(max-width: 600px)');
+		let observer;
+		const handleUpdate = () => {
+			if (!mediaQuery.matches) {
+				toggleStickyVisibility(true);
+				if (observer) {
+					observer.disconnect();
+					observer = null;
+				}
+				return;
+			}
+			if (!observer && 'IntersectionObserver' in window) {
+				observer = new IntersectionObserver(
+					(entries) => {
+						entries.forEach((entry) => {
+							toggleStickyVisibility(entry.isIntersecting);
+						});
+					},
+					{
+						threshold: 0.1,
+					}
+				);
+				observer.observe(buyButton);
+			}
+		};
+		handleUpdate();
+		mediaQuery.addEventListener('change', handleUpdate);
+		return () => {
+			mediaQuery.removeEventListener('change', handleUpdate);
+			if (observer) {
+				observer.disconnect();
+			}
+		};
+	};
+
+	setupStickyObserver();
 
 	const gallery = document.querySelector('[data-service-gallery]');
 	const galleryTrigger = document.querySelector('[data-service-screenshots]');
