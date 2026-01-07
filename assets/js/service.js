@@ -159,14 +159,31 @@
 		if (!stickyWrapper) {
 			return null;
 		}
+		const servicePage = document.querySelector('.service-page');
 		const mediaQuery = window.matchMedia('(max-width: 600px)');
-		const handleUpdate = () => {
-			toggleStickyVisibility(!mediaQuery.matches);
+		const updateStickyLayout = () => {
+			const isMobile = mediaQuery.matches;
+			toggleStickyVisibility(!isMobile);
+			if (!servicePage) {
+				return;
+			}
+			if (isMobile) {
+				window.requestAnimationFrame(() => {
+					const height = stickyWrapper.offsetHeight || 0;
+					if (height) {
+						servicePage.style.setProperty('--service-sticky-offset', `${height}px`);
+					}
+				});
+			} else {
+				servicePage.style.removeProperty('--service-sticky-offset');
+			}
 		};
-		handleUpdate();
-		mediaQuery.addEventListener('change', handleUpdate);
+		updateStickyLayout();
+		mediaQuery.addEventListener('change', updateStickyLayout);
+		window.addEventListener('resize', updateStickyLayout);
 		return () => {
-			mediaQuery.removeEventListener('change', handleUpdate);
+			mediaQuery.removeEventListener('change', updateStickyLayout);
+			window.removeEventListener('resize', updateStickyLayout);
 		};
 	};
 
