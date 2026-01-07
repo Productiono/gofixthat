@@ -7,6 +7,13 @@
 	font-family: "Inter", "Helvetica Neue", Arial, sans-serif;
 }
 
+.service-page {
+	display: grid;
+	grid-template-columns: minmax(0, 2fr) minmax(300px, 1fr);
+	gap: 32px;
+	align-items: start;
+}
+
 .service-breadcrumbs {
 	display: flex;
 	gap: 8px;
@@ -14,6 +21,7 @@
 	color: #8b95a7;
 	align-items: center;
 	margin-bottom: 14px;
+	grid-column: 1 / -1;
 }
 
 .service-breadcrumbs a {
@@ -29,6 +37,7 @@
 	border-bottom: 1px solid #e2e8f0;
 	padding-bottom: 18px;
 	margin-bottom: 22px;
+	grid-column: 1 / -1;
 }
 
 .service-title {
@@ -82,20 +91,22 @@
 }
 
 .service-main {
-	display: grid;
-	grid-template-columns: minmax(0, 2fr) minmax(300px, 1fr);
-	gap: 32px;
-	align-items: start;
+	display: contents;
 }
 
 .service-main-left {
 	display: flex;
 	flex-direction: column;
 	gap: 16px;
+	grid-column: 1 / 2;
 }
 
 .service-main-right {
 	align-self: start;
+	position: sticky;
+	top: 120px;
+	grid-column: 2 / 3;
+	grid-row: 3 / -1;
 }
 
 .service-preview {
@@ -244,8 +255,6 @@
 	padding: 18px 18px 20px;
 	background: #fff;
 	box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
-	position: sticky;
-	top: 120px;
 }
 
 .service-license {
@@ -403,6 +412,7 @@
 
 .service-variations {
 	margin: 36px 0 20px;
+	grid-column: 1 / 2;
 }
 
 .service-variations h2 {
@@ -434,6 +444,7 @@
 .service-tabs {
 	margin-top: 28px;
 	border-top: 1px solid #e2e8f0;
+	grid-column: 1 / 2;
 }
 
 .service-tab-list {
@@ -711,11 +722,16 @@
 }
 
 @media (max-width: 960px) {
+	.service-page {
+		display: block;
+	}
+
 	.service-main {
+		display: grid;
 		grid-template-columns: 1fr;
 	}
 
-	.service-pricing-card {
+	.service-main-right {
 		position: static;
 	}
 
