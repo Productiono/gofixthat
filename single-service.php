@@ -116,35 +116,90 @@ while ( have_posts() ) :
 		<section class="service-main">
 			<div class="service-main-left">
 				<div class="service-preview">
-					<?php if ( $preview_image ) : ?>
-						<?php echo $preview_image; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-					<?php else : ?>
-						<div class="service-preview-placeholder">
-							<span><?php esc_html_e( 'Preview not available', 'apparel' ); ?></span>
-						</div>
-					<?php endif; ?>
-				</div>
+					<div class="service-preview-media">
+						<?php if ( $preview_image ) : ?>
+							<?php echo $preview_image; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+						<?php else : ?>
+							<div class="service-preview-placeholder">
+								<span><?php esc_html_e( 'Preview not available', 'apparel' ); ?></span>
+							</div>
+						<?php endif; ?>
+					</div>
 
-				<div class="service-actions">
-					<?php if ( $live_preview_url ) : ?>
-						<a class="service-button service-button-primary" href="<?php echo esc_url( $live_preview_url ); ?>" target="_blank" rel="noopener noreferrer">
+					<div class="service-preview-actions">
+						<?php if ( $live_preview_url ) : ?>
+							<a class="service-button service-button-primary" href="<?php echo esc_url( $live_preview_url ); ?>" target="_blank" rel="noopener noreferrer">
+								<?php esc_html_e( 'Live Preview', 'apparel' ); ?>
+								<span class="service-button-icon" aria-hidden="true">
+									<svg viewBox="0 0 24 24" role="presentation" focusable="false">
+										<path d="M14 3h7v7h-2V6.4l-9.3 9.3-1.4-1.4 9.3-9.3H14V3z"/>
+										<path d="M5 5h6v2H7v10h10v-4h2v6H5V5z"/>
+									</svg>
+								</span>
+							</a>
+						<?php endif; ?>
+						<button class="service-button service-button-secondary" type="button" data-service-screenshots <?php echo empty( $gallery_images ) ? 'disabled' : ''; ?>>
+							<?php esc_html_e( 'Screenshots', 'apparel' ); ?>
 							<span class="service-button-icon" aria-hidden="true">
 								<svg viewBox="0 0 24 24" role="presentation" focusable="false">
-									<path d="M3 5h18a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1h-7v2h3a1 1 0 1 1 0 2H7a1 1 0 1 1 0-2h3v-2H3a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1zm1 2v8h16V7H4z"/>
+									<path d="M4 6h5l1.5 2H20a1 1 0 0 1 1 1v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a1 1 0 0 1 1-1zm1 4v8h14v-8H5zm3 6l2-2 2 2 3-3 3 3H8z"/>
 								</svg>
 							</span>
-							<?php esc_html_e( 'Live Preview', 'apparel' ); ?>
-						</a>
-					<?php endif; ?>
-					<button class="service-button service-button-secondary" type="button" data-service-screenshots <?php echo empty( $gallery_images ) ? 'disabled' : ''; ?>>
-						<span class="service-button-icon" aria-hidden="true">
-							<svg viewBox="0 0 24 24" role="presentation" focusable="false">
-								<path d="M4 5h4l1.2 2H20a1 1 0 0 1 1 1v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a1 1 0 0 1 1-1zm1 4v8h14V9H5zm3 6l2-2 2 2 3-3 3 3H8z"/>
-							</svg>
-						</span>
-						<?php esc_html_e( 'Screenshots', 'apparel' ); ?>
-					</button>
+						</button>
+					</div>
 				</div>
+
+				<?php
+				$support_tiles = array(
+					array(
+						'label' => __( 'Get Support', 'apparel' ),
+						'url'   => $support_url,
+						'icon'  => '<svg viewBox="0 0 24 24" role="presentation" focusable="false"><path d="M5 6h10a3 3 0 0 1 3 3v8h-2v-8a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h5v2H5a3 3 0 0 1-3-3V9a3 3 0 0 1 3-3zm13 10l4 3v-3h-4z"/></svg>',
+					),
+					array(
+						'label' => __( 'Documentation', 'apparel' ),
+						'url'   => $docs_url,
+						'icon'  => '<svg viewBox="0 0 24 24" role="presentation" focusable="false"><path d="M6 4h10a3 3 0 0 1 3 3v11a2 2 0 0 1-2 2H6a3 3 0 0 1-3-3V7a3 3 0 0 1 3-3zm0 2a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11V7a1 1 0 0 0-1-1H6z"/></svg>',
+					),
+					array(
+						'label' => __( 'Pre-Sales Questions?', 'apparel' ),
+						'url'   => $presales_url,
+						'icon'  => '<svg viewBox="0 0 24 24" role="presentation" focusable="false"><path d="M12 3a7 7 0 0 1 0 14h-1v3l-4-3H7a7 7 0 0 1 5-14zm0 4a2 2 0 0 0-2 2H8a4 4 0 1 1 6 3.5V14h-4v-2h2a2 2 0 0 0 0-4zm-1 9h2v2h-2v-2z"/></svg>',
+					),
+					array(
+						'label' => __( 'Hire Us', 'apparel' ),
+						'url'   => $hire_url,
+						'icon'  => '<svg viewBox="0 0 24 24" role="presentation" focusable="false"><path d="M7 11h10l4 2v5h-2v-3H5v3H3v-5l4-2zm5-7a4 4 0 0 1 4 4h-2a2 2 0 0 0-4 0H8a4 4 0 0 1 4-4z"/></svg>',
+					),
+					array(
+						'label' => __( 'Join our WhatsApp channel now!', 'apparel' ),
+						'url'   => get_post_meta( $service_id, '_service_whatsapp_url', true ),
+						'icon'  => '<svg viewBox="0 0 32 32" role="presentation" focusable="false"><path d="M16 5a11 11 0 0 0-9.3 16.9L5 27l5.3-1.4A11 11 0 1 0 16 5zm0 2a9 9 0 0 1 0 18 8.7 8.7 0 0 1-4.5-1.3l-.6-.3-3.1.8.8-3-.3-.6A9 9 0 0 1 16 7zm-3.1 4.7c.2-.4.4-.4.7-.4h.6c.2 0 .4.1.5.4l.7 1.6c.1.2.1.4 0 .6l-.3.6c-.1.2-.1.4 0 .6.5 1 1.3 1.8 2.3 2.3.2.1.4.1.6 0l.6-.3c.2-.1.4-.1.6 0l1.6.7c.2.1.4.3.4.5v.6c0 .3 0 .6-.4.7-.4.2-1 .4-1.7.3-1.8-.3-3.5-1.8-4.7-3-1.2-1.2-2.6-2.9-3-4.7-.1-.7.1-1.3.3-1.7z"/></svg>',
+						'class' => 'service-support-tile-whatsapp',
+					),
+				);
+
+				$visible_tiles = array_filter(
+					$support_tiles,
+					static function ( $tile ) {
+						return ! empty( $tile['url'] );
+					}
+				);
+				?>
+
+				<?php if ( ! empty( $visible_tiles ) ) : ?>
+					<div class="service-support-tiles" aria-label="<?php esc_attr_e( 'Support links', 'apparel' ); ?>">
+						<?php foreach ( $visible_tiles as $tile ) : ?>
+							<?php $tile_class = isset( $tile['class'] ) ? $tile['class'] : ''; ?>
+							<a class="service-support-tile <?php echo esc_attr( $tile_class ); ?>" href="<?php echo esc_url( $tile['url'] ); ?>" target="_blank" rel="noopener noreferrer">
+								<span class="service-support-icon" aria-hidden="true">
+									<?php echo $tile['icon']; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+								</span>
+								<span class="service-support-label"><?php echo esc_html( $tile['label'] ); ?></span>
+							</a>
+						<?php endforeach; ?>
+					</div>
+				<?php endif; ?>
 			</div>
 
 			<aside class="service-main-right">

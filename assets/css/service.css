@@ -91,7 +91,7 @@
 .service-main-left {
 	display: flex;
 	flex-direction: column;
-	gap: 12px;
+	gap: 16px;
 }
 
 .service-main-right {
@@ -100,14 +100,20 @@
 
 .service-preview {
 	background: #fff;
-	border: 1px solid #e2e8f0;
-	border-radius: 10px;
-	padding: 18px;
+	border: 1px solid #d9e1ea;
+	border-radius: 12px;
+	padding: 18px 18px 16px;
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+	box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
+}
+
+.service-preview-media {
 	display: flex;
 	justify-content: center;
 	align-items: center;
-	min-height: 340px;
-	box-shadow: 0 10px 26px rgba(15, 23, 42, 0.08);
+	min-height: 320px;
 }
 
 .service-preview-image {
@@ -121,27 +127,28 @@
 	align-items: center;
 	justify-content: center;
 	width: 100%;
-	min-height: 320px;
+	min-height: 300px;
 	background: #f3f4f6;
 	border-radius: 8px;
 	color: #9ca3af;
 	font-size: 14px;
 }
 
-.service-actions {
+.service-preview-actions {
 	display: flex;
-	gap: 10px;
-	margin-top: 6px;
+	gap: 14px;
 	justify-content: center;
+	padding-bottom: 4px;
+	flex-wrap: wrap;
 }
 
 .service-button {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	gap: 8px;
-	padding: 8px 16px;
-	border-radius: 4px;
+	gap: 10px;
+	padding: 10px 18px;
+	border-radius: 6px;
 	font-weight: 600;
 	font-size: 13px;
 	text-decoration: none;
@@ -152,35 +159,48 @@
 
 .service-button-icon {
 	display: inline-flex;
-	width: 16px;
-	height: 16px;
+	width: 28px;
+	height: 22px;
+	align-items: center;
+	justify-content: center;
+	border-radius: 4px;
+	background: rgba(255, 255, 255, 0.2);
 	color: currentColor;
 }
 
 .service-button-icon svg {
-	width: 16px;
-	height: 16px;
+	width: 14px;
+	height: 14px;
 	fill: currentColor;
 }
 
 .service-button-primary {
-	background: #0f6cb6;
+	background: #0a74c9;
 	color: #fff;
+	box-shadow: inset 0 0 0 1px rgba(5, 65, 112, 0.2);
 }
 
 .service-button-primary:hover {
-	background: #0d5a97;
+	background: #0865af;
 	color: #fff;
 }
 
+.service-button-primary .service-button-icon {
+	background: rgba(255, 255, 255, 0.28);
+}
+
 .service-button-secondary {
-	background: #f1f5f9;
-	color: #1f2937;
-	border-color: #d7dde5;
+	background: #6b7280;
+	color: #fff;
+	border-color: #5f6770;
 }
 
 .service-button-secondary:hover {
-	background: #e2e8f0;
+	background: #5c636b;
+}
+
+.service-button-secondary .service-button-icon {
+	background: rgba(255, 255, 255, 0.2);
 }
 
 .service-button-cta {
@@ -458,23 +478,72 @@
 
 .service-support-tiles {
 	display: grid;
-	grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-	gap: 12px;
+	grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+	gap: 10px;
 }
 
 .service-support-tile {
-	border: 1px solid #e2e8f0;
-	border-radius: 10px;
-	padding: 14px;
+	border: 1px solid #d1d5db;
+	border-radius: 6px;
+	padding: 12px 10px 10px;
 	background: #fff;
 	text-decoration: none;
 	color: inherit;
-	transition: box-shadow 0.2s ease, transform 0.2s ease;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 6px;
+	min-height: 86px;
+	transition: box-shadow 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
 }
 
 .service-support-tile:hover {
-	box-shadow: 0 10px 24px rgba(15, 23, 42, 0.1);
-	transform: translateY(-2px);
+	box-shadow: 0 8px 18px rgba(15, 23, 42, 0.12);
+	transform: translateY(-1px);
+	border-color: #b9c2cc;
+}
+
+.service-support-icon {
+	width: 30px;
+	height: 30px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	color: #1f2937;
+}
+
+.service-support-icon svg {
+	width: 26px;
+	height: 26px;
+	fill: currentColor;
+}
+
+.service-support-label {
+	font-size: 12px;
+	font-weight: 600;
+	color: #6b7280;
+	text-align: center;
+	line-height: 1.2;
+}
+
+.service-support-tile-whatsapp {
+	background: radial-gradient(circle at top left, #19c37d 0%, #0b5ee9 55%, #0a48d9 100%);
+	border: none;
+	color: #fff;
+}
+
+.service-support-tile-whatsapp .service-support-icon {
+	color: #fff;
+}
+
+.service-support-tile-whatsapp .service-support-label {
+	color: #fff;
+	font-weight: 700;
+}
+
+.service-support-tile-whatsapp:hover {
+	box-shadow: 0 12px 22px rgba(13, 94, 233, 0.35);
+	transform: translateY(-1px);
 }
 
 .service-gallery {
