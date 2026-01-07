@@ -159,6 +159,9 @@
 		if (!stickyWrapper) {
 			return null;
 		}
+		if (stickyWrapper.parentElement !== document.body) {
+			document.body.appendChild(stickyWrapper);
+		}
 		const servicePage = document.querySelector('.service-page');
 		const mediaQuery = window.matchMedia('(max-width: 600px)');
 		const updateStickyLayout = () => {
