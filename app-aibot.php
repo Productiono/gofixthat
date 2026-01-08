@@ -426,7 +426,7 @@ get_header(); ?>
 }
 </style>
 
-<div id="primary" class="mbf-content-area">
+<div id="primary" class="mbf-content-area app-aibot-page">
 
 	<?php
 	/**
@@ -451,72 +451,70 @@ get_header(); ?>
 		do_action( 'mbf_page_before' );
 		?>
 
-		<main class="app-aibot-page">
-			<div class="mbf-entry__wrap">
+		<div class="mbf-entry__wrap">
+
+			<?php
+			/**
+			 * The mbf_entry_wrap_start hook.
+			 *
+			 * @since 1.0.0
+			 */
+			do_action( 'mbf_entry_wrap_start' );
+			?>
+
+			<div class="mbf-entry__container">
 
 				<?php
 				/**
-				 * The mbf_entry_wrap_start hook.
+				 * The mbf_entry_container_start hook.
 				 *
 				 * @since 1.0.0
 				 */
-				do_action( 'mbf_entry_wrap_start' );
+				do_action( 'mbf_entry_container_start' );
 				?>
 
-				<div class="mbf-entry__container">
+				<?php
+				/**
+				 * The mbf_entry_content_before hook.
+				 *
+				 * @since 1.0.0
+				 */
+				do_action( 'mbf_entry_content_before' );
+				?>
 
-					<?php
-					/**
-					 * The mbf_entry_container_start hook.
-					 *
-					 * @since 1.0.0
-					 */
-					do_action( 'mbf_entry_container_start' );
-					?>
-
-					<?php
-					/**
-					 * The mbf_entry_content_before hook.
-					 *
-					 * @since 1.0.0
-					 */
-					do_action( 'mbf_entry_content_before' );
-					?>
-
-					<div class="entry-content">
-						<?php the_content(); ?>
-					</div>
-
-					<?php
-					/**
-					 * The mbf_entry_content_after hook.
-					 *
-					 * @since 1.0.0
-					 */
-					do_action( 'mbf_entry_content_after' );
-					?>
-
-					<?php
-					/**
-					 * The mbf_entry_container_end hook.
-					 *
-					 * @since 1.0.0
-					 */
-					do_action( 'mbf_entry_container_end' );
-					?>
-
+				<div class="entry-content">
+					<?php the_content(); ?>
 				</div>
 
 				<?php
 				/**
-				 * The mbf_entry_wrap_end hook.
+				 * The mbf_entry_content_after hook.
 				 *
 				 * @since 1.0.0
 				 */
-				do_action( 'mbf_entry_wrap_end' );
+				do_action( 'mbf_entry_content_after' );
 				?>
+
+				<?php
+				/**
+				 * The mbf_entry_container_end hook.
+				 *
+				 * @since 1.0.0
+				 */
+				do_action( 'mbf_entry_container_end' );
+				?>
+
 			</div>
-		</main>
+
+			<?php
+			/**
+			 * The mbf_entry_wrap_end hook.
+			 *
+			 * @since 1.0.0
+			 */
+			do_action( 'mbf_entry_wrap_end' );
+			?>
+		</div>
 
 		<?php
 		/**
