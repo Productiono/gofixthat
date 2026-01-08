@@ -91,7 +91,7 @@ get_header(); ?>
 		<?php
 	} elseif ( ! get_query_var( 'mbf_have_search' ) ) {
 		?>
-		<div class="entry-content mbf-content-not-found">
+		<div class="entry-content prose mbf-content-not-found">
 
 			<?php if ( is_search() ) { ?>
 				<div class="mbf-content-not-found-content">

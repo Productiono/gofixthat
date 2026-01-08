@@ -43,7 +43,13 @@ if ( ! class_exists( 'Apparel' ) ) {
 			add_theme_support( 'custom-logo' );
 			add_theme_support( 'custom-header' );
 			add_theme_support( 'custom-background' );
-			add_editor_style();
+			add_editor_style(
+				array(
+					'assets/css/tokens.css',
+					'assets/css/global.css',
+					'style.css',
+				)
+			);
 		}
 
 		/**

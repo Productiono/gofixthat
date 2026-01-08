@@ -1,0 +1,245 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text);
+  background-color: var(--bg);
+}
+
+@media (min-width: 768px) {
+  body {
+    font-size: 16px;
+  }
+}
+
+.site,
+.site-content,
+.wp-site-blocks {
+  background-color: var(--bg);
+  color: var(--text);
+}
+
+:where(img) {
+  max-width: 100%;
+  height: auto;
+}
+
+:where(h1, h2, h3, h4, h5, h6) {
+  margin: 0 0 calc(var(--space) * 2);
+  font-family: var(--font-heading);
+  color: var(--text-strong);
+  line-height: 1.25;
+}
+
+h1 {
+  font-size: 28px;
+}
+
+h2 {
+  font-size: 24px;
+}
+
+h3 {
+  font-size: 20px;
+}
+
+h4 {
+  font-size: 18px;
+}
+
+h5 {
+  font-size: 16px;
+}
+
+h6 {
+  font-size: 14px;
+}
+
+p {
+  margin: 0 0 calc(var(--space) * 2);
+}
+
+:where(ul, ol) {
+  margin: 0 0 calc(var(--space) * 2);
+  padding-left: calc(var(--space) * 3);
+}
+
+blockquote {
+  margin: 0 0 calc(var(--space) * 2);
+  padding: calc(var(--space) * 2);
+  border-left: 3px solid var(--border);
+  background: var(--bg-muted);
+  color: var(--text-strong);
+}
+
+code,
+pre {
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  font-size: 0.9em;
+}
+
+pre {
+  margin: 0 0 calc(var(--space) * 2);
+  padding: calc(var(--space) * 2);
+  background: var(--bg-subtle);
+  border-radius: var(--radius);
+  overflow-x: auto;
+}
+
+:where(a) {
+  color: var(--primary);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  transition: color 0.2s ease, text-decoration-color 0.2s ease;
+}
+
+:where(a:hover, a:focus) {
+  color: var(--text-strong);
+  text-decoration-color: var(--text-strong);
+}
+
+:where(a:focus-visible) {
+  outline: none;
+  box-shadow: var(--focus-ring);
+  border-radius: 2px;
+}
+
+:where(button, .button, .wp-element-button, input[type="submit"], input[type="button"], input[type="reset"]) {
+  appearance: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-emphasis);
+  color: var(--text-strong);
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.1;
+  padding: calc(var(--space) * 1.25) calc(var(--space) * 2.5);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+:where(button:hover, .button:hover, .wp-element-button:hover, input[type="submit"]:hover, input[type="button"]:hover, input[type="reset"]:hover) {
+  background: var(--bg-subtle);
+}
+
+:where(button:focus-visible, .button:focus-visible, .wp-element-button:focus-visible, input[type="submit"]:focus-visible, input[type="button"]:focus-visible, input[type="reset"]:focus-visible) {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.btn-primary,
+:where(.wp-block-button.is-style-fill .wp-element-button) {
+  background: var(--primary);
+  color: var(--primary-contrast);
+  border-color: var(--primary);
+}
+
+.btn-primary:hover,
+:where(.wp-block-button.is-style-fill .wp-element-button:hover) {
+  filter: brightness(1.05);
+}
+
+:where(input, select, textarea) {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: calc(var(--space) * 1.25) calc(var(--space) * 1.5);
+  font-family: var(--font-body);
+  font-size: 14px;
+  background: var(--bg);
+  color: var(--text);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+:where(input:focus, select:focus, textarea:focus) {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: var(--focus-ring);
+}
+
+hr,
+:where(.wp-block-separator) {
+  border: none;
+  height: 1px;
+  background: var(--border);
+  margin: calc(var(--space) * 3) 0;
+}
+
+.prose,
+.content,
+.entry-content,
+.wp-block-post-content {
+  color: var(--text);
+}
+
+.prose :where(p, ul, ol, blockquote, pre),
+.content :where(p, ul, ol, blockquote, pre),
+.entry-content :where(p, ul, ol, blockquote, pre),
+.wp-block-post-content :where(p, ul, ol, blockquote, pre) {
+  margin-bottom: calc(var(--space) * 2);
+}
+
+.prose :where(h1, h2, h3, h4, h5, h6),
+.content :where(h1, h2, h3, h4, h5, h6),
+.entry-content :where(h1, h2, h3, h4, h5, h6),
+.wp-block-post-content :where(h1, h2, h3, h4, h5, h6) {
+  margin-top: calc(var(--space) * 3);
+}
+
+.prose :where(.wp-block-image img),
+.entry-content :where(.wp-block-image img),
+.wp-block-post-content :where(.wp-block-image img) {
+  border-radius: var(--radius);
+}
+
+.prose :where(.wp-block-quote),
+.entry-content :where(.wp-block-quote),
+.wp-block-post-content :where(.wp-block-quote) {
+  border-left: 3px solid var(--border);
+  padding-left: calc(var(--space) * 2);
+}
+
+.prose :where(.wp-block-table),
+.entry-content :where(.wp-block-table),
+.wp-block-post-content :where(.wp-block-table) {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.prose :where(.wp-block-table table),
+.entry-content :where(.wp-block-table table),
+.wp-block-post-content :where(.wp-block-table table) {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.prose :where(.wp-block-table th, .wp-block-table td),
+.entry-content :where(.wp-block-table th, .wp-block-table td),
+.wp-block-post-content :where(.wp-block-table th, .wp-block-table td) {
+  border-bottom: 1px solid var(--border);
+  padding: calc(var(--space) * 1.5);
+  text-align: left;
+}
+
+:where(.woocommerce) :where(button, .button, input[type="submit"], input[type="button"], input[type="reset"]) {
+  border-radius: var(--radius);
+}
+
+:where(.woocommerce) :where(input, select, textarea) {
+  border-radius: var(--radius);
+}
