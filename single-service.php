@@ -71,6 +71,7 @@ while ( have_posts() ) :
 	$variation_options     = array();
 	$default_variation     = null;
 	$default_variation_id  = '';
+	$default_price_id      = '';
 	$default_price         = $service_price;
 	$default_sale          = $service_sale;
 	$default_checkout_url  = $checkout_url;
@@ -81,6 +82,7 @@ while ( have_posts() ) :
 		$price              = isset( $variation['price'] ) ? $variation['price'] : '';
 		$sale_price         = isset( $variation['sale_price'] ) ? $variation['sale_price'] : '';
 		$checkout_link      = isset( $variation['stripe_payment_link'] ) ? $variation['stripe_payment_link'] : '';
+		$price_id           = isset( $variation['stripe_price_id'] ) ? $variation['stripe_price_id'] : '';
 		$effective_price    = ( '' !== $sale_price && '' !== $price && (float) $sale_price < (float) $price ) ? $sale_price : $price;
 		$effective_value    = is_numeric( $effective_price ) ? (float) $effective_price : PHP_FLOAT_MAX;
 		$variation_options[] = array(
@@ -89,6 +91,7 @@ while ( have_posts() ) :
 			'price'         => $price,
 			'sale_price'    => $sale_price,
 			'checkout_link' => $checkout_link,
+			'price_id'      => $price_id,
 			'effective'     => $effective_value,
 		);
 
@@ -106,6 +109,7 @@ while ( have_posts() ) :
 		$default_price        = $default_variation['price'];
 		$default_sale         = $default_variation['sale_price'];
 		$default_checkout_url = $default_variation['checkout_link'] ? $default_variation['checkout_link'] : $checkout_url;
+		$default_price_id     = $default_variation['price_id'] ?? '';
 	}
 
 	$service_price_display = apparel_service_format_price( $default_price );
@@ -120,13 +124,17 @@ while ( have_posts() ) :
 	$content               = apply_filters( 'the_content', get_the_content() );
 	$has_h2                = false !== stripos( $content, '<h2' );
 	$pricing_data_attrs    = array(
+		'data-service-id'   => $service_id,
 		'data-price'         => $default_price,
 		'data-sale'          => $default_sale,
 		'data-checkout'      => $default_checkout_url,
+		'data-price-id'      => $default_price_id,
 		'data-base-price'    => $service_price,
 		'data-base-sale'     => $service_sale,
 		'data-base-checkout' => $checkout_url,
+		'data-base-price-id' => $default_price_id,
 		'data-variation'     => $default_variation_id,
+		'data-checkout-endpoint' => rest_url( 'apparel/v1/stripe/checkout-session' ),
 	);
 	?>
 	<div class="service-page">
@@ -273,9 +281,10 @@ while ( have_posts() ) :
 										</div>
 								<?php
 									$variation_checkout = isset( $variation['stripe_payment_link'] ) ? $variation['stripe_payment_link'] : '';
+									$variation_price_id = isset( $variation['stripe_price_id'] ) ? $variation['stripe_price_id'] : '';
 									$button_class       = 'service-button service-button-ghost' . ( $var_id === $default_variation_id ? ' is-selected' : '' );
 									?>
-								<button class="<?php echo esc_attr( $button_class ); ?>" type="button" data-variation-select data-variation-id="<?php echo esc_attr( $var_id ); ?>" data-variation-price="<?php echo esc_attr( $price ); ?>" data-variation-sale="<?php echo esc_attr( $sale_price ); ?>" data-variation-checkout="<?php echo esc_url( $variation_checkout ); ?>">
+								<button class="<?php echo esc_attr( $button_class ); ?>" type="button" data-variation-select data-variation-id="<?php echo esc_attr( $var_id ); ?>" data-variation-price="<?php echo esc_attr( $price ); ?>" data-variation-sale="<?php echo esc_attr( $sale_price ); ?>" data-variation-checkout="<?php echo esc_url( $variation_checkout ); ?>" data-variation-price-id="<?php echo esc_attr( $variation_price_id ); ?>">
 									<?php esc_html_e( 'Select', 'apparel' ); ?>
 								</button>
 									</div>
@@ -379,7 +388,7 @@ while ( have_posts() ) :
 							<div class="service-quantity-control">
 								<select id="service-variation-select" class="service-variation-select" data-service-variation>
 									<?php foreach ( $variation_options as $variation_option ) : ?>
-										<option value="<?php echo esc_attr( $variation_option['id'] ); ?>" data-variation-price="<?php echo esc_attr( $variation_option['price'] ); ?>" data-variation-sale="<?php echo esc_attr( $variation_option['sale_price'] ); ?>" data-variation-checkout="<?php echo esc_url( $variation_option['checkout_link'] ); ?>" <?php selected( $variation_option['id'], $default_variation_id ); ?>>
+										<option value="<?php echo esc_attr( $variation_option['id'] ); ?>" data-variation-price="<?php echo esc_attr( $variation_option['price'] ); ?>" data-variation-sale="<?php echo esc_attr( $variation_option['sale_price'] ); ?>" data-variation-checkout="<?php echo esc_url( $variation_option['checkout_link'] ); ?>" data-variation-price-id="<?php echo esc_attr( $variation_option['price_id'] ?? '' ); ?>" <?php selected( $variation_option['id'], $default_variation_id ); ?>>
 											<?php echo esc_html( $variation_option['name'] ); ?>
 										</option>
 									<?php endforeach; ?>

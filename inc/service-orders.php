@@ -323,6 +323,22 @@ function apparel_service_register_stripe_webhook() {
 add_action( 'rest_api_init', 'apparel_service_register_stripe_webhook' );
 
 /**
+ * Register Stripe checkout session creation endpoint.
+ */
+function apparel_service_register_checkout_session_endpoint() {
+	register_rest_route(
+		'apparel/v1',
+		'/stripe/checkout-session',
+		array(
+			'methods'             => 'POST',
+			'callback'            => 'apparel_service_create_checkout_session',
+			'permission_callback' => '__return_true',
+		)
+	);
+}
+add_action( 'rest_api_init', 'apparel_service_register_checkout_session_endpoint' );
+
+/**
  * Handle Stripe webhook payload.
  *
  * @param WP_REST_Request $request Request object.
@@ -343,6 +359,10 @@ function apparel_service_handle_stripe_webhook( WP_REST_Request $request ) {
 	}
 
 	if ( 'checkout.session.completed' === $event['type'] && ! empty( $event['data']['object'] ) ) {
+		apparel_service_process_checkout_session( $event['data']['object'] );
+	}
+
+	if ( 'checkout.session.async_payment_succeeded' === $event['type'] && ! empty( $event['data']['object'] ) ) {
 		apparel_service_process_checkout_session( $event['data']['object'] );
 	}
 
@@ -374,6 +394,105 @@ function apparel_service_handle_stripe_webhook( WP_REST_Request $request ) {
 	}
 
 	return new WP_REST_Response( array( 'received' => true ), 200 );
+}
+
+/**
+ * Create a Stripe Checkout Session for a service purchase.
+ *
+ * @param WP_REST_Request $request Request object.
+ * @return WP_REST_Response
+ */
+function apparel_service_create_checkout_session( WP_REST_Request $request ) {
+	$params = $request->get_json_params();
+	if ( empty( $params ) ) {
+		$params = $request->get_body_params();
+	}
+
+	$price_id     = isset( $params['price_id'] ) ? sanitize_text_field( wp_unslash( $params['price_id'] ) ) : '';
+	$service_id   = isset( $params['service_id'] ) ? absint( $params['service_id'] ) : 0;
+	$variation_id = isset( $params['variation_id'] ) ? sanitize_text_field( wp_unslash( $params['variation_id'] ) ) : '';
+	$quantity     = isset( $params['quantity'] ) ? absint( $params['quantity'] ) : 1;
+
+	if ( ! $price_id || 0 !== strpos( $price_id, 'price_' ) ) {
+		return new WP_REST_Response( array( 'message' => 'Invalid price ID.' ), 400 );
+	}
+
+	if ( $quantity < 1 ) {
+		$quantity = 1;
+	} elseif ( $quantity > 10 ) {
+		$quantity = 10;
+	}
+
+	$service_match = array();
+	if ( $service_id ) {
+		$service_match = apparel_service_find_service_by_price_id( $price_id );
+		if ( empty( $service_match ) || (int) $service_match['service_id'] !== $service_id ) {
+			return new WP_REST_Response( array( 'message' => 'Price ID does not match service.' ), 400 );
+		}
+	} else {
+		$service_match = apparel_service_find_service_by_price_id( $price_id );
+		if ( empty( $service_match['service_id'] ) ) {
+			return new WP_REST_Response( array( 'message' => 'Price ID does not match a service.' ), 400 );
+		}
+		$service_id = $service_match['service_id'];
+	}
+
+	if ( ! $variation_id && ! empty( $service_match['variation_id'] ) ) {
+		$variation_id = $service_match['variation_id'];
+	}
+
+	$secret_key = apparel_service_get_stripe_secret_key();
+	if ( ! $secret_key ) {
+		return new WP_REST_Response( array( 'message' => 'Stripe secret key is not configured.' ), 500 );
+	}
+
+	$success_url = apparel_service_get_checkout_success_url();
+	$cancel_url  = apparel_service_get_checkout_cancel_url();
+
+	$metadata = array();
+	if ( $service_id ) {
+		$metadata['service_id'] = (string) $service_id;
+		$metadata['service_name'] = get_the_title( $service_id );
+	}
+	if ( $variation_id ) {
+		$metadata['variation_id'] = $variation_id;
+		$variation_name = apparel_service_get_variation_name( $service_id, $variation_id );
+		if ( $variation_name ) {
+			$metadata['variation_name'] = $variation_name;
+		}
+	}
+
+	$body = array(
+		'mode'                       => 'payment',
+		'success_url'                => $success_url,
+		'cancel_url'                 => $cancel_url,
+		'line_items[0][price]'       => $price_id,
+		'line_items[0][quantity]'    => $quantity,
+	);
+
+	foreach ( $metadata as $key => $value ) {
+		if ( '' !== $value && null !== $value ) {
+			$body[ sprintf( 'metadata[%s]', $key ) ] = $value;
+		}
+	}
+
+	$response = apparel_service_stripe_request(
+		$secret_key,
+		'https://api.stripe.com/v1/checkout/sessions',
+		$body
+	);
+
+	if ( ! $response || empty( $response['id'] ) || empty( $response['url'] ) ) {
+		return new WP_REST_Response( array( 'message' => 'Unable to create checkout session.' ), 500 );
+	}
+
+	return new WP_REST_Response(
+		array(
+			'id'  => sanitize_text_field( $response['id'] ),
+			'url' => esc_url_raw( $response['url'] ),
+		),
+		200
+	);
 }
 
 /**
@@ -579,6 +698,33 @@ function apparel_service_update_order_status( $status, $session_id = '', $paymen
 	}
 
 	return $order_id;
+}
+
+/**
+ * Get a service order ID by Stripe checkout session ID.
+ *
+ * @param string $session_id Checkout session ID.
+ * @return int
+ */
+function apparel_service_get_order_id_by_session_id( $session_id ) {
+	if ( ! $session_id ) {
+		return 0;
+	}
+
+	$existing = get_posts(
+		array(
+			'post_type'              => 'service_order',
+			'posts_per_page'         => 1,
+			'fields'                 => 'ids',
+			'meta_key'               => '_stripe_session_id',
+			'meta_value'             => $session_id,
+			'no_found_rows'          => true,
+			'update_post_meta_cache' => true,
+			'update_post_term_cache' => false,
+		)
+	);
+
+	return ! empty( $existing ) ? (int) $existing[0] : 0;
 }
 
 /**

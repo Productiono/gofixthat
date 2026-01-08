@@ -668,6 +668,17 @@ function apparel_service_get_checkout_success_url() {
 }
 
 /**
+ * Build the Stripe checkout cancel URL.
+ *
+ * @return string
+ */
+function apparel_service_get_checkout_cancel_url() {
+	$base_url = untrailingslashit( home_url( '/checkout' ) );
+
+	return add_query_arg( 'canceled', '1', $base_url );
+}
+
+/**
  * Find a Stripe payment link by its URL.
  *
  * @param string $secret_key Stripe secret key.

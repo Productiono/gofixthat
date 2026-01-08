@@ -60,7 +60,9 @@
 			return;
 		}
 		const baseUrl = pricingCard.dataset.checkout || '';
-		if (!baseUrl) {
+		const priceId = pricingCard.dataset.priceId || '';
+		const endpoint = pricingCard.dataset.checkoutEndpoint || '';
+		if (!baseUrl && (!priceId || !endpoint)) {
 			buyButton.dataset.checkoutUrl = '';
 			buyButton.setAttribute('disabled', 'disabled');
 			if (stickyButton) {
@@ -84,10 +86,12 @@
 		const price = data.price || pricingCard.dataset.basePrice || '';
 		const sale = data.sale || pricingCard.dataset.baseSale || '';
 		const checkout = data.checkout || pricingCard.dataset.baseCheckout || '';
+		const priceId = data.priceId || pricingCard.dataset.basePriceId || '';
 		pricingCard.dataset.price = price;
 		pricingCard.dataset.sale = sale;
 		pricingCard.dataset.variation = data.id || '';
 		pricingCard.dataset.checkout = checkout;
+		pricingCard.dataset.priceId = priceId;
 		updatePriceDisplay(price, sale);
 		buildCheckoutUrl();
 	};
@@ -107,6 +111,7 @@
 				sale: button.dataset.variationSale || '',
 				id: button.dataset.variationId || '',
 				checkout: button.dataset.variationCheckout || '',
+				priceId: button.dataset.variationPriceId || '',
 			});
 			if (variationSelect && button.dataset.variationId) {
 				variationSelect.value = button.dataset.variationId;
@@ -134,6 +139,7 @@
 				sale: option.dataset.variationSale || '',
 				id: option.value || '',
 				checkout: option.dataset.variationCheckout || '',
+				priceId: option.dataset.variationPriceId || '',
 			});
 			if (option.value) {
 				variationButtons.forEach((button) => {
@@ -143,21 +149,67 @@
 		});
 	}
 
+	const requestCheckoutSession = async () => {
+		if (!pricingCard) {
+			return;
+		}
+		const endpoint = pricingCard.dataset.checkoutEndpoint || '';
+		const priceId = pricingCard.dataset.priceId || '';
+		if (!endpoint || !priceId) {
+			return;
+		}
+
+		const payload = {
+			price_id: priceId,
+			service_id: pricingCard.dataset.serviceId || '',
+			variation_id: pricingCard.dataset.variation || '',
+			quantity: 1,
+		};
+
+		const response = await fetch(endpoint, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify(payload),
+		});
+
+		if (!response.ok) {
+			throw new Error('Unable to start checkout.');
+		}
+
+		const data = await response.json();
+		if (data.url) {
+			window.location.href = data.url;
+		}
+	};
+
+	const handleCheckoutClick = async (button) => {
+		const url = button.dataset.checkoutUrl || '';
+		if (url) {
+			window.location.href = url;
+			return;
+		}
+
+		button.setAttribute('disabled', 'disabled');
+		button.setAttribute('aria-busy', 'true');
+		try {
+			await requestCheckoutSession();
+		} catch (error) {
+			button.removeAttribute('aria-busy');
+			buildCheckoutUrl();
+		}
+	};
+
 	if (buyButton) {
 		buyButton.addEventListener('click', () => {
-			const url = buyButton.dataset.checkoutUrl || '';
-			if (url) {
-				window.location.href = url;
-			}
+			handleCheckoutClick(buyButton);
 		});
 	}
 
 	if (stickyButton) {
 		stickyButton.addEventListener('click', () => {
-			const url = stickyButton.dataset.checkoutUrl || '';
-			if (url) {
-				window.location.href = url;
-			}
+			handleCheckoutClick(stickyButton);
 		});
 	}
 
