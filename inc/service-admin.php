@@ -567,12 +567,15 @@ function apparel_service_sync_variations_with_stripe( $variations, $existing_var
 		}
 
 		if ( $variation['stripe_price_id'] && ! $variation['stripe_payment_link'] ) {
+			$thank_you_url = esc_url_raw( home_url( '/thank-you/' ) );
 			$payment_link_response = apparel_service_stripe_request(
 				$secret_key,
 				'https://api.stripe.com/v1/payment_links',
 				array(
 					'line_items[0][price]'    => $variation['stripe_price_id'],
 					'line_items[0][quantity]' => 1,
+					'after_completion[type]'  => 'redirect',
+					'after_completion[redirect][url]' => $thank_you_url,
 				)
 			);
 
