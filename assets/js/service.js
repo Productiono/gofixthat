@@ -269,6 +269,17 @@
 	let galleryIndex = 0;
 	let galleryScrollY = 0;
 
+	const updateGalleryControls = () => {
+		const shouldShow = galleryItems.length > 1;
+		[galleryPrev, galleryNext].forEach((button) => {
+			if (!button) {
+				return;
+			}
+			button.hidden = !shouldShow;
+			button.disabled = !shouldShow;
+		});
+	};
+
 	const updateGalleryImage = () => {
 		if (!galleryItems.length || !galleryImage) {
 			return;
@@ -276,6 +287,7 @@
 		const current = galleryItems[galleryIndex];
 		galleryImage.src = current.url;
 		galleryImage.alt = current.alt || '';
+		updateGalleryControls();
 	};
 
 	const lockGalleryScroll = () => {
