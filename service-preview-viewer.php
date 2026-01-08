@@ -10,6 +10,13 @@ $preview_token = (string) get_query_var( 'service_preview_token' );
 $preview_data  = $preview_token ? apparel_service_preview_get_token( $preview_token ) : false;
 $preview_url   = $preview_data && (int) $preview_data['service_id'] === $service_id ? $preview_data['preview_url'] : '';
 
+if ( ! $preview_url && $service_id ) {
+	$preview_url = get_post_meta( $service_id, '_service_live_preview_url', true );
+	if ( $preview_url ) {
+		$preview_token = apparel_service_preview_store_token( $service_id, $preview_url );
+	}
+}
+
 $service_title = $service_id ? get_the_title( $service_id ) : '';
 $service_link  = $service_id ? get_permalink( $service_id ) : home_url( '/' );
 
