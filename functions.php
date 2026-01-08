@@ -165,6 +165,7 @@ if ( ! class_exists( 'Apparel' ) ) {
 			require_once get_theme_file_path( '/inc/actions.php' );
 			require_once get_theme_file_path( '/inc/partials.php' );
 			require_once get_theme_file_path( '/inc/metabox.php' );
+			require_once get_theme_file_path( '/inc/main-page-template.php' );
 			require_once get_theme_file_path( '/inc/service-admin.php' );
 			require_once get_theme_file_path( '/inc/service-orders.php' );
 			require_once get_theme_file_path( '/inc/theme-tags.php' );
