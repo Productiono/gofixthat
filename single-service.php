@@ -23,8 +23,12 @@ if ( ! function_exists( 'apparel_service_format_price' ) ) {
 	}
 }
 
-while ( have_posts() ) :
-	the_post();
+?>
+<main id="primary" class="site-main content-area">
+	<div class="entry-content">
+		<?php
+		while ( have_posts() ) :
+			the_post();
 	$service_id        = get_the_ID();
 	$service_price     = get_post_meta( $service_id, '_service_price', true );
 	$service_sale      = get_post_meta( $service_id, '_service_sale_price', true );
@@ -407,7 +411,9 @@ while ( have_posts() ) :
 			<button class="service-gallery-nav" type="button" data-gallery-next aria-label="<?php esc_attr_e( 'Next screenshot', 'apparel' ); ?>">›</button>
 		</div>
 	</div>
-<?php endwhile; ?>
+		<?php endwhile; ?>
+	</div>
+</main>
 
 <?php
 get_footer();

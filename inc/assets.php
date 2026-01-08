@@ -118,7 +118,7 @@ JS;
 		wp_register_style( 'apparel-fonts', 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap', array(), null );
 		wp_register_style( 'apparel-tokens', get_template_directory_uri() . '/assets/css/tokens.css', array( 'apparel-fonts' ), $version );
 		wp_register_style( 'apparel-global', get_template_directory_uri() . '/assets/css/global.css', array( 'apparel-tokens' ), $version );
-		wp_register_style( 'mbf-styles', mbf_style( get_template_directory_uri() . '/style.css' ), array(), $version );
+		wp_register_style( 'mbf-styles', mbf_style( get_template_directory_uri() . '/style.css' ), array( 'apparel-global' ), $version );
 		wp_register_style( 'apparel-service', get_template_directory_uri() . '/assets/css/service.css', array(), $version );
 
 		// Enqueue theme styles.
