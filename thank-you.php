@@ -21,13 +21,32 @@ remove_action( 'mbf_main_before', 'mbf_page_header', 100 );
 $session_id           = isset( $_GET['session_id'] ) ? sanitize_text_field( wp_unslash( $_GET['session_id'] ) ) : '';
 $payment_state        = 'missing';
 $session              = null;
+$order_id             = 0;
+$order_status         = '';
 $payment_status       = '';
 $payment_intent       = null;
 $payment_intent_state = '';
 $line_items           = array();
 
 if ( $session_id && 0 === strpos( $session_id, 'cs_' ) ) {
-	$session = apparel_service_get_stripe_checkout_session( $session_id );
+	$order_id = apparel_service_get_order_id_by_session_id( $session_id );
+
+	if ( $order_id ) {
+		$order_status = get_post_meta( $order_id, '_status', true );
+		if ( 'paid' === $order_status ) {
+			$payment_state = 'confirmed';
+		} elseif ( 'refunded' === $order_status ) {
+			$payment_state = 'refunded';
+		} elseif ( 'failed' === $order_status ) {
+			$payment_state = 'invalid';
+		} else {
+			$payment_state = 'processing';
+		}
+	}
+
+	if ( ! $order_id ) {
+		$session = apparel_service_get_stripe_checkout_session( $session_id );
+	}
 
 	if ( $session ) {
 		$payment_state  = 'unconfirmed';
@@ -73,6 +92,10 @@ switch ( $payment_state ) {
 		$thank_you_heading = __( 'Payment processing', 'apparel' );
 		$thank_you_message = __( 'Your payment is still processing. Please refresh this page in a moment to see the confirmed status.', 'apparel' );
 		break;
+	case 'refunded':
+		$thank_you_heading = __( 'Payment refunded', 'apparel' );
+		$thank_you_message = __( 'Your payment was refunded. If you have questions, please contact support for assistance.', 'apparel' );
+		break;
 	case 'invalid':
 		$thank_you_heading = __( 'Payment session not found', 'apparel' );
 		$thank_you_message = sprintf(
@@ -100,6 +123,62 @@ switch ( $payment_state ) {
 }
 
 $details = array();
+
+if ( $order_id && in_array( $payment_state, array( 'confirmed', 'refunded', 'processing' ), true ) ) {
+	$order_amount   = get_post_meta( $order_id, '_amount_total', true );
+	$order_currency = get_post_meta( $order_id, '_currency', true );
+	if ( '' !== $order_amount && '' !== $order_currency ) {
+		$details[] = sprintf(
+			/* translators: 1: formatted amount, 2: currency code */
+			__( 'Amount: %1$s %2$s', 'apparel' ),
+			number_format_i18n( (float) $order_amount, 2 ),
+			strtoupper( $order_currency )
+		);
+	}
+
+	$order_email = get_post_meta( $order_id, '_customer_email', true );
+	if ( $order_email ) {
+		$details[] = sprintf(
+			/* translators: %s: customer email */
+			__( 'Email: %s', 'apparel' ),
+			sanitize_email( $order_email )
+		);
+	}
+
+	$order_line_items = get_post_meta( $order_id, '_stripe_line_items', true );
+	if ( is_array( $order_line_items ) ) {
+		foreach ( $order_line_items as $line_item ) {
+			$description = $line_item['description'] ?? '';
+			$quantity    = isset( $line_item['quantity'] ) ? absint( $line_item['quantity'] ) : 1;
+			if ( $description ) {
+				$details[] = sprintf(
+					/* translators: 1: item description, 2: item quantity */
+					__( 'Item: %1$s × %2$d', 'apparel' ),
+					sanitize_text_field( $description ),
+					$quantity
+				);
+			}
+		}
+	}
+
+	$order_variation = get_post_meta( $order_id, '_variation_name', true );
+	if ( $order_variation ) {
+		$details[] = sprintf(
+			/* translators: %s: service name */
+			__( 'Service: %s', 'apparel' ),
+			sanitize_text_field( $order_variation )
+		);
+	} else {
+		$order_service_id = absint( get_post_meta( $order_id, '_service_id', true ) );
+		if ( $order_service_id ) {
+			$details[] = sprintf(
+				/* translators: %s: service name */
+				__( 'Service: %s', 'apparel' ),
+				sanitize_text_field( get_the_title( $order_service_id ) )
+			);
+		}
+	}
+}
 
 if ( $session && 'confirmed' === $payment_state ) {
 	if ( isset( $session['amount_total'], $session['currency'] ) ) {
