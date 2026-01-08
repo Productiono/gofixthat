@@ -820,15 +820,18 @@ function apparel_service_render_stripe_settings_page() {
 
 	if ( isset( $_POST['apparel_service_stripe_settings_nonce'] ) && wp_verify_nonce( $_POST['apparel_service_stripe_settings_nonce'], 'apparel_service_save_stripe_settings' ) ) {
 		$secret_key       = isset( $_POST['stripe_secret_key'] ) ? sanitize_text_field( wp_unslash( $_POST['stripe_secret_key'] ) ) : '';
+		$webhook_secret   = isset( $_POST['stripe_webhook_secret'] ) ? sanitize_text_field( wp_unslash( $_POST['stripe_webhook_secret'] ) ) : '';
 		$default_currency = isset( $_POST['default_currency'] ) ? strtolower( sanitize_text_field( wp_unslash( $_POST['default_currency'] ) ) ) : '';
 
 		update_option( 'stripe_secret_key', $secret_key );
+		update_option( 'stripe_webhook_secret', $webhook_secret );
 		update_option( 'default_currency', $default_currency );
 
 		echo '<div class="updated"><p>' . esc_html__( 'Stripe settings saved.', 'apparel' ) . '</p></div>';
 	}
 
 	$secret_key       = get_option( 'stripe_secret_key', '' );
+	$webhook_secret   = get_option( 'stripe_webhook_secret', '' );
 	$default_currency = get_option( 'default_currency', '' );
 	?>
 	<div class="wrap">
@@ -842,6 +845,14 @@ function apparel_service_render_stripe_settings_page() {
 					</th>
 					<td>
 						<input name="stripe_secret_key" id="stripe_secret_key" type="text" class="regular-text" value="<?php echo esc_attr( $secret_key ); ?>" />
+					</td>
+				</tr>
+				<tr>
+					<th scope="row">
+						<label for="stripe_webhook_secret"><?php esc_html_e( 'Stripe Webhook Secret', 'apparel' ); ?></label>
+					</th>
+					<td>
+						<input name="stripe_webhook_secret" id="stripe_webhook_secret" type="text" class="regular-text" value="<?php echo esc_attr( $webhook_secret ); ?>" />
 					</td>
 				</tr>
 				<tr>
