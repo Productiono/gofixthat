@@ -983,6 +983,34 @@ if ( ! function_exists( 'apparel_service_get_stripe_secret_key' ) ) {
 	}
 }
 
+if ( ! function_exists( 'apparel_service_get_stripe_webhook_secret' ) ) {
+	/**
+	 * Get the Stripe webhook secret from a secure source.
+	 *
+	 * @return string
+	 */
+	function apparel_service_get_stripe_webhook_secret() {
+		$webhook_secret = '';
+
+		if ( defined( 'STRIPE_WEBHOOK_SECRET' ) && STRIPE_WEBHOOK_SECRET ) {
+			$webhook_secret = STRIPE_WEBHOOK_SECRET;
+		}
+
+		if ( ! $webhook_secret ) {
+			$env_secret = getenv( 'STRIPE_WEBHOOK_SECRET' );
+			if ( $env_secret ) {
+				$webhook_secret = $env_secret;
+			}
+		}
+
+		if ( ! $webhook_secret ) {
+			$webhook_secret = get_option( 'stripe_webhook_secret' );
+		}
+
+		return $webhook_secret;
+	}
+}
+
 if ( ! function_exists( 'apparel_service_get_stripe_checkout_session' ) ) {
 	/**
 	 * Fetch a Stripe Checkout Session.

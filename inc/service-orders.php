@@ -331,7 +331,7 @@ add_action( 'rest_api_init', 'apparel_service_register_stripe_webhook' );
 function apparel_service_handle_stripe_webhook( WP_REST_Request $request ) {
 	$payload    = $request->get_body();
 	$sig_header = $request->get_header( 'stripe-signature' );
-	$secret     = get_option( 'stripe_webhook_secret', '' );
+	$secret     = apparel_service_get_stripe_webhook_secret();
 
 	if ( ! $secret || ! $sig_header || ! apparel_service_verify_stripe_signature( $payload, $sig_header, $secret ) ) {
 		return new WP_REST_Response( array( 'message' => 'Invalid signature.' ), 400 );
@@ -443,10 +443,32 @@ function apparel_service_process_checkout_session( $session ) {
 
 	$secret_key = apparel_service_get_stripe_secret_key();
 
-	$service_match = apparel_service_find_service_by_session( $session, $secret_key );
+	$line_items   = array();
+	$service_match = apparel_service_find_service_by_session( $session, $secret_key, $line_items );
 	$service_id    = $service_match['service_id'] ?? 0;
 	$variation_id  = $service_match['variation_id'] ?? '';
 	$quantity      = $service_match['quantity'] ?? 1;
+
+	$line_item_summary = array();
+	if ( ! empty( $line_items ) ) {
+		foreach ( $line_items as $line_item ) {
+			$price_id     = $line_item['price']['id'] ?? '';
+			$product_id   = $line_item['price']['product'] ?? '';
+			$description  = $line_item['description'] ?? '';
+			$item_quantity = isset( $line_item['quantity'] ) ? absint( $line_item['quantity'] ) : 1;
+			$amount_total = isset( $line_item['amount_total'] ) ? ( (float) $line_item['amount_total'] / 100 ) : '';
+			$currency     = isset( $line_item['currency'] ) ? strtolower( $line_item['currency'] ) : '';
+
+			$line_item_summary[] = array(
+				'price_id'    => sanitize_text_field( $price_id ),
+				'product_id'  => sanitize_text_field( $product_id ),
+				'description' => sanitize_text_field( $description ),
+				'quantity'    => $item_quantity,
+				'amount_total' => $amount_total,
+				'currency'    => $currency,
+			);
+		}
+	}
 
 	$amount_total = isset( $session['amount_total'] ) ? ( (float) $session['amount_total'] / 100 ) : '';
 	$currency     = isset( $session['currency'] ) ? strtolower( $session['currency'] ) : '';
@@ -495,6 +517,7 @@ function apparel_service_process_checkout_session( $session ) {
 		'variation_id'            => $variation_id,
 		'variation_name'          => $variation_name,
 		'quantity'                => $quantity,
+		'line_items'              => $line_item_summary,
 	);
 
 	apparel_service_upsert_order( $order_data );
@@ -563,18 +586,19 @@ function apparel_service_update_order_status( $status, $session_id = '', $paymen
  *
  * @param array  $session    Checkout session data.
  * @param string $secret_key Stripe secret key.
+ * @param array  $line_items Checkout session line items.
  * @return array
  */
-function apparel_service_find_service_by_session( $session, $secret_key ) {
+function apparel_service_find_service_by_session( $session, $secret_key, &$line_items = array() ) {
 	$payment_link_id = isset( $session['payment_link'] ) ? sanitize_text_field( $session['payment_link'] ) : '';
 	if ( $payment_link_id ) {
 		$service_match = apparel_service_find_service_by_payment_link( $payment_link_id, $secret_key );
 		if ( $service_match ) {
+			$line_items = array();
 			return $service_match;
 		}
 	}
 
-	$line_items = array();
 	if ( $secret_key && ! empty( $session['id'] ) ) {
 		$line_items = apparel_service_get_checkout_line_items( $secret_key, $session['id'] );
 	}
@@ -879,6 +903,7 @@ function apparel_service_upsert_order( $order_data ) {
 	update_post_meta( $order_id, '_variation_id', sanitize_text_field( $order_data['variation_id'] ?? '' ) );
 	update_post_meta( $order_id, '_variation_name', sanitize_text_field( $order_data['variation_name'] ?? '' ) );
 	update_post_meta( $order_id, '_quantity', absint( $order_data['quantity'] ?? 1 ) );
+	update_post_meta( $order_id, '_stripe_line_items', $order_data['line_items'] ?? array() );
 
 	return $order_id;
 }
