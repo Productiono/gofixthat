@@ -25,7 +25,7 @@ $payment_status       = '';
 $payment_intent       = null;
 $payment_intent_state = '';
 
-if ( $session_id ) {
+if ( $session_id && 0 === strpos( $session_id, 'cs_' ) ) {
 	$session = apparel_service_get_stripe_checkout_session( $session_id );
 
 	if ( $session ) {
@@ -52,6 +52,8 @@ if ( $session_id ) {
 	} else {
 		$payment_state = 'invalid';
 	}
+} elseif ( $session_id ) {
+	$payment_state = 'invalid';
 }
 
 $support_url = home_url( '/contact' );
@@ -124,9 +126,6 @@ if ( $session && 'confirmed' === $payment_state ) {
 	}
 }
 
-if ( $session && 'confirmed' === $payment_state && function_exists( 'apparel_service_process_checkout_session' ) ) {
-	apparel_service_process_checkout_session( $session );
-}
 ?>
 
 <div id="primary" class="mbf-content-area">

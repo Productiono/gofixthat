@@ -346,6 +346,33 @@ function apparel_service_handle_stripe_webhook( WP_REST_Request $request ) {
 		apparel_service_process_checkout_session( $event['data']['object'] );
 	}
 
+	if ( 'checkout.session.async_payment_failed' === $event['type'] && ! empty( $event['data']['object'] ) ) {
+		$session = $event['data']['object'];
+		apparel_service_update_order_status(
+			'failed',
+			sanitize_text_field( $session['id'] ?? '' ),
+			sanitize_text_field( $session['payment_intent'] ?? '' )
+		);
+	}
+
+	if ( 'payment_intent.payment_failed' === $event['type'] && ! empty( $event['data']['object'] ) ) {
+		$payment_intent = $event['data']['object'];
+		apparel_service_update_order_status(
+			'failed',
+			'',
+			sanitize_text_field( $payment_intent['id'] ?? '' )
+		);
+	}
+
+	if ( 'charge.refunded' === $event['type'] && ! empty( $event['data']['object'] ) ) {
+		$charge = $event['data']['object'];
+		apparel_service_update_order_status(
+			'refunded',
+			'',
+			sanitize_text_field( $charge['payment_intent'] ?? '' )
+		);
+	}
+
 	return new WP_REST_Response( array( 'received' => true ), 200 );
 }
 
@@ -471,6 +498,64 @@ function apparel_service_process_checkout_session( $session ) {
 	);
 
 	apparel_service_upsert_order( $order_data );
+}
+
+/**
+ * Update an order status by Stripe session or payment intent ID.
+ *
+ * @param string $status Status value.
+ * @param string $session_id Checkout session ID.
+ * @param string $payment_intent_id Payment intent ID.
+ * @return int
+ */
+function apparel_service_update_order_status( $status, $session_id = '', $payment_intent_id = '' ) {
+	if ( ! $status || ( ! $session_id && ! $payment_intent_id ) ) {
+		return 0;
+	}
+
+	$existing = array();
+	if ( $session_id ) {
+		$existing = get_posts(
+			array(
+				'post_type'              => 'service_order',
+				'posts_per_page'         => 1,
+				'fields'                 => 'ids',
+				'meta_key'               => '_stripe_session_id',
+				'meta_value'             => $session_id,
+				'no_found_rows'          => true,
+				'update_post_meta_cache' => false,
+				'update_post_term_cache' => false,
+			)
+		);
+	}
+
+	if ( empty( $existing ) && $payment_intent_id ) {
+		$existing = get_posts(
+			array(
+				'post_type'              => 'service_order',
+				'posts_per_page'         => 1,
+				'fields'                 => 'ids',
+				'meta_key'               => '_stripe_payment_intent_id',
+				'meta_value'             => $payment_intent_id,
+				'no_found_rows'          => true,
+				'update_post_meta_cache' => false,
+				'update_post_term_cache' => false,
+			)
+		);
+	}
+
+	if ( empty( $existing ) ) {
+		return 0;
+	}
+
+	$order_id = (int) $existing[0];
+	update_post_meta( $order_id, '_status', sanitize_text_field( $status ) );
+
+	if ( $payment_intent_id ) {
+		update_post_meta( $order_id, '_stripe_payment_intent_id', sanitize_text_field( $payment_intent_id ) );
+	}
+
+	return $order_id;
 }
 
 /**
