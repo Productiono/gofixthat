@@ -98,10 +98,12 @@ if ( ! function_exists( 'apparel_service_get_download_link' ) ) {
 		}
 
 		if ( $variation_id ) {
+			$variation_id = (string) $variation_id;
 			$variations = get_post_meta( $service_id, '_service_variations', true );
 			if ( is_array( $variations ) ) {
 				foreach ( $variations as $variation ) {
-					if ( ! empty( $variation['variation_id'] ) && $variation['variation_id'] === $variation_id ) {
+					$stored_variation_id = isset( $variation['variation_id'] ) ? (string) $variation['variation_id'] : '';
+					if ( $stored_variation_id && $stored_variation_id === $variation_id ) {
 						if ( ! empty( $variation['download_link'] ) ) {
 							return esc_url_raw( $variation['download_link'] );
 						}
