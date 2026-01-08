@@ -10208,6 +10208,9 @@ div[class*=" gallery-columns-"] {
 /*--------------------------------------------------------------
 ## Main Page Hero
 --------------------------------------------------------------*/
+.page-template-main-page .mbf-entry__title {
+	display: none;
+}
 .mbf-main-page-hero {
 	background-color: var(--mbf-color-contrast-50);
 	padding: 60px 0 40px;
@@ -10218,24 +10221,29 @@ div[class*=" gallery-columns-"] {
 	}
 }
 .mbf-main-page-hero__inner {
-	max-width: var(--mbf-entry-content-large-width);
+	max-width: none;
 	margin: 0 auto;
-	padding: 0 20px;
+	padding: 0;
 	display: flex;
 	flex-direction: column;
 	gap: 2rem;
 }
 @media (min-width: 992px) {
 	.mbf-main-page-hero__inner {
-		padding: 0 30px;
 		gap: 2.5rem;
 	}
 }
 .mbf-main-page-hero__content {
 	max-width: 760px;
+	margin: 0 auto;
+	text-align: center;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 1rem;
 }
 .mbf-main-page-hero__title {
-	margin-bottom: 0.75rem;
+	margin: 0;
 }
 .mbf-main-page-hero__subtitle {
 	font-size: 1.125rem;
@@ -10298,5 +10306,61 @@ div[class*=" gallery-columns-"] {
 	margin: 0;
 }
 .mbf-main-page-hero__cta {
-	margin-top: 0.5rem;
+	margin-top: 0.25rem;
+}
+
+/*--------------------------------------------------------------
+## Main Page Stats
+--------------------------------------------------------------*/
+.mbf-main-page-stats {
+	background-color: #3c3c3c;
+	color: #ffffff;
+	padding: 48px 0;
+}
+@media (min-width: 992px) {
+	.mbf-main-page-stats {
+		padding: 64px 0;
+	}
+}
+.mbf-main-page-stats__inner {
+	display: flex;
+	flex-direction: column;
+	gap: 2rem;
+	text-align: center;
+}
+.mbf-main-page-stats__title {
+	color: inherit;
+	margin: 0;
+}
+.mbf-main-page-stats__grid {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 24px;
+}
+@media (min-width: 768px) {
+	.mbf-main-page-stats__grid {
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+	}
+}
+@media (min-width: 1200px) {
+	.mbf-main-page-stats__grid {
+		grid-template-columns: repeat(5, minmax(0, 1fr));
+	}
+}
+.mbf-main-page-stats__item {
+	display: flex;
+	flex-direction: column;
+	gap: 0.35rem;
+	align-items: center;
+}
+.mbf-main-page-stats__value {
+	font-size: 2rem;
+	font-weight: 600;
+	letter-spacing: 0.02em;
+}
+.mbf-main-page-stats__label {
+	font-size: 0.875rem;
+	color: rgba(255, 255, 255, 0.75);
+	text-transform: uppercase;
+	letter-spacing: 0.06em;
 }
