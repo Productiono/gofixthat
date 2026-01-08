@@ -101,11 +101,17 @@ if ( ! function_exists( 'apparel_service_get_download_link' ) ) {
 			$variations = get_post_meta( $service_id, '_service_variations', true );
 			if ( is_array( $variations ) ) {
 				foreach ( $variations as $variation ) {
-					if ( ! empty( $variation['variation_id'] ) && $variation['variation_id'] === $variation_id && ! empty( $variation['download_link'] ) ) {
-						return esc_url_raw( $variation['download_link'] );
+					if ( ! empty( $variation['variation_id'] ) && $variation['variation_id'] === $variation_id ) {
+						if ( ! empty( $variation['download_link'] ) ) {
+							return esc_url_raw( $variation['download_link'] );
+						}
+
+						return '';
 					}
 				}
 			}
+
+			return '';
 		}
 
 		$service_download_link = get_post_meta( $service_id, '_service_download_link', true );
