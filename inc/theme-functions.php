@@ -955,6 +955,34 @@ if ( ! function_exists( 'apparel_service_maybe_create_thank_you_page' ) ) {
 }
 add_action( 'init', 'apparel_service_maybe_create_thank_you_page' );
 
+if ( ! function_exists( 'apparel_service_get_stripe_secret_key' ) ) {
+	/**
+	 * Get the Stripe secret key from a secure source.
+	 *
+	 * @return string
+	 */
+	function apparel_service_get_stripe_secret_key() {
+		$secret_key = '';
+
+		if ( defined( 'STRIPE_SECRET_KEY' ) && STRIPE_SECRET_KEY ) {
+			$secret_key = STRIPE_SECRET_KEY;
+		}
+
+		if ( ! $secret_key ) {
+			$env_key = getenv( 'STRIPE_SECRET_KEY' );
+			if ( $env_key ) {
+				$secret_key = $env_key;
+			}
+		}
+
+		if ( ! $secret_key ) {
+			$secret_key = get_option( 'stripe_secret_key' );
+		}
+
+		return $secret_key;
+	}
+}
+
 if ( ! function_exists( 'apparel_service_get_stripe_checkout_session' ) ) {
 	/**
 	 * Fetch a Stripe Checkout Session.
@@ -963,13 +991,51 @@ if ( ! function_exists( 'apparel_service_get_stripe_checkout_session' ) ) {
 	 * @return array|false
 	 */
 	function apparel_service_get_stripe_checkout_session( $session_id ) {
-		$secret_key = get_option( 'stripe_secret_key' );
+		$secret_key = apparel_service_get_stripe_secret_key();
 		if ( ! $secret_key || ! $session_id ) {
 			return false;
 		}
 
 		$response = wp_remote_get(
 			sprintf( 'https://api.stripe.com/v1/checkout/sessions/%s', rawurlencode( $session_id ) ),
+			array(
+				'headers' => array(
+					'Authorization' => 'Bearer ' . $secret_key,
+				),
+				'timeout' => 20,
+			)
+		);
+
+		if ( is_wp_error( $response ) ) {
+			return false;
+		}
+
+		$code = wp_remote_retrieve_response_code( $response );
+		$body = json_decode( wp_remote_retrieve_body( $response ), true );
+
+		if ( $code < 200 || $code >= 300 ) {
+			return false;
+		}
+
+		return $body;
+	}
+}
+
+if ( ! function_exists( 'apparel_service_get_stripe_payment_intent' ) ) {
+	/**
+	 * Fetch a Stripe Payment Intent.
+	 *
+	 * @param string $payment_intent_id Payment intent ID.
+	 * @return array|false
+	 */
+	function apparel_service_get_stripe_payment_intent( $payment_intent_id ) {
+		$secret_key = apparel_service_get_stripe_secret_key();
+		if ( ! $secret_key || ! $payment_intent_id ) {
+			return false;
+		}
+
+		$response = wp_remote_get(
+			sprintf( 'https://api.stripe.com/v1/payment_intents/%s', rawurlencode( $payment_intent_id ) ),
 			array(
 				'headers' => array(
 					'Authorization' => 'Bearer ' . $secret_key,
