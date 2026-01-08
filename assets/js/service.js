@@ -267,6 +267,7 @@
 	const galleryNext = document.querySelector('[data-gallery-next]');
 	let galleryItems = [];
 	let galleryIndex = 0;
+	let galleryScrollY = 0;
 
 	const updateGalleryImage = () => {
 		if (!galleryItems.length || !galleryImage) {
@@ -277,13 +278,33 @@
 		galleryImage.alt = current.alt || '';
 	};
 
+	const lockGalleryScroll = () => {
+		galleryScrollY = window.scrollY || window.pageYOffset || 0;
+		document.body.style.position = 'fixed';
+		document.body.style.top = `-${galleryScrollY}px`;
+		document.body.style.left = '0';
+		document.body.style.right = '0';
+		document.body.style.width = '100%';
+		document.body.classList.add('service-gallery-open');
+	};
+
+	const unlockGalleryScroll = () => {
+		document.body.classList.remove('service-gallery-open');
+		document.body.style.position = '';
+		document.body.style.top = '';
+		document.body.style.left = '';
+		document.body.style.right = '';
+		document.body.style.width = '';
+		window.scrollTo(0, galleryScrollY);
+	};
+
 	const openGallery = () => {
 		if (!gallery || !galleryItems.length) {
 			return;
 		}
 		gallery.classList.add('is-active');
 		gallery.setAttribute('aria-hidden', 'false');
-		document.body.classList.add('service-gallery-open');
+		lockGalleryScroll();
 		updateGalleryImage();
 	};
 
@@ -293,7 +314,7 @@
 		}
 		gallery.classList.remove('is-active');
 		gallery.setAttribute('aria-hidden', 'true');
-		document.body.classList.remove('service-gallery-open');
+		unlockGalleryScroll();
 	};
 
 	if (gallery) {
