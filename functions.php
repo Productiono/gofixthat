@@ -152,6 +152,7 @@ if ( ! class_exists( 'Apparel' ) ) {
 			require_once get_theme_file_path( '/core/theme-demos/class-theme-demos.php' );
 			require_once get_theme_file_path( '/core/customizer/class-customizer.php' );
 			require_once get_theme_file_path( '/core/promo-banner/class-promo-banner.php' );
+			require_once get_theme_file_path( '/inc/service-preview.php' );
 			require_once get_theme_file_path( '/inc/assets.php' );
 			require_once get_theme_file_path( '/inc/widgets-init.php' );
 			require_once get_theme_file_path( '/inc/theme-functions.php' );

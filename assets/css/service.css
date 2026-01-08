@@ -120,13 +120,13 @@
 
 .service-preview {
 	background: #fff;
-	border: 1px solid #d9e1ea;
-	border-radius: 12px;
+	border: 1px solid var(--docs-border);
+	border-radius: 1px;
 	padding: 18px 18px 16px;
 	display: flex;
 	flex-direction: column;
 	gap: 16px;
-	box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
+	box-shadow: none;
 }
 
 .service-preview-media {
@@ -138,7 +138,7 @@
 
 .service-preview-image {
 	max-width: 100%;
-	border-radius: 8px;
+	border-radius: 1px;
 	height: auto;
 }
 
@@ -149,7 +149,7 @@
 	width: 100%;
 	min-height: 300px;
 	background: #f3f4f6;
-	border-radius: 8px;
+	border-radius: 1px;
 	color: #9ca3af;
 	font-size: 14px;
 }
@@ -168,14 +168,14 @@
 	justify-content: center;
 	gap: 10px;
 	padding: 10px 18px;
-	border-radius: 10px;
+	border-radius: 4px;
 	font-weight: 600;
 	font-size: 14px;
 	text-decoration: none;
 	border: 1px solid transparent;
 	min-height: 40px;
 	cursor: pointer;
-	transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, color 0.2s ease;
+	transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
 
 .service-button-icon {
@@ -199,7 +199,7 @@
 	background: #1f2937;
 	color: #fff;
 	border-color: #1f2937;
-	box-shadow: 0 8px 16px rgba(15, 23, 42, 0.18);
+	box-shadow: none;
 }
 
 .service-button-primary:hover {
@@ -221,7 +221,7 @@
 	font-weight: 600;
 	letter-spacing: 0;
 	padding: 10px 18px;
-	border-radius: 10px;
+	border-radius: 4px;
 	text-transform: none;
 }
 
@@ -247,9 +247,9 @@
 	font-size: 14px;
 	font-weight: 600;
 	letter-spacing: 0;
-	border-radius: 10px;
+	border-radius: 4px;
 	text-transform: none;
-	box-shadow: 0 8px 16px rgba(15, 23, 42, 0.18);
+	box-shadow: none;
 }
 
 .service-button-cta:hover,
@@ -280,11 +280,11 @@
 }
 
 .service-pricing-card {
-	border: 1px solid #e2e8f0;
-	border-radius: 10px;
+	border: 1px solid var(--docs-border);
+	border-radius: 1px;
 	padding: 18px 18px 20px;
 	background: #fff;
-	box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+	box-shadow: none;
 }
 
 .service-license {
@@ -407,8 +407,8 @@
 
 .service-vendor-card {
 	margin-top: 18px;
-	border: 1px solid #e2e8f0;
-	border-radius: 10px;
+	border: 1px solid var(--docs-border);
+	border-radius: 1px;
 	padding: 18px;
 	background: #fff;
 	display: flex;
@@ -416,13 +416,13 @@
 	gap: 12px;
 	align-items: center;
 	text-align: center;
-	box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
+	box-shadow: none;
 }
 
 .service-vendor-avatar img {
 	width: 72px;
 	height: 72px;
-	border-radius: 12px;
+	border-radius: 1px;
 }
 
 .service-vendor-info h3 {
@@ -457,8 +457,8 @@
 }
 
 .service-variation {
-	border: 1px solid #e5e7eb;
-	border-radius: 12px;
+	border: 1px solid var(--docs-border);
+	border-radius: 1px;
 	padding: 14px 16px;
 	background: #fff;
 	display: flex;
@@ -591,8 +591,8 @@
 }
 
 .service-support-tile {
-	border: 1px solid #d1d5db;
-	border-radius: 6px;
+	border: 1px solid var(--docs-border);
+	border-radius: 1px;
 	padding: 14px 12px;
 	background: #fff;
 	text-decoration: none;
@@ -602,12 +602,10 @@
 	align-items: center;
 	gap: 8px;
 	min-height: 92px;
-	transition: box-shadow 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+	transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .service-support-tile:hover {
-	box-shadow: 0 8px 18px rgba(15, 23, 42, 0.12);
-	transform: translateY(-1px);
 	border-color: #b9c2cc;
 }
 
@@ -641,7 +639,7 @@
 
 .service-support-tile-whatsapp {
 	background: radial-gradient(circle at top left, #19c37d 0%, #0b5ee9 55%, #0a48d9 100%);
-	border: none;
+	border: 1px solid var(--docs-border);
 	color: #fff;
 }
 
@@ -655,8 +653,7 @@
 }
 
 .service-support-tile-whatsapp:hover {
-	box-shadow: 0 12px 22px rgba(13, 94, 233, 0.35);
-	transform: translateY(-1px);
+	border-color: #0b5ee9;
 }
 
 .service-sticky-buy {
@@ -668,8 +665,8 @@
 	max-width: 100%;
 	padding: 10px 12px calc(14px + env(safe-area-inset-bottom));
 	background: rgba(255, 255, 255, 0.98);
-	border-top: 1px solid #e2e8f0;
-	box-shadow: 0 -8px 18px rgba(15, 23, 42, 0.12);
+	border-top: 1px solid var(--docs-border);
+	box-shadow: none;
 	z-index: 9990;
 	display: none;
 }
@@ -724,7 +721,8 @@
 .service-gallery-content {
 	position: relative;
 	background: #0f172a;
-	border-radius: 18px;
+	border-radius: 1px;
+	border: 1px solid var(--docs-border);
 	padding: 48px 40px 32px;
 	display: flex;
 	flex-direction: column;
@@ -738,7 +736,7 @@
 	height: min(92dvh, 720px);
 	box-sizing: border-box;
 	overflow: auto;
-	box-shadow: 0 28px 60px rgba(15, 23, 42, 0.45);
+	box-shadow: none;
 	z-index: 1;
 	-webkit-overflow-scrolling: touch;
 	scrollbar-width: thin;
@@ -834,11 +832,11 @@ body.service-gallery-open {
 }
 
 .service-card {
-	border: 1px solid #e5e7eb;
-	border-radius: 14px;
+	border: 1px solid var(--docs-border);
+	border-radius: 1px;
 	overflow: hidden;
 	background: #fff;
-	box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+	box-shadow: none;
 	display: flex;
 	flex-direction: column;
 }
@@ -852,7 +850,7 @@ body.service-gallery-open {
 .service-card-image {
 	width: 100%;
 	height: auto;
-	border-radius: 8px;
+	border-radius: 1px;
 }
 
 .service-card-placeholder {
@@ -861,7 +859,7 @@ body.service-gallery-open {
 	justify-content: center;
 	min-height: 180px;
 	background: #f3f4f6;
-	border-radius: 8px;
+	border-radius: 1px;
 	color: #9ca3af;
 }
 
@@ -1000,8 +998,8 @@ body.service-gallery-open {
 		max-height: 80vh;
 		max-height: 80dvh;
 		padding: calc(48px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right)) calc(20px + env(safe-area-inset-bottom)) calc(16px + env(safe-area-inset-left));
-		border-radius: 16px;
-		box-shadow: 0 24px 50px rgba(15, 23, 42, 0.4);
+		border-radius: 1px;
+		box-shadow: none;
 		background: #0f172a;
 	}
 
@@ -1027,4 +1025,131 @@ body.service-gallery-open {
 		right: 12px;
 	}
 
+}
+
+.service-preview-viewer {
+	background: #f8fafc;
+	--docs-border: var(--mbf-color-border, #e3e3e3);
+}
+
+.service-preview-viewer__page {
+	--preview-footer-height: 78px;
+	min-height: 100vh;
+	min-height: 100dvh;
+	display: flex;
+	flex-direction: column;
+	background: #fff;
+	color: #0f172a;
+}
+
+.service-preview-viewer__header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	padding: 14px 18px;
+	border-bottom: 1px solid var(--docs-border);
+	background: #fff;
+}
+
+.service-preview-viewer__label {
+	font-size: 15px;
+	font-weight: 600;
+}
+
+.service-preview-viewer__back {
+	font-size: 13px;
+	text-decoration: none;
+	color: #0f6cb6;
+	border: 1px solid var(--docs-border);
+	border-radius: 4px;
+	padding: 6px 10px;
+	transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.service-preview-viewer__back:hover {
+	background: #f1f5f9;
+	border-color: #cbd5e1;
+	color: #0f6cb6;
+}
+
+.service-preview-viewer__main {
+	flex: 1 1 auto;
+	padding: 0 0 calc(var(--preview-footer-height) + env(safe-area-inset-bottom));
+	background: #f8fafc;
+}
+
+.service-preview-viewer__frame {
+	width: 100%;
+	height: 100%;
+	min-height: calc(100vh - var(--preview-footer-height));
+	min-height: calc(100dvh - var(--preview-footer-height));
+	border: none;
+	display: block;
+	background: #fff;
+}
+
+.service-preview-viewer__empty {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-height: calc(100vh - var(--preview-footer-height));
+	min-height: calc(100dvh - var(--preview-footer-height));
+	color: #64748b;
+	font-size: 14px;
+}
+
+.service-preview-viewer__footer {
+	position: fixed;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+	padding: 12px 18px calc(12px + env(safe-area-inset-bottom));
+	border-top: 1px solid var(--docs-border);
+	background: #fff;
+	box-shadow: none;
+	z-index: 20;
+}
+
+.service-preview-viewer__meta {
+	display: grid;
+	gap: 4px;
+	font-size: 13px;
+}
+
+.service-preview-viewer__name {
+	font-weight: 600;
+}
+
+.service-preview-viewer__price {
+	color: #16a34a;
+	font-weight: 700;
+}
+
+.service-preview-viewer__buy {
+	white-space: nowrap;
+}
+
+@media (max-width: 600px) {
+	.service-preview-viewer__page {
+		--preview-footer-height: 96px;
+	}
+
+	.service-preview-viewer__header {
+		flex-direction: column;
+		align-items: flex-start;
+	}
+
+	.service-preview-viewer__footer {
+		flex-direction: column;
+		align-items: stretch;
+	}
+
+	.service-preview-viewer__buy {
+		width: 100%;
+	}
 }
