@@ -923,3 +923,72 @@ if ( ! function_exists( 'mbf_get_page_by_title' ) ) {
 		return $page_got_by_title;
 	}
 }
+
+if ( ! function_exists( 'apparel_service_maybe_create_thank_you_page' ) ) {
+	/**
+	 * Ensure the thank you page exists.
+	 */
+	function apparel_service_maybe_create_thank_you_page() {
+		$page = get_page_by_path( 'thank-you' );
+
+		if ( $page instanceof WP_Post ) {
+			if ( 'thank-you.php' !== get_page_template_slug( $page->ID ) ) {
+				update_post_meta( $page->ID, '_wp_page_template', 'thank-you.php' );
+			}
+			return;
+		}
+
+		$page_id = wp_insert_post(
+			array(
+				'post_title'   => __( 'Thank You', 'apparel' ),
+				'post_status'  => 'publish',
+				'post_type'    => 'page',
+				'post_name'    => 'thank-you',
+				'post_content' => '',
+			)
+		);
+
+		if ( ! is_wp_error( $page_id ) ) {
+			update_post_meta( $page_id, '_wp_page_template', 'thank-you.php' );
+		}
+	}
+}
+add_action( 'init', 'apparel_service_maybe_create_thank_you_page' );
+
+if ( ! function_exists( 'apparel_service_get_stripe_checkout_session' ) ) {
+	/**
+	 * Fetch a Stripe Checkout Session.
+	 *
+	 * @param string $session_id Checkout session ID.
+	 * @return array|false
+	 */
+	function apparel_service_get_stripe_checkout_session( $session_id ) {
+		$secret_key = get_option( 'stripe_secret_key' );
+		if ( ! $secret_key || ! $session_id ) {
+			return false;
+		}
+
+		$response = wp_remote_get(
+			sprintf( 'https://api.stripe.com/v1/checkout/sessions/%s', rawurlencode( $session_id ) ),
+			array(
+				'headers' => array(
+					'Authorization' => 'Bearer ' . $secret_key,
+				),
+				'timeout' => 20,
+			)
+		);
+
+		if ( is_wp_error( $response ) ) {
+			return false;
+		}
+
+		$code = wp_remote_retrieve_response_code( $response );
+		$body = json_decode( wp_remote_retrieve_body( $response ), true );
+
+		if ( $code < 200 || $code >= 300 ) {
+			return false;
+		}
+
+		return $body;
+	}
+}

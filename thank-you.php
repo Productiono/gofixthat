@@ -11,6 +11,26 @@ get_header();
 // Remove default title outputs for this template.
 remove_action( 'mbf_main_before', 'mbf_entry_header', 10 );
 remove_action( 'mbf_main_before', 'mbf_page_header', 100 );
+
+$session_id        = isset( $_GET['session_id'] ) ? sanitize_text_field( wp_unslash( $_GET['session_id'] ) ) : '';
+$payment_confirmed = true;
+
+if ( $session_id ) {
+	$session = apparel_service_get_stripe_checkout_session( $session_id );
+
+	$payment_confirmed = $session && (
+		( isset( $session['payment_status'] ) && 'paid' === $session['payment_status'] ) ||
+		( isset( $session['status'] ) && 'complete' === $session['status'] )
+	);
+}
+
+$thank_you_heading = $payment_confirmed
+	? __( 'Thank you — your payment is confirmed', 'apparel' )
+	: __( 'Payment not confirmed', 'apparel' );
+
+$thank_you_message = $payment_confirmed
+	? __( 'We’ve received your payment and our team will be in touch as soon as possible to help you get started.', 'apparel' )
+	: __( 'We could not confirm your payment. If you believe this is an error, please contact support.', 'apparel' );
 ?>
 
 <div id="primary" class="mbf-content-area">
@@ -35,11 +55,11 @@ remove_action( 'mbf_main_before', 'mbf_page_header', 100 );
 						</span>
 
 						<h1 id="mbf-thank-you-heading" class="mbf-thank-you__headline">
-							<?php esc_html_e( 'Thank you — your information has been submitted', 'apparel' ); ?>
+							<?php echo esc_html( $thank_you_heading ); ?>
 						</h1>
 
 						<p class="mbf-thank-you__message">
-							<?php esc_html_e( 'We’ve received your details and our team will be in touch as soon as possible to help you get started.', 'apparel' ); ?>
+							<?php echo esc_html( $thank_you_message ); ?>
 						</p>
 
 						<div class="mbf-thank-you__actions">
