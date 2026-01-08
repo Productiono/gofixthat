@@ -568,9 +568,7 @@ function apparel_service_sync_variations_with_stripe( $variations, $existing_var
 		}
 
 		if ( $variation['stripe_price_id'] && ! $variation['stripe_payment_link'] ) {
-			$thank_you_url = esc_url_raw(
-				add_query_arg( 'session_id', '{CHECKOUT_SESSION_ID}', home_url( '/thank-you/' ) )
-			);
+			$thank_you_url = apparel_service_build_stripe_thank_you_url();
 			$payment_link_response = apparel_service_stripe_request(
 				$secret_key,
 				'https://api.stripe.com/v1/payment_links',
@@ -638,9 +636,7 @@ function apparel_service_maybe_update_payment_link_redirect( $payment_link_url )
 		return;
 	}
 
-	$thank_you_url = esc_url_raw(
-		add_query_arg( 'session_id', '{CHECKOUT_SESSION_ID}', home_url( '/thank-you/' ) )
-	);
+	$thank_you_url = apparel_service_build_stripe_thank_you_url();
 
 	$after_completion = $payment_link['after_completion'] ?? array();
 	$redirect_url     = $after_completion['redirect']['url'] ?? '';
@@ -706,6 +702,18 @@ function apparel_service_find_payment_link_by_url( $secret_key, $payment_link_ur
 	}
 
 	return false;
+}
+
+/**
+ * Build the Stripe redirect URL with the Checkout Session placeholder intact.
+ *
+ * @return string
+ */
+function apparel_service_build_stripe_thank_you_url() {
+	$base_url = esc_url_raw( home_url( '/thank-you/' ) );
+	$url      = add_query_arg( 'session_id', 'CHECKOUT_SESSION_ID', $base_url );
+
+	return str_replace( 'session_id=CHECKOUT_SESSION_ID', 'session_id={CHECKOUT_SESSION_ID}', $url );
 }
 
 /**
