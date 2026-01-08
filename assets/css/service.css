@@ -690,14 +690,14 @@
 .service-gallery {
 	position: fixed;
 	inset: 0;
+	width: 100vw;
 	height: 100vh;
 	height: 100dvh;
-	width: 100vw;
-	background: rgba(2, 6, 23, 0.72);
+	background: transparent;
 	display: none;
 	align-items: center;
 	justify-content: center;
-	z-index: 13000;
+	z-index: 20000;
 	padding: 12px;
 	box-sizing: border-box;
 	overflow: hidden;
@@ -709,26 +709,47 @@
 }
 
 .service-gallery-overlay {
-\tposition: fixed;
-\tinset: 0;
+	position: fixed;
+	inset: 0;
+	width: 100vw;
+	height: 100vh;
+	height: 100dvh;
+	background: rgba(2, 6, 23, 0.72);
+	z-index: 0;
+	touch-action: none;
 }
 
 .service-gallery-content {
 	position: relative;
 	background: #0f172a;
-	border-radius: 14px;
-	padding: 52px 56px 32px;
+	border-radius: 18px;
+	padding: 48px 40px 32px;
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	max-width: 960px;
-	width: min(960px, calc(100vw - 24px));
-	max-height: calc(100vh - 24px);
-	max-height: calc(100dvh - 24px);
+	max-width: min(96vw, 980px);
+	width: min(96vw, 980px);
+	max-height: min(92vh, 720px);
+	max-height: min(92dvh, 720px);
 	height: auto;
 	box-sizing: border-box;
-	overflow: hidden;
+	overflow: auto;
 	box-shadow: 0 28px 60px rgba(15, 23, 42, 0.45);
+	z-index: 1;
+	-webkit-overflow-scrolling: touch;
+	scrollbar-width: thin;
+	scrollbar-color: rgba(148, 163, 184, 0.6) transparent;
+}
+
+.service-gallery-media {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	height: 100%;
+	max-width: 100%;
+	max-height: 100%;
+	overflow: hidden;
 }
 
 .service-gallery-image {
@@ -757,6 +778,7 @@
 	font-size: 22px;
 	cursor: pointer;
 	box-shadow: 0 10px 20px rgba(15, 23, 42, 0.3);
+	z-index: 2;
 }
 
 .service-gallery-nav {
@@ -774,6 +796,7 @@
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
+	z-index: 2;
 }
 
 .service-gallery-nav[data-gallery-prev] {
@@ -963,13 +986,13 @@ body.service-gallery-open {
 	}
 
 	.service-gallery-content {
-		width: calc(100vw - 24px);
-		max-width: calc(100vw - 24px);
-		max-height: calc(100vh - 24px);
-		max-height: calc(100dvh - 24px);
+		width: min(96vw, 980px);
+		max-width: min(96vw, 980px);
+		max-height: min(92vh, 720px);
+		max-height: min(92dvh, 720px);
 		height: auto;
-		padding: 52px 16px 24px;
-		border-radius: 14px;
+		padding: 44px 16px 20px;
+		border-radius: 12px;
 	}
 
 	.service-gallery-image {

@@ -268,6 +268,8 @@
 	let galleryItems = [];
 	let galleryIndex = 0;
 	let galleryScrollY = 0;
+	let bodyOverflow = '';
+	let bodyTouchAction = '';
 
 	const updateGalleryControls = () => {
 		const shouldShow = galleryItems.length > 1;
@@ -292,11 +294,17 @@
 
 	const lockGalleryScroll = () => {
 		galleryScrollY = window.scrollY || window.pageYOffset || 0;
+		bodyOverflow = document.body.style.overflow;
+		bodyTouchAction = document.body.style.touchAction;
 		document.body.classList.add('service-gallery-open');
+		document.body.style.overflow = 'hidden';
+		document.body.style.touchAction = 'none';
 	};
 
 	const unlockGalleryScroll = () => {
 		document.body.classList.remove('service-gallery-open');
+		document.body.style.overflow = bodyOverflow;
+		document.body.style.touchAction = bodyTouchAction;
 		if (galleryScrollY) {
 			window.scrollTo(0, galleryScrollY);
 		}
@@ -322,6 +330,9 @@
 	};
 
 	if (gallery) {
+		if (gallery.parentElement !== document.body) {
+			document.body.appendChild(gallery);
+		}
 		try {
 			galleryItems = JSON.parse(gallery.dataset.images || '[]');
 		} catch (error) {

@@ -403,7 +403,9 @@ while ( have_posts() ) :
 		<div class="service-gallery-content" role="dialog" aria-modal="true">
 			<button class="service-gallery-close" type="button" data-gallery-close aria-label="<?php esc_attr_e( 'Close gallery', 'apparel' ); ?>">×</button>
 			<button class="service-gallery-nav" type="button" data-gallery-prev aria-label="<?php esc_attr_e( 'Previous screenshot', 'apparel' ); ?>">‹</button>
-			<img class="service-gallery-image" alt="" src="" />
+			<div class="service-gallery-media">
+				<img class="service-gallery-image" alt="" src="" />
+			</div>
 			<button class="service-gallery-nav" type="button" data-gallery-next aria-label="<?php esc_attr_e( 'Next screenshot', 'apparel' ); ?>">›</button>
 		</div>
 	</div>
