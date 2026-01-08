@@ -34,10 +34,13 @@ get_header(); ?>
 		?>
 
 		<section class="mbf-main-page-hero">
-			<div class="mbf-main-page-hero__inner">
+			<div class="mbf-main-page-hero__inner mbf-container">
 				<div class="mbf-main-page-hero__content">
-					<h1 class="mbf-main-page-hero__title mbf-entry__title"><?php echo esc_html( $hero['headline'] ); ?></h1>
-					<p class="mbf-main-page-hero__subtitle"><?php echo esc_html( $hero['subheadline'] ); ?></p>
+					<h1 class="mbf-main-page-hero__title"><?php echo esc_html__( 'Power your next growth step with our experts.', 'apparel' ); ?></h1>
+					<p class="mbf-main-page-hero__subtitle"><?php echo esc_html__( 'Choose a specialized team to build, market, or automate your next initiative.', 'apparel' ); ?></p>
+					<div class="mbf-main-page-hero__cta">
+						<a class="mbf-button mbf-button--solid" href="<?php echo esc_url( ! empty( $hero['cta']['link'] ) ? $hero['cta']['link'] : home_url( '/' ) ); ?>"><?php echo esc_html__( 'START FOR FREE', 'apparel' ); ?></a>
+					</div>
 				</div>
 				<div class="mbf-main-page-hero__cards">
 					<?php foreach ( $hero['cards'] as $card ) : ?>
@@ -48,11 +51,33 @@ get_header(); ?>
 						</a>
 					<?php endforeach; ?>
 				</div>
-				<?php if ( ! empty( $hero['cta']['label'] ) && ! empty( $hero['cta']['link'] ) ) : ?>
-					<div class="mbf-main-page-hero__cta">
-						<a class="mbf-button mbf-button--solid" href="<?php echo esc_url( $hero['cta']['link'] ); ?>"><?php echo esc_html( $hero['cta']['label'] ); ?></a>
+			</div>
+		</section>
+		<section class="mbf-main-page-stats">
+			<div class="mbf-main-page-stats__inner mbf-container">
+				<h2 class="mbf-main-page-stats__title"><?php echo esc_html__( 'Growth momentum, measured in outcomes.', 'apparel' ); ?></h2>
+				<div class="mbf-main-page-stats__grid">
+					<div class="mbf-main-page-stats__item">
+						<div class="mbf-main-page-stats__value">50+</div>
+						<div class="mbf-main-page-stats__label"><?php echo esc_html__( 'Specialists on demand', 'apparel' ); ?></div>
 					</div>
-				<?php endif; ?>
+					<div class="mbf-main-page-stats__item">
+						<div class="mbf-main-page-stats__value">3x</div>
+						<div class="mbf-main-page-stats__label"><?php echo esc_html__( 'Faster launch cycles', 'apparel' ); ?></div>
+					</div>
+					<div class="mbf-main-page-stats__item">
+						<div class="mbf-main-page-stats__value">120+</div>
+						<div class="mbf-main-page-stats__label"><?php echo esc_html__( 'Growth playbooks', 'apparel' ); ?></div>
+					</div>
+					<div class="mbf-main-page-stats__item">
+						<div class="mbf-main-page-stats__value">24/7</div>
+						<div class="mbf-main-page-stats__label"><?php echo esc_html__( 'Execution support', 'apparel' ); ?></div>
+					</div>
+					<div class="mbf-main-page-stats__item">
+						<div class="mbf-main-page-stats__value">98%</div>
+						<div class="mbf-main-page-stats__label"><?php echo esc_html__( 'Client satisfaction', 'apparel' ); ?></div>
+					</div>
+				</div>
 			</div>
 		</section>
 
