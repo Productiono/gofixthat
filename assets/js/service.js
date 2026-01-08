@@ -283,6 +283,7 @@
 		}
 		gallery.classList.add('is-active');
 		gallery.setAttribute('aria-hidden', 'false');
+		document.body.classList.add('service-gallery-open');
 		updateGalleryImage();
 	};
 
@@ -292,6 +293,7 @@
 		}
 		gallery.classList.remove('is-active');
 		gallery.setAttribute('aria-hidden', 'true');
+		document.body.classList.remove('service-gallery-open');
 	};
 
 	if (gallery) {
