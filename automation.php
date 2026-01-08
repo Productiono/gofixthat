@@ -11,8 +11,6 @@ get_header();
 // Remove default title outputs for this template.
 remove_action( 'mbf_main_before', 'mbf_entry_header', 10 );
 remove_action( 'mbf_main_before', 'mbf_page_header', 100 );
-
-$form_id = 'FORM_ID_AUTOMATION';
 ?>
 
 <div id="primary" class="mbf-content-area">
@@ -33,7 +31,7 @@ $form_id = 'FORM_ID_AUTOMATION';
 							<?php esc_html_e( 'Automate workflows with AI agents that save hours every week', 'apparel' ); ?>
 						</h1>
 
-						<ul class="mbf-funnel__benefits" aria-label="<?php esc_attr_e( 'Automation benefits', 'apparel' ); ?>">
+						<ul class="mbf-funnel__benefits" aria-label="<?php esc_attr_e( 'Product benefits', 'apparel' ); ?>">
 							<li class="mbf-funnel__benefit">
 								<span class="mbf-funnel__icon" aria-hidden="true">
 									<svg viewBox="0 0 24 24" role="presentation" focusable="false">
@@ -83,10 +81,10 @@ $form_id = 'FORM_ID_AUTOMATION';
 						</div>
 					</div>
 
-					<aside class="mbf-funnel__form" aria-label="<?php esc_attr_e( 'Get access to your automation trial', 'apparel' ); ?>">
+					<aside class="mbf-funnel__form" aria-label="<?php esc_attr_e( 'Get access to your trial account', 'apparel' ); ?>">
 						<div class="mbf-funnel__form-card">
 							<h2 class="mbf-funnel__form-title"><?php esc_html_e( 'Get access to your automation trial', 'apparel' ); ?></h2>
-							<?php echo do_shortcode( '[fluentform id="' . $form_id . '"]' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+							<?php echo do_shortcode( '[fluentform id="FORM_ID_AUTOMATION"]' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 							<p class="mbf-funnel__form-footnote">
 								<?php
 								printf(
