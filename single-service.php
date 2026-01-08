@@ -68,9 +68,49 @@ while ( have_posts() ) :
 		$variations = array();
 	}
 
-	$service_price_display = apparel_service_format_price( $service_price );
-	$service_sale_display  = apparel_service_format_price( $service_sale );
-	$has_sale              = '' !== $service_sale && '' !== $service_price && (float) $service_sale < (float) $service_price;
+	$variation_options     = array();
+	$default_variation     = null;
+	$default_variation_id  = '';
+	$default_price         = $service_price;
+	$default_sale          = $service_sale;
+	$default_checkout_url  = $checkout_url;
+
+	foreach ( $variations as $variation ) {
+		$variation_id       = isset( $variation['variation_id'] ) ? $variation['variation_id'] : '';
+		$name               = isset( $variation['name'] ) ? $variation['name'] : '';
+		$price              = isset( $variation['price'] ) ? $variation['price'] : '';
+		$sale_price         = isset( $variation['sale_price'] ) ? $variation['sale_price'] : '';
+		$checkout_link      = isset( $variation['stripe_payment_link'] ) ? $variation['stripe_payment_link'] : '';
+		$effective_price    = ( '' !== $sale_price && '' !== $price && (float) $sale_price < (float) $price ) ? $sale_price : $price;
+		$effective_value    = is_numeric( $effective_price ) ? (float) $effective_price : PHP_FLOAT_MAX;
+		$variation_options[] = array(
+			'id'            => $variation_id,
+			'name'          => $name,
+			'price'         => $price,
+			'sale_price'    => $sale_price,
+			'checkout_link' => $checkout_link,
+			'effective'     => $effective_value,
+		);
+
+		if ( null === $default_variation || $effective_value < $default_variation['effective'] ) {
+			$default_variation = end( $variation_options );
+		}
+	}
+
+	if ( null === $default_variation && ! empty( $variation_options ) ) {
+		$default_variation = $variation_options[0];
+	}
+
+	if ( $default_variation ) {
+		$default_variation_id = $default_variation['id'];
+		$default_price        = $default_variation['price'];
+		$default_sale         = $default_variation['sale_price'];
+		$default_checkout_url = $default_variation['checkout_link'] ? $default_variation['checkout_link'] : $checkout_url;
+	}
+
+	$service_price_display = apparel_service_format_price( $default_price );
+	$service_sale_display  = apparel_service_format_price( $default_sale );
+	$has_sale              = '' !== $default_sale && '' !== $default_price && (float) $default_sale < (float) $default_price;
 	$author_id             = (int) get_post_field( 'post_author', $service_id );
 	$author_url            = get_author_posts_url( $author_id );
 	$author_name           = get_the_author_meta( 'display_name', $author_id );
@@ -80,11 +120,13 @@ while ( have_posts() ) :
 	$content               = apply_filters( 'the_content', get_the_content() );
 	$has_h2                = false !== stripos( $content, '<h2' );
 	$pricing_data_attrs    = array(
-		'data-price'      => $service_price,
-		'data-sale'       => $service_sale,
-		'data-checkout'   => $checkout_url,
-		'data-base-price' => $service_price,
-		'data-base-sale'  => $service_sale,
+		'data-price'         => $default_price,
+		'data-sale'          => $default_sale,
+		'data-checkout'      => $default_checkout_url,
+		'data-base-price'    => $service_price,
+		'data-base-sale'     => $service_sale,
+		'data-base-checkout' => $checkout_url,
+		'data-variation'     => $default_variation_id,
 	);
 	?>
 	<div class="service-page">
@@ -229,9 +271,13 @@ while ( have_posts() ) :
 												<?php endif; ?>
 											</div>
 										</div>
-										<button class="service-button service-button-ghost" type="button" data-variation-select data-variation-id="<?php echo esc_attr( $var_id ); ?>" data-variation-price="<?php echo esc_attr( $price ); ?>" data-variation-sale="<?php echo esc_attr( $sale_price ); ?>">
-											<?php esc_html_e( 'Select', 'apparel' ); ?>
-										</button>
+								<?php
+									$variation_checkout = isset( $variation['stripe_payment_link'] ) ? $variation['stripe_payment_link'] : '';
+									$button_class       = 'service-button service-button-ghost' . ( $var_id === $default_variation_id ? ' is-selected' : '' );
+									?>
+								<button class="<?php echo esc_attr( $button_class ); ?>" type="button" data-variation-select data-variation-id="<?php echo esc_attr( $var_id ); ?>" data-variation-price="<?php echo esc_attr( $price ); ?>" data-variation-sale="<?php echo esc_attr( $sale_price ); ?>" data-variation-checkout="<?php echo esc_url( $variation_checkout ); ?>">
+									<?php esc_html_e( 'Select', 'apparel' ); ?>
+								</button>
 									</div>
 							<?php endforeach; ?>
 						</div>
@@ -327,15 +373,21 @@ while ( have_posts() ) :
 						<li><?php esc_html_e( 'Future updates', 'apparel' ); ?></li>
 						<li><?php esc_html_e( 'Support', 'apparel' ); ?></li>
 					</ul>
-					<div class="service-quantity">
-						<label for="service-quantity-input"><?php esc_html_e( 'Quantity', 'apparel' ); ?></label>
-						<div class="service-quantity-control">
-							<button type="button" class="service-quantity-btn" data-quantity="decrease">−</button>
-							<input id="service-quantity-input" type="number" min="1" value="1" />
-							<button type="button" class="service-quantity-btn" data-quantity="increase">+</button>
+					<?php if ( ! empty( $variation_options ) ) : ?>
+						<div class="service-quantity">
+							<label for="service-variation-select"><?php esc_html_e( 'Variation', 'apparel' ); ?></label>
+							<div class="service-quantity-control">
+								<select id="service-variation-select" class="service-variation-select" data-service-variation>
+									<?php foreach ( $variation_options as $variation_option ) : ?>
+										<option value="<?php echo esc_attr( $variation_option['id'] ); ?>" data-variation-price="<?php echo esc_attr( $variation_option['price'] ); ?>" data-variation-sale="<?php echo esc_attr( $variation_option['sale_price'] ); ?>" data-variation-checkout="<?php echo esc_url( $variation_option['checkout_link'] ); ?>" <?php selected( $variation_option['id'], $default_variation_id ); ?>>
+											<?php echo esc_html( $variation_option['name'] ); ?>
+										</option>
+									<?php endforeach; ?>
+								</select>
+							</div>
 						</div>
-					</div>
-					<button class="service-button service-button-cta" type="button" data-service-buy <?php echo empty( $checkout_url ) ? 'disabled' : ''; ?>>
+					<?php endif; ?>
+					<button class="service-button service-button-cta" type="button" data-service-buy <?php echo empty( $default_checkout_url ) ? 'disabled' : ''; ?>>
 						<span class="service-button-icon" aria-hidden="true">
 							<svg viewBox="0 0 24 24" role="presentation" focusable="false">
 								<path d="M7 6h-2l-1 2v2h2l2.7 8.4a2 2 0 0 0 1.9 1.4h7.8a2 2 0 0 0 1.9-1.4L22 10H8.4L7 6zm3 14a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm9 0a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/>
@@ -343,7 +395,7 @@ while ( have_posts() ) :
 						</span>
 						<?php esc_html_e( 'Buy Now', 'apparel' ); ?>
 					</button>
-					<?php if ( empty( $checkout_url ) ) : ?>
+					<?php if ( empty( $default_checkout_url ) ) : ?>
 						<p class="service-checkout-note"><?php esc_html_e( 'Checkout link not set.', 'apparel' ); ?></p>
 					<?php endif; ?>
 				</div>
@@ -365,7 +417,7 @@ while ( have_posts() ) :
 	</div>
 
 	<div class="service-sticky-buy" data-service-sticky aria-hidden="true">
-		<button class="service-button service-button-cta" type="button" data-service-buy-sticky <?php echo empty( $checkout_url ) ? 'disabled' : ''; ?>>
+		<button class="service-button service-button-cta" type="button" data-service-buy-sticky <?php echo empty( $default_checkout_url ) ? 'disabled' : ''; ?>>
 			<span class="service-button-icon" aria-hidden="true">
 				<svg viewBox="0 0 24 24" role="presentation" focusable="false">
 					<path d="M7 6h-2l-1 2v2h2l2.7 8.4a2 2 0 0 0 1.9 1.4h7.8a2 2 0 0 0 1.9-1.4L22 10H8.4L7 6zm3 14a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm9 0a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/>

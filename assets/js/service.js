@@ -19,32 +19,13 @@
 		});
 	});
 
-	const quantityInput = document.querySelector('#service-quantity-input');
-	const quantityButtons = document.querySelectorAll('[data-quantity]');
-
-	const updateQuantity = (delta) => {
-		if (!quantityInput) {
-			return;
-		}
-		const current = parseInt(quantityInput.value || '1', 10);
-		const nextValue = Math.max(1, current + delta);
-		quantityInput.value = String(nextValue);
-		buildCheckoutUrl();
-	};
-
-	quantityButtons.forEach((button) => {
-		button.addEventListener('click', () => {
-			const delta = button.dataset.quantity === 'increase' ? 1 : -1;
-			updateQuantity(delta);
-		});
-	});
-
 	const pricingCard = document.querySelector('.service-pricing-card');
 	const buyButton = document.querySelector('[data-service-buy]');
 	const stickyWrapper = document.querySelector('[data-service-sticky]');
 	const stickyButton = document.querySelector('[data-service-buy-sticky]');
 	const priceCurrent = document.querySelector('.service-price-current');
 	const priceOriginal = document.querySelector('.service-price-original');
+	const variationSelect = document.querySelector('[data-service-variation]');
 
 	const formatPrice = (value) => {
 		const number = parseFloat(value);
@@ -80,24 +61,35 @@
 		}
 		const baseUrl = pricingCard.dataset.checkout || '';
 		if (!baseUrl) {
+			buyButton.dataset.checkoutUrl = '';
+			buyButton.setAttribute('disabled', 'disabled');
+			if (stickyButton) {
+				stickyButton.dataset.checkoutUrl = '';
+				stickyButton.setAttribute('disabled', 'disabled');
+			}
 			return;
 		}
-		const quantity = quantityInput ? quantityInput.value || '1' : '1';
-		const variationId = pricingCard.dataset.variation || '';
-		let url;
-		try {
-			url = new URL(baseUrl, window.location.origin);
-		} catch (error) {
-			return;
-		}
-		url.searchParams.set('qty', quantity);
-		if (variationId) {
-			url.searchParams.set('variation_id', variationId);
-		}
-		buyButton.dataset.checkoutUrl = url.toString();
+		buyButton.dataset.checkoutUrl = baseUrl;
+		buyButton.removeAttribute('disabled');
 		if (stickyButton) {
-			stickyButton.dataset.checkoutUrl = url.toString();
+			stickyButton.dataset.checkoutUrl = baseUrl;
+			stickyButton.removeAttribute('disabled');
 		}
+	};
+
+	const applyVariationSelection = (data) => {
+		if (!pricingCard || !data) {
+			return;
+		}
+		const price = data.price || pricingCard.dataset.basePrice || '';
+		const sale = data.sale || pricingCard.dataset.baseSale || '';
+		const checkout = data.checkout || pricingCard.dataset.baseCheckout || '';
+		pricingCard.dataset.price = price;
+		pricingCard.dataset.sale = sale;
+		pricingCard.dataset.variation = data.id || '';
+		pricingCard.dataset.checkout = checkout;
+		updatePriceDisplay(price, sale);
+		buildCheckoutUrl();
 	};
 
 	if (pricingCard) {
@@ -110,22 +102,44 @@
 		button.addEventListener('click', () => {
 			variationButtons.forEach((item) => item.classList.remove('is-selected'));
 			button.classList.add('is-selected');
-			const price = button.dataset.variationPrice || pricingCard.dataset.basePrice || '';
-			const sale = button.dataset.variationSale || pricingCard.dataset.baseSale || '';
-			pricingCard.dataset.price = price;
-			pricingCard.dataset.sale = sale;
-			pricingCard.dataset.variation = button.dataset.variationId || '';
-			updatePriceDisplay(price, sale);
-			buildCheckoutUrl();
+			applyVariationSelection({
+				price: button.dataset.variationPrice || '',
+				sale: button.dataset.variationSale || '',
+				id: button.dataset.variationId || '',
+				checkout: button.dataset.variationCheckout || '',
+			});
+			if (variationSelect && button.dataset.variationId) {
+				variationSelect.value = button.dataset.variationId;
+			}
 		});
 	});
 
-	if (quantityInput) {
-		quantityInput.addEventListener('change', () => {
-			if (parseInt(quantityInput.value, 10) < 1) {
-				quantityInput.value = '1';
+	if (variationSelect) {
+		const selectedOption = variationSelect.selectedOptions[0];
+		if (selectedOption) {
+			applyVariationSelection({
+				price: selectedOption.dataset.variationPrice || '',
+				sale: selectedOption.dataset.variationSale || '',
+				id: selectedOption.value || '',
+				checkout: selectedOption.dataset.variationCheckout || '',
+			});
+		}
+		variationSelect.addEventListener('change', () => {
+			const option = variationSelect.selectedOptions[0];
+			if (!option) {
+				return;
 			}
-			buildCheckoutUrl();
+			applyVariationSelection({
+				price: option.dataset.variationPrice || '',
+				sale: option.dataset.variationSale || '',
+				id: option.value || '',
+				checkout: option.dataset.variationCheckout || '',
+			});
+			if (option.value) {
+				variationButtons.forEach((button) => {
+					button.classList.toggle('is-selected', button.dataset.variationId === option.value);
+				});
+			}
 		});
 	}
 
