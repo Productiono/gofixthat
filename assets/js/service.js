@@ -384,6 +384,35 @@
 	let supportScrollY = 0;
 	let supportBodyOverflow = '';
 	let supportBodyTouchAction = '';
+	let supportLastFocusedElement = null;
+
+	const supportFocusableSelectors = [
+		'a[href]',
+		'button:not([disabled])',
+		'textarea:not([disabled])',
+		'input:not([type="hidden"]):not([disabled])',
+		'select:not([disabled])',
+		'[tabindex]:not([tabindex="-1"])',
+	];
+
+	const getSupportFocusableElements = () => {
+		if (!supportModal) {
+			return [];
+		}
+		return Array.from(supportModal.querySelectorAll(supportFocusableSelectors.join(','))).filter((element) => {
+			return element.getClientRects().length > 0;
+		});
+	};
+
+	const restoreActiveSupportForm = () => {
+		if (!activeSupportForm || !supportFormContainer) {
+			return;
+		}
+		activeSupportForm.hidden = true;
+		if (activeSupportForm.parentElement !== supportFormContainer) {
+			supportFormContainer.appendChild(activeSupportForm);
+		}
+	};
 
 	const lockSupportScroll = () => {
 		supportScrollY = window.scrollY || window.pageYOffset || 0;
@@ -409,12 +438,13 @@
 		}
 		supportModal.classList.remove('is-active');
 		supportModal.setAttribute('aria-hidden', 'true');
-		if (activeSupportForm && supportFormContainer) {
-			activeSupportForm.hidden = true;
-			supportFormContainer.appendChild(activeSupportForm);
-		}
+		restoreActiveSupportForm();
 		activeSupportForm = null;
 		unlockSupportScroll();
+		if (supportLastFocusedElement && document.contains(supportLastFocusedElement)) {
+			supportLastFocusedElement.focus();
+		}
+		supportLastFocusedElement = null;
 	};
 
 	const openSupportModal = (trigger) => {
@@ -426,6 +456,9 @@
 		const template = document.querySelector(`[data-support-form-template="${formKey}"]`);
 		if (!template) {
 			return;
+		}
+		if (activeSupportForm && activeSupportForm !== template) {
+			restoreActiveSupportForm();
 		}
 		if (supportModal.parentElement !== document.body) {
 			document.body.appendChild(supportModal);
@@ -440,6 +473,14 @@
 		supportModal.classList.add('is-active');
 		supportModal.setAttribute('aria-hidden', 'false');
 		lockSupportScroll();
+		supportLastFocusedElement = document.activeElement;
+		const focusableElements = getSupportFocusableElements();
+		if (focusableElements.length) {
+			focusableElements[0].focus();
+		} else {
+			supportModal.setAttribute('tabindex', '-1');
+			supportModal.focus();
+		}
 	};
 
 	supportTriggers.forEach((trigger) => {
@@ -455,6 +496,24 @@
 	document.addEventListener('keydown', (event) => {
 		if (supportModal && supportModal.classList.contains('is-active') && event.key === 'Escape') {
 			closeSupportModal();
+		}
+		if (supportModal && supportModal.classList.contains('is-active') && event.key === 'Tab') {
+			const focusableElements = getSupportFocusableElements();
+			if (!focusableElements.length) {
+				event.preventDefault();
+				return;
+			}
+			const firstElement = focusableElements[0];
+			const lastElement = focusableElements[focusableElements.length - 1];
+			if (event.shiftKey && document.activeElement === firstElement) {
+				event.preventDefault();
+				lastElement.focus();
+				return;
+			}
+			if (!event.shiftKey && document.activeElement === lastElement) {
+				event.preventDefault();
+				firstElement.focus();
+			}
 		}
 		if (!gallery || !gallery.classList.contains('is-active')) {
 			return;
