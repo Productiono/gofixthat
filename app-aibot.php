@@ -1,8 +1,7 @@
 <?php
 /* Template Name: App AiBoot */
 
-get_header();
-?>
+get_header(); ?>
 
 <style>
 .app-aibot-page {
@@ -427,194 +426,119 @@ get_header();
 }
 </style>
 
-<main class="app-aibot-page">
-    <section class="hero section-wrap">
-        <div class="inner hero-grid">
-            <div>
-                <div class="badge-row">
-                    <span class="badge">Welcome</span>
-                </div>
-                <h1>Desktop agents that use computers like a human — at cloud scale.</h1>
-                <p class="lead">Desktop bots that inhabit both the web, sandboxed container and computers. They are multiple agents in the swarm, these clicking and typing things for you.</p>
-                <p class="small-label">Roles</p>
-                <p class="lead">Code editor, Data Entry</p>
-                <div class="cta-row">
-                    <a class="btn-primary" href="#">Get Started</a>
-                    <a class="btn-link" href="#">Demo Video →</a>
-                </div>
-            </div>
-            <div class="hero-illustration">
-                <img src="https://via.placeholder.com/800x520" alt="App AiBoot hero placeholder" />
-            </div>
-        </div>
-    </section>
+<div id="primary" class="mbf-content-area">
 
-    <section class="quote section-wrap">
-        <div class="inner">
-            <div>“Desktop agents are the missing link between LLMs and real work.”</div>
-            <span>— The Age of UX Desktop Agents, blog</span>
-        </div>
-    </section>
+	<?php
+	/**
+	 * The mbf_main_before hook.
+	 *
+	 * @since 1.0.0
+	 */
+	do_action( 'mbf_main_before' );
+	?>
 
-    <section class="dark-section">
-        <div class="inner">
-            <div class="section-title">Why a Desktop Agent</div>
-            <div class="section-subtitle">A desktop agent is the ideal automation solution because it works just like a person, making it universally compatible with any software.</div>
-            <div class="feature-grid">
-                <div class="feature-card">
-                    <img class="icon" src="https://via.placeholder.com/48" alt="Firefox icon" />
-                    <h3>Firefox</h3>
-                    <p>A complete computer</p>
-                    <p>Desktop agents work like a human. They understand images, enter text, click, copy, and paste. They can use any software.</p>
-                </div>
-                <div class="feature-card">
-                    <img class="icon" src="https://via.placeholder.com/48" alt="Control icon" />
-                    <h3>Fine-grained control</h3>
-                    <p>Desktop agents understand user interfaces and can control software, using the same keyboard and mouse operations as humans.</p>
-                </div>
-                <div class="feature-card">
-                    <img class="icon" src="https://via.placeholder.com/48" alt="Tasks icon" />
-                    <h3>Tasks in minutes</h3>
-                    <p>Once an employee is logged in, a desktop agent that automates it can be set up in minutes.</p>
-                </div>
-                <div class="feature-card">
-                    <img class="icon" src="https://via.placeholder.com/48" alt="History icon" />
-                    <h3>History and replays</h3>
-                    <p>Session replays make it easy to review interactions and understand how the agent works.</p>
-                </div>
-                <div class="feature-card">
-                    <img class="icon" src="https://via.placeholder.com/48" alt="Cloud icon" />
-                    <h3>Secure to private clouds</h3>
-                    <p>Desktop agents live in fully isolated sandboxes, with access only to the applications needed for each workflow.</p>
-                    <div class="tag-list">
-                        <span class="tag">AWS</span>
-                        <span class="tag">Google Cloud</span>
-                        <span class="tag">Azure</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+	<?php
+	while ( have_posts() ) :
+		the_post();
+		?>
 
-    <section class="live-demos section-wrap">
-        <div class="inner">
-            <div class="section-title" style="color:#1f1e23;">Live Demos</div>
-            <div class="section-subtitle" style="color:#6a6871;">Watch how desktop agents automate complex tasks from booking to security.</div>
-            <div class="demos-grid">
-                <div class="demo-card gradient">
-                    <div class="demo-inner">
-                        <img src="https://via.placeholder.com/800x460" alt="Live demo placeholder" />
-                    </div>
-                </div>
-                <div class="demo-text">
-                    <h4>Live demo #1</h4>
-                    <h3>Booking and checking into a flight</h3>
-                    <p>A desktop agent books a flight, checks the traveler into the flight, and even finds the refund policy and submits it to the company’s system for future reference.</p>
-                </div>
-            </div>
-            <div class="demos-row">
-                <div class="demo-card gradient">
-                    <div class="demo-inner">
-                        <img src="https://via.placeholder.com/800x460" alt="2FA login placeholder" />
-                    </div>
-                </div>
-                <div class="demo-text">
-                    <h4>Live demo #2</h4>
-                    <h3>Making secure logins with 2FA</h3>
-                    <p>A desktop agent uses an authenticator app, sends the two-factor code to the user by email and securely logs into the target system.</p>
-                </div>
-            </div>
-            <div class="demos-row" style="margin-top:26px;">
-                <div class="demo-card gradient">
-                    <div class="demo-inner">
-                        <img src="https://via.placeholder.com/800x460" alt="Development workflows placeholder" />
-                    </div>
-                </div>
-                <div class="demo-text">
-                    <h4>Live demo #3</h4>
-                    <h3>Extending Development Workflows</h3>
-                    <p>A desktop agent can refactor code, search documentation, review code, and enforce style guidelines across repositories.</p>
-                </div>
-            </div>
-            <div class="demos-row" style="margin-top:26px;">
-                <div class="demo-card gradient">
-                    <div class="demo-inner">
-                        <img src="https://via.placeholder.com/800x460" alt="Technical research placeholder" />
-                    </div>
-                </div>
-                <div class="demo-text">
-                    <h4>Live demo #4</h4>
-                    <h3>Technical Research &amp; Summarization</h3>
-                    <p>By reading docs, synthesizing content, and writing a report, a desktop agent can summarize any workflow and provide a clean handoff to the entire company.</p>
-                </div>
-            </div>
-        </div>
-    </section>
+		<?php
+		/**
+		 * The mbf_page_before hook.
+		 *
+		 * @since 1.0.0
+		 */
+		do_action( 'mbf_page_before' );
+		?>
 
-    <section class="latest-posts section-wrap">
-        <div class="inner">
-            <div class="section-title" style="color:#1f1e23;">Latest posts</div>
-            <div class="section-subtitle" style="color:#6a6871;">News and updates from the team.</div>
-            <div class="post-grid">
-                <div class="post-card">
-                    <img src="https://via.placeholder.com/360x200" alt="Latest post 1" />
-                    <div class="body">
-                        <div class="tag-line">News</div>
-                        <h5>The AiBoot core — Free Linux GUI template for agent Outlook runtime.</h5>
-                        <div class="date">Jul 27, 2023</div>
-                    </div>
-                </div>
-                <div class="post-card">
-                    <img src="https://via.placeholder.com/360x200" alt="Latest post 2" />
-                    <div class="body">
-                        <div class="tag-line">News</div>
-                        <h5>Why the simplest Desktop Agent Automation wins</h5>
-                        <div class="date">Jul 27, 2023</div>
-                    </div>
-                </div>
-                <div class="post-card">
-                    <img src="https://via.placeholder.com/360x200" alt="Latest post 3" />
-                    <div class="body">
-                        <div class="tag-line">News</div>
-                        <h5>The Age of the Desktop Agents is here</h5>
-                        <div class="date">May 12, 2023</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+		<main class="app-aibot-page">
+			<div class="mbf-entry__wrap">
 
-    <section class="faq section-wrap">
-        <div class="inner">
-            <div class="section-title" style="color:#1f1e23;">Frequently Asked Questions</div>
-            <div class="section-subtitle" style="color:#6a6871;">Get answers to common questions about using desktop agents.</div>
-            <div class="faq-grid">
-                <details class="faq-item">
-                    <summary>What is a desktop agent?</summary>
-                    <p>Desktop agents can understand interfaces, execute clicks and keystrokes, and access multiple tools to complete tasks end-to-end.</p>
-                </details>
-                <details class="faq-item">
-                    <summary>How are desktop agents different?</summary>
-                    <p>They operate exactly like a human within your computer, making them compatible with any software.</p>
-                </details>
-                <details class="faq-item">
-                    <summary>Can desktop agents handle authentication?</summary>
-                    <p>Yes, they can interact with login prompts, authenticator apps, and secure environments.</p>
-                </details>
-                <details class="faq-item">
-                    <summary>How much do desktop agents cost?</summary>
-                    <p>Pricing can be customized to each workflow and usage profile.</p>
-                </details>
-            </div>
-        </div>
-    </section>
+				<?php
+				/**
+				 * The mbf_entry_wrap_start hook.
+				 *
+				 * @since 1.0.0
+				 */
+				do_action( 'mbf_entry_wrap_start' );
+				?>
 
-    <section class="cta-dark">
-        <div class="section-title" style="color:#f7f6f3;">Ready to Hire Your First Desktop Agent?</div>
-        <p>Start automating all the high-value workflows in minutes — no coding required.</p>
-        <a class="btn-primary" href="#">Get started</a>
-    </section>
-</main>
+				<div class="mbf-entry__container">
 
-<?php
-get_footer();
+					<?php
+					/**
+					 * The mbf_entry_container_start hook.
+					 *
+					 * @since 1.0.0
+					 */
+					do_action( 'mbf_entry_container_start' );
+					?>
+
+					<?php
+					/**
+					 * The mbf_entry_content_before hook.
+					 *
+					 * @since 1.0.0
+					 */
+					do_action( 'mbf_entry_content_before' );
+					?>
+
+					<div class="entry-content">
+						<?php the_content(); ?>
+					</div>
+
+					<?php
+					/**
+					 * The mbf_entry_content_after hook.
+					 *
+					 * @since 1.0.0
+					 */
+					do_action( 'mbf_entry_content_after' );
+					?>
+
+					<?php
+					/**
+					 * The mbf_entry_container_end hook.
+					 *
+					 * @since 1.0.0
+					 */
+					do_action( 'mbf_entry_container_end' );
+					?>
+
+				</div>
+
+				<?php
+				/**
+				 * The mbf_entry_wrap_end hook.
+				 *
+				 * @since 1.0.0
+				 */
+				do_action( 'mbf_entry_wrap_end' );
+				?>
+			</div>
+		</main>
+
+		<?php
+		/**
+		 * The mbf_page_after hook.
+		 *
+		 * @since 1.0.0
+		 */
+		do_action( 'mbf_page_after' );
+		?>
+
+	<?php endwhile; ?>
+
+	<?php
+	/**
+	 * The mbf_main_after hook.
+	 *
+	 * @since 1.0.0
+	 */
+	do_action( 'mbf_main_after' );
+	?>
+
+</div>
+
+<?php get_sidebar(); ?>
+<?php get_footer();
