@@ -1,0 +1,49 @@
+:root {
+  --font-heading: "Cal Sans", "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-body: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+
+  --text-strong: #111827;
+  --text: #1f2937;
+  --text-muted: #6b7280;
+  --border: #e5e7eb;
+
+  --bg: #ffffff;
+  --bg-muted: #f9fafb;
+  --bg-subtle: #f3f4f6;
+  --bg-emphasis: #e5e7eb;
+  --bg-inverted: #0f172a;
+
+  --primary: #111827;
+  --primary-contrast: #ffffff;
+
+  --radius: 6px;
+  --space: 8px;
+  --focus-ring: 0 0 0 3px rgba(15, 23, 42, 0.2);
+}
+
+.dark,
+[data-theme="dark"] {
+  --text-strong: #f9fafb;
+  --text: #e5e7eb;
+  --text-muted: #9ca3af;
+  --border: #1f2937;
+
+  --bg: #0b1120;
+  --bg-muted: #111827;
+  --bg-subtle: #0f172a;
+  --bg-emphasis: #1f2937;
+  --bg-inverted: #f8fafc;
+
+  --primary: #f9fafb;
+  --primary-contrast: #111827;
+
+  --focus-ring: 0 0 0 3px rgba(248, 250, 252, 0.3);
+}
+
+@font-face {
+  font-family: "Cal Sans";
+  src: local("Cal Sans"), local("CalSans"), url("../fonts/CalSans-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}

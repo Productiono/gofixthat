@@ -190,7 +190,7 @@ if ( $is_blog_post ) {
 						</nav>
 					<?php endif; ?>
 
-					<div class="entry-content">
+					<div class="entry-content prose">
 						<?php echo $entry_content_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 					</div>
 
@@ -240,7 +240,7 @@ if ( $is_blog_post ) {
 				do_action( 'mbf_entry_content_before' );
 				?>
 
-				<div class="entry-content">
+				<div class="entry-content prose">
 					<?php echo $entry_content_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 				</div>
 

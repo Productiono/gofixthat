@@ -165,7 +165,7 @@ get_header(); ?>
 		<?php
 	} else {
 		?>
-		<div class="entry-content mbf-content-not-found">
+		<div class="entry-content prose mbf-content-not-found">
 			<div class="mbf-content-not-found-content">
 				<?php esc_html_e( 'No docs are available in this category yet.', 'apparel' ); ?>
 			</div>
