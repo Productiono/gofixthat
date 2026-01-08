@@ -6,13 +6,9 @@
  */
 
 $service_id = absint( get_query_var( 'service_id' ) );
-$preview_url = (string) get_query_var( 'service_preview_url' );
-
-if ( empty( $preview_url ) && $service_id ) {
-	$preview_url = (string) get_post_meta( $service_id, '_service_live_preview_url', true );
-}
-
-$preview_url = esc_url_raw( $preview_url );
+$preview_token = (string) get_query_var( 'service_preview_token' );
+$preview_data  = $preview_token ? apparel_service_preview_get_token( $preview_token ) : false;
+$preview_url   = $preview_data && (int) $preview_data['service_id'] === $service_id ? $preview_data['preview_url'] : '';
 
 $service_title = $service_id ? get_the_title( $service_id ) : '';
 $service_link  = $service_id ? get_permalink( $service_id ) : home_url( '/' );
@@ -20,10 +16,63 @@ $service_link  = $service_id ? get_permalink( $service_id ) : home_url( '/' );
 $service_price   = $service_id ? get_post_meta( $service_id, '_service_price', true ) : '';
 $service_sale    = $service_id ? get_post_meta( $service_id, '_service_sale_price', true ) : '';
 $checkout_url    = $service_id ? get_post_meta( $service_id, '_service_checkout_url', true ) : '';
+$variations      = $service_id ? get_post_meta( $service_id, '_service_variations', true ) : array();
+$variation_data  = is_array( $variations ) ? $variations : array();
 $has_sale        = '' !== $service_sale && '' !== $service_price && (float) $service_sale < (float) $service_price;
 $price_display   = apparel_service_format_price( $has_sale ? $service_sale : $service_price );
 $price_display   = $price_display ? $price_display : __( 'Price unavailable', 'apparel' );
 $service_heading = $service_title ? $service_title : __( 'Service Preview', 'apparel' );
+
+$default_variation    = null;
+$default_variation_id = '';
+$default_price_id     = '';
+$default_price        = $service_price;
+$default_sale         = $service_sale;
+$default_checkout_url = $checkout_url;
+
+foreach ( $variation_data as $variation ) {
+	$price          = isset( $variation['price'] ) ? $variation['price'] : '';
+	$sale_price     = isset( $variation['sale_price'] ) ? $variation['sale_price'] : '';
+	$checkout_link  = isset( $variation['stripe_payment_link'] ) ? $variation['stripe_payment_link'] : '';
+	$price_id       = isset( $variation['stripe_price_id'] ) ? $variation['stripe_price_id'] : '';
+	$effective      = ( '' !== $sale_price && '' !== $price && (float) $sale_price < (float) $price ) ? $sale_price : $price;
+	$effective_value = is_numeric( $effective ) ? (float) $effective : PHP_FLOAT_MAX;
+	if ( null === $default_variation || $effective_value < $default_variation['effective'] ) {
+		$default_variation = array(
+			'id'            => $variation['variation_id'] ?? '',
+			'price'         => $price,
+			'sale_price'    => $sale_price,
+			'checkout_link' => $checkout_link,
+			'price_id'      => $price_id,
+			'effective'     => $effective_value,
+		);
+	}
+}
+
+if ( $default_variation ) {
+	$default_variation_id = $default_variation['id'];
+	$default_price        = $default_variation['price'];
+	$default_sale         = $default_variation['sale_price'];
+	$default_checkout_url = $default_variation['checkout_link'] ? $default_variation['checkout_link'] : $checkout_url;
+	$default_price_id     = $default_variation['price_id'] ?? '';
+}
+
+$checkout_available = ! empty( $default_checkout_url ) || ! empty( $default_price_id );
+$pricing_data_attrs = array(
+	'data-service-id'       => $service_id,
+	'data-price'            => $default_price,
+	'data-sale'             => $default_sale,
+	'data-checkout'         => $default_checkout_url,
+	'data-price-id'         => $default_price_id,
+	'data-base-price'       => $service_price,
+	'data-base-sale'        => $service_sale,
+	'data-base-checkout'    => $checkout_url,
+	'data-base-price-id'    => $default_price_id,
+	'data-variation'        => $default_variation_id,
+	'data-checkout-endpoint' => rest_url( 'apparel/v1/stripe/checkout-session' ),
+);
+
+$frame_url = apparel_service_preview_frame_url( $service_id, $preview_token );
 
 wp_enqueue_style( 'apparel-service' );
 ?>
@@ -45,8 +94,8 @@ wp_enqueue_style( 'apparel-service' );
 			</a>
 		</header>
 		<main class="service-preview-viewer__main">
-			<?php if ( $preview_url ) : ?>
-				<iframe class="service-preview-viewer__frame" title="<?php echo esc_attr( $service_heading ); ?>" src="<?php echo esc_url( $preview_url ); ?>" loading="lazy"></iframe>
+			<?php if ( $preview_url && $frame_url ) : ?>
+				<iframe class="service-preview-viewer__frame" title="<?php echo esc_attr( $service_heading ); ?>" src="<?php echo esc_url( $frame_url ); ?>" loading="lazy"></iframe>
 			<?php else : ?>
 				<div class="service-preview-viewer__empty">
 					<?php esc_html_e( 'Preview unavailable.', 'apparel' ); ?>
@@ -58,15 +107,10 @@ wp_enqueue_style( 'apparel-service' );
 				<span class="service-preview-viewer__name"><?php echo esc_html( $service_heading ); ?></span>
 				<span class="service-preview-viewer__price"><?php echo esc_html( $price_display ); ?></span>
 			</div>
-			<?php if ( $checkout_url ) : ?>
-				<a class="service-button service-button-cta service-preview-viewer__buy" href="<?php echo esc_url( $checkout_url ); ?>" target="_blank" rel="noopener noreferrer">
-					<?php esc_html_e( 'Buy Now', 'apparel' ); ?>
-				</a>
-			<?php else : ?>
-				<button class="service-button service-button-cta service-preview-viewer__buy" type="button" disabled>
-					<?php esc_html_e( 'Buy Now', 'apparel' ); ?>
-				</button>
-			<?php endif; ?>
+			<div class="service-pricing-card" <?php foreach ( $pricing_data_attrs as $attr => $value ) : ?><?php echo esc_attr( $attr ); ?>="<?php echo esc_attr( $value ); ?>" <?php endforeach; ?>></div>
+			<button class="service-button service-button-cta service-preview-viewer__buy" type="button" data-service-buy <?php echo $checkout_available ? '' : 'disabled'; ?>>
+				<?php esc_html_e( 'Buy Now', 'apparel' ); ?>
+			</button>
 		</footer>
 	</div>
 	<?php wp_footer(); ?>
