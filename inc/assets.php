@@ -117,15 +117,15 @@ JS;
 		// Register theme styles.
 		wp_register_style( 'apparel-fonts', 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap', array(), null );
 		wp_register_style( 'apparel-tokens', get_template_directory_uri() . '/assets/css/tokens.css', array( 'apparel-fonts' ), $version );
-		wp_register_style( 'apparel-global', get_template_directory_uri() . '/assets/css/global.css', array( 'apparel-tokens' ), $version );
-		wp_register_style( 'mbf-styles', mbf_style( get_template_directory_uri() . '/style.css' ), array( 'apparel-global' ), $version );
+		wp_register_style( 'mbf-styles', mbf_style( get_template_directory_uri() . '/style.css' ), array( 'apparel-tokens' ), $version );
+		wp_register_style( 'apparel-global', get_template_directory_uri() . '/assets/css/global.css', array( 'mbf-styles' ), $version );
 		wp_register_style( 'apparel-service', get_template_directory_uri() . '/assets/css/service.css', array(), $version );
 
 		// Enqueue theme styles.
 		wp_enqueue_style( 'apparel-fonts' );
 		wp_enqueue_style( 'apparel-tokens' );
-		wp_enqueue_style( 'apparel-global' );
 		wp_enqueue_style( 'mbf-styles' );
+		wp_enqueue_style( 'apparel-global' );
 
 		// Add RTL support.
 		wp_style_add_data( 'mbf-styles', 'rtl', 'replace' );

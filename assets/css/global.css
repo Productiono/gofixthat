@@ -301,3 +301,25 @@ hr,
   background: var(--bg);
   color: var(--text);
 }
+
+:where(.wp-site-blocks, main, .site-main, .content-area) {
+  font-family: var(--font-body);
+  color: var(--text);
+  background-color: var(--bg);
+}
+
+:where(.wp-site-blocks, main, .site-main, .content-area) :where(h1, h2, h3, h4, h5, h6) {
+  font-family: var(--font-heading);
+  color: var(--text-strong);
+}
+
+:where(.wp-block-button .wp-element-button, .wp-block-button__link) {
+  border-radius: var(--radius);
+  font-family: var(--font-body);
+  font-weight: 600;
+}
+
+/* TEMP: remove after confirming global.css loads on all templates. */
+html {
+  outline: 5px solid red;
+}
