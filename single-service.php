@@ -202,59 +202,75 @@ while ( have_posts() ) :
 
 				<?php
 				$support_tiles = array(
-					array(
-						'label' => __( 'Get Support', 'apparel' ),
-						'url'   => $support_url,
-						'icon'  => '<svg viewBox="0 0 24 24" role="presentation" focusable="false"><path d="M5 6h10a3 3 0 0 1 3 3v8h-2v-8a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h5v2H5a3 3 0 0 1-3-3V9a3 3 0 0 1 3-3zm13 10l4 3v-3h-4z"/></svg>',
+					'documentation' => array(
+						'label'       => __( 'Documentation', 'apparel' ),
+						'form_id'     => absint( get_theme_mod( 'service_support_form_documentation' ) ),
+						'description' => __( 'Browse guides, FAQs, and helpful resources.', 'apparel' ),
+						'icon'        => '<svg viewBox="0 0 24 24" role="presentation" focusable="false"><path d="M6 4h10a3 3 0 0 1 3 3v11a2 2 0 0 1-2 2H6a3 3 0 0 1-3-3V7a3 3 0 0 1 3-3zm0 2a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11V7a1 1 0 0 0-1-1H6z"/></svg>',
 					),
-					array(
-						'label' => __( 'Documentation', 'apparel' ),
-						'url'   => $docs_url,
-						'icon'  => '<svg viewBox="0 0 24 24" role="presentation" focusable="false"><path d="M6 4h10a3 3 0 0 1 3 3v11a2 2 0 0 1-2 2H6a3 3 0 0 1-3-3V7a3 3 0 0 1 3-3zm0 2a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11V7a1 1 0 0 0-1-1H6z"/></svg>',
+					'presales'       => array(
+						'label'       => __( 'Pre-Sales Questions?', 'apparel' ),
+						'form_id'     => absint( get_theme_mod( 'service_support_form_presales' ) ),
+						'description' => __( 'Ask about features, licensing, or delivery.', 'apparel' ),
+						'icon'        => '<svg viewBox="0 0 24 24" role="presentation" focusable="false"><path d="M12 3a7 7 0 0 1 0 14h-1v3l-4-3H7a7 7 0 0 1 5-14zm0 4a2 2 0 0 0-2 2H8a4 4 0 1 1 6 3.5V14h-4v-2h2a2 2 0 0 0 0-4zm-1 9h2v2h-2v-2z"/></svg>',
 					),
-					array(
-						'label' => __( 'Pre-Sales Questions?', 'apparel' ),
-						'url'   => $presales_url,
-						'icon'  => '<svg viewBox="0 0 24 24" role="presentation" focusable="false"><path d="M12 3a7 7 0 0 1 0 14h-1v3l-4-3H7a7 7 0 0 1 5-14zm0 4a2 2 0 0 0-2 2H8a4 4 0 1 1 6 3.5V14h-4v-2h2a2 2 0 0 0 0-4zm-1 9h2v2h-2v-2z"/></svg>',
+					'hire'           => array(
+						'label'       => __( 'Hire Us', 'apparel' ),
+						'form_id'     => absint( get_theme_mod( 'service_support_form_hire' ) ),
+						'description' => __( 'Schedule custom work or ongoing support.', 'apparel' ),
+						'icon'        => '<svg viewBox="0 0 24 24" role="presentation" focusable="false"><path d="M7 11h10l4 2v5h-2v-3H5v3H3v-5l4-2zm5-7a4 4 0 0 1 4 4h-2a2 2 0 0 0-4 0H8a4 4 0 0 1 4-4z"/></svg>',
 					),
-					array(
-						'label' => __( 'Hire Us', 'apparel' ),
-						'url'   => $hire_url,
-						'icon'  => '<svg viewBox="0 0 24 24" role="presentation" focusable="false"><path d="M7 11h10l4 2v5h-2v-3H5v3H3v-5l4-2zm5-7a4 4 0 0 1 4 4h-2a2 2 0 0 0-4 0H8a4 4 0 0 1 4-4z"/></svg>',
+					'support'        => array(
+						'label'       => __( 'Get Support', 'apparel' ),
+						'form_id'     => absint( get_theme_mod( 'service_support_form_support' ) ),
+						'description' => __( 'Reach out for help with setup and troubleshooting.', 'apparel' ),
+						'icon'        => '<svg viewBox="0 0 24 24" role="presentation" focusable="false"><path d="M5 6h10a3 3 0 0 1 3 3v8h-2v-8a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h5v2H5a3 3 0 0 1-3-3V9a3 3 0 0 1 3-3zm13 10l4 3v-3h-4z"/></svg>',
 					),
-					array(
-						'label' => __( 'Join our WhatsApp channel now!', 'apparel' ),
-						'url'   => get_post_meta( $service_id, '_service_whatsapp_url', true ),
-						'icon'  => '<svg viewBox="0 0 32 32" role="presentation" focusable="false"><path d="M16 5a11 11 0 0 0-9.3 16.9L5 27l5.3-1.4A11 11 0 1 0 16 5zm0 2a9 9 0 0 1 0 18 8.7 8.7 0 0 1-4.5-1.3l-.6-.3-3.1.8.8-3-.3-.6A9 9 0 0 1 16 7zm-3.1 4.7c.2-.4.4-.4.7-.4h.6c.2 0 .4.1.5.4l.7 1.6c.1.2.1.4 0 .6l-.3.6c-.1.2-.1.4 0 .6.5 1 1.3 1.8 2.3 2.3.2.1.4.1.6 0l.6-.3c.2-.1.4-.1.6 0l1.6.7c.2.1.4.3.4.5v.6c0 .3 0 .6-.4.7-.4.2-1 .4-1.7.3-1.8-.3-3.5-1.8-4.7-3-1.2-1.2-2.6-2.9-3-4.7-.1-.7.1-1.3.3-1.7z"/></svg>',
-						'class' => 'service-support-tile-whatsapp',
-					),
+				);
+
+				$available_support_tiles = array_filter(
+					$support_tiles,
+					function( $tile ) {
+						return ! empty( $tile['form_id'] );
+					}
 				);
 
 				?>
 
 				<div class="service-support-tiles service-support-tiles-compact" aria-label="<?php esc_attr_e( 'Support links', 'apparel' ); ?>">
-					<?php foreach ( $support_tiles as $tile ) : ?>
-						<?php
-						$tile_class   = isset( $tile['class'] ) ? $tile['class'] : '';
-						$tile_url     = isset( $tile['url'] ) ? $tile['url'] : '';
-						$tile_has_url = ! empty( $tile_url );
-						$tile_tag     = $tile_has_url ? 'a' : 'div';
-						?>
-						<<?php echo esc_html( $tile_tag ); ?>
-							class="service-support-tile <?php echo esc_attr( $tile_class ); ?><?php echo $tile_has_url ? '' : ' is-disabled'; ?>"
-							<?php if ( $tile_has_url ) : ?>
-								href="<?php echo esc_url( $tile_url ); ?>" target="_blank" rel="noopener noreferrer"
-							<?php else : ?>
-								aria-disabled="true"
-							<?php endif; ?>
+					<?php foreach ( $available_support_tiles as $tile_key => $tile ) : ?>
+						<button
+							class="service-support-tile"
+							type="button"
+							data-support-trigger
+							data-support-form="<?php echo esc_attr( $tile_key ); ?>"
+							data-support-title="<?php echo esc_attr( $tile['label'] ); ?>"
 						>
 							<span class="service-support-icon" aria-hidden="true">
 								<?php echo $tile['icon']; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 							</span>
 							<span class="service-support-label"><?php echo esc_html( $tile['label'] ); ?></span>
-						</<?php echo esc_html( $tile_tag ); ?>>
+						</button>
 					<?php endforeach; ?>
 				</div>
+
+				<?php if ( ! empty( $available_support_tiles ) ) : ?>
+					<div class="service-support-modal" data-support-modal aria-hidden="true" aria-modal="true" role="dialog">
+						<div class="service-support-modal__overlay" data-support-modal-close aria-hidden="true"></div>
+						<div class="service-support-modal__content" role="document">
+							<button class="service-support-modal__close" type="button" data-support-modal-close aria-label="<?php esc_attr_e( 'Close support form', 'apparel' ); ?>">×</button>
+							<h3 class="service-support-modal__title" data-support-modal-title></h3>
+							<div class="service-support-modal__body" data-support-modal-body></div>
+						</div>
+					</div>
+					<div class="service-support-forms" data-support-form-container hidden>
+						<?php foreach ( $available_support_tiles as $tile_key => $tile ) : ?>
+							<div class="service-support-form" data-support-form-template="<?php echo esc_attr( $tile_key ); ?>" hidden>
+								<?php echo do_shortcode( '[fluentform id="' . (int) $tile['form_id'] . '"]' ); ?>
+							</div>
+						<?php endforeach; ?>
+					</div>
+				<?php endif; ?>
 
 				<section class="service-tabs">
 					<div class="service-tab-list" role="tablist">
@@ -292,31 +308,19 @@ while ( have_posts() ) :
 					</div>
 					<div class="service-tab-panel" data-tab-panel="support" role="tabpanel">
 						<div class="service-support-tiles">
-							<?php if ( $support_url ) : ?>
-								<a class="service-support-tile" href="<?php echo esc_url( $support_url ); ?>" target="_blank" rel="noopener noreferrer">
-									<h3><?php esc_html_e( 'Get Support', 'apparel' ); ?></h3>
-									<p><?php esc_html_e( 'Reach out for help with setup and troubleshooting.', 'apparel' ); ?></p>
-								</a>
-							<?php endif; ?>
-							<?php if ( $docs_url ) : ?>
-								<a class="service-support-tile" href="<?php echo esc_url( $docs_url ); ?>" target="_blank" rel="noopener noreferrer">
-									<h3><?php esc_html_e( 'Documentation', 'apparel' ); ?></h3>
-									<p><?php esc_html_e( 'Browse guides, FAQs, and helpful resources.', 'apparel' ); ?></p>
-								</a>
-							<?php endif; ?>
-							<?php if ( $presales_url ) : ?>
-								<a class="service-support-tile" href="<?php echo esc_url( $presales_url ); ?>" target="_blank" rel="noopener noreferrer">
-									<h3><?php esc_html_e( 'Pre-Sales Questions', 'apparel' ); ?></h3>
-									<p><?php esc_html_e( 'Ask about features, licensing, or delivery.', 'apparel' ); ?></p>
-								</a>
-							<?php endif; ?>
-							<?php if ( $hire_url ) : ?>
-								<a class="service-support-tile" href="<?php echo esc_url( $hire_url ); ?>" target="_blank" rel="noopener noreferrer">
-									<h3><?php esc_html_e( 'Hire Us', 'apparel' ); ?></h3>
-									<p><?php esc_html_e( 'Schedule custom work or ongoing support.', 'apparel' ); ?></p>
-								</a>
-							<?php endif; ?>
-							<?php if ( ! $support_url && ! $docs_url && ! $presales_url && ! $hire_url ) : ?>
+							<?php foreach ( $available_support_tiles as $tile_key => $tile ) : ?>
+								<button
+									class="service-support-tile"
+									type="button"
+									data-support-trigger
+									data-support-form="<?php echo esc_attr( $tile_key ); ?>"
+									data-support-title="<?php echo esc_attr( $tile['label'] ); ?>"
+								>
+									<h3><?php echo esc_html( $tile['label'] ); ?></h3>
+									<p><?php echo esc_html( $tile['description'] ); ?></p>
+								</button>
+							<?php endforeach; ?>
+							<?php if ( empty( $available_support_tiles ) ) : ?>
 								<p><?php esc_html_e( 'Support resources are not available.', 'apparel' ); ?></p>
 							<?php endif; ?>
 						</div>
