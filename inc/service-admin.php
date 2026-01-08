@@ -372,6 +372,7 @@ function apparel_service_save_meta( $post_id, $post ) {
 	$checkout_url = isset( $_POST['apparel_service_checkout_url'] ) ? esc_url_raw( wp_unslash( $_POST['apparel_service_checkout_url'] ) ) : '';
 	if ( $checkout_url && filter_var( $checkout_url, FILTER_VALIDATE_URL ) ) {
 		update_post_meta( $post_id, '_service_checkout_url', $checkout_url );
+		apparel_service_maybe_update_payment_link_redirect( $checkout_url );
 	} else {
 		delete_post_meta( $post_id, '_service_checkout_url' );
 	}
@@ -567,7 +568,9 @@ function apparel_service_sync_variations_with_stripe( $variations, $existing_var
 		}
 
 		if ( $variation['stripe_price_id'] && ! $variation['stripe_payment_link'] ) {
-			$thank_you_url = esc_url_raw( home_url( '/thank-you/' ) );
+			$thank_you_url = esc_url_raw(
+				add_query_arg( 'session_id', '{CHECKOUT_SESSION_ID}', home_url( '/thank-you/' ) )
+			);
 			$payment_link_response = apparel_service_stripe_request(
 				$secret_key,
 				'https://api.stripe.com/v1/payment_links',
@@ -585,6 +588,8 @@ function apparel_service_sync_variations_with_stripe( $variations, $existing_var
 				$errors[] = sprintf( __( 'Stripe payment link creation failed for variation "%s".', 'apparel' ), $variation['name'] );
 				$variation_failed = true;
 			}
+		} elseif ( $variation['stripe_payment_link'] ) {
+			apparel_service_maybe_update_payment_link_redirect( $variation['stripe_payment_link'] );
 		}
 
 		if ( $variation_failed && $existing ) {
@@ -610,6 +615,97 @@ function apparel_service_sync_variations_with_stripe( $variations, $existing_var
 	}
 
 	return $variations;
+}
+
+/**
+ * Maybe update a Stripe payment link to redirect after completion.
+ *
+ * @param string $payment_link_url Stripe payment link URL.
+ */
+function apparel_service_maybe_update_payment_link_redirect( $payment_link_url ) {
+	$secret_key = get_option( 'stripe_secret_key' );
+	if ( ! $secret_key || ! $payment_link_url ) {
+		return;
+	}
+
+	$host = wp_parse_url( $payment_link_url, PHP_URL_HOST );
+	if ( ! $host || false === strpos( $host, 'stripe.com' ) ) {
+		return;
+	}
+
+	$payment_link = apparel_service_find_payment_link_by_url( $secret_key, $payment_link_url );
+	if ( ! $payment_link || empty( $payment_link['id'] ) ) {
+		return;
+	}
+
+	$thank_you_url = esc_url_raw(
+		add_query_arg( 'session_id', '{CHECKOUT_SESSION_ID}', home_url( '/thank-you/' ) )
+	);
+
+	$after_completion = $payment_link['after_completion'] ?? array();
+	$redirect_url     = $after_completion['redirect']['url'] ?? '';
+	$type             = $after_completion['type'] ?? '';
+
+	if ( 'redirect' === $type && $redirect_url === $thank_you_url ) {
+		return;
+	}
+
+	apparel_service_stripe_request(
+		$secret_key,
+		sprintf( 'https://api.stripe.com/v1/payment_links/%s', rawurlencode( $payment_link['id'] ) ),
+		array(
+			'after_completion[type]'          => 'redirect',
+			'after_completion[redirect][url]' => $thank_you_url,
+		)
+	);
+}
+
+/**
+ * Find a Stripe payment link by its URL.
+ *
+ * @param string $secret_key Stripe secret key.
+ * @param string $payment_link_url Stripe payment link URL.
+ * @return array|false
+ */
+function apparel_service_find_payment_link_by_url( $secret_key, $payment_link_url ) {
+	$endpoint = 'https://api.stripe.com/v1/payment_links';
+	$limit    = 100;
+	$attempts = 0;
+	$starting_after = '';
+
+	while ( $attempts < 5 ) {
+		$query = array(
+			'limit' => $limit,
+		);
+		if ( $starting_after ) {
+			$query['starting_after'] = $starting_after;
+		}
+
+		$response = apparel_service_stripe_get_request( $secret_key, $endpoint, $query );
+		if ( ! $response || empty( $response['data'] ) ) {
+			return false;
+		}
+
+		foreach ( $response['data'] as $payment_link ) {
+			if ( ! empty( $payment_link['url'] ) && $payment_link['url'] === $payment_link_url ) {
+				return $payment_link;
+			}
+		}
+
+		if ( empty( $response['has_more'] ) ) {
+			break;
+		}
+
+		$last = end( $response['data'] );
+		$starting_after = $last['id'] ?? '';
+		if ( ! $starting_after ) {
+			break;
+		}
+
+		$attempts++;
+	}
+
+	return false;
 }
 
 /**
@@ -640,6 +736,44 @@ function apparel_service_stripe_request( $secret_key, $endpoint, $body ) {
 	$body = json_decode( wp_remote_retrieve_body( $response ), true );
 
 	if ( $code < 200 || $code >= 300 ) {
+		return false;
+	}
+
+	return $body;
+}
+
+/**
+ * Stripe API GET helper.
+ *
+ * @param string $secret_key Stripe secret key.
+ * @param string $endpoint   API endpoint.
+ * @param array  $query      Request query args.
+ * @return array|false
+ */
+function apparel_service_stripe_get_request( $secret_key, $endpoint, $query = array() ) {
+	$url = $endpoint;
+	if ( ! empty( $query ) ) {
+		$url = add_query_arg( $query, $endpoint );
+	}
+
+	$response = wp_remote_get(
+		$url,
+		array(
+			'headers' => array(
+				'Authorization' => 'Bearer ' . $secret_key,
+			),
+			'timeout' => 20,
+		)
+	);
+
+	if ( is_wp_error( $response ) ) {
+		return false;
+	}
+
+	$code = wp_remote_retrieve_response_code( $response );
+	$body = json_decode( wp_remote_retrieve_body( $response ), true );
+
+	if ( $code < 200 || $code >= 300 || ! is_array( $body ) ) {
 		return false;
 	}
 
