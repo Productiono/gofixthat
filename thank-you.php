@@ -24,6 +24,7 @@ $session              = null;
 $payment_status       = '';
 $payment_intent       = null;
 $payment_intent_state = '';
+$line_items           = array();
 
 if ( $session_id && 0 === strpos( $session_id, 'cs_' ) ) {
 	$session = apparel_service_get_stripe_checkout_session( $session_id );
@@ -31,6 +32,7 @@ if ( $session_id && 0 === strpos( $session_id, 'cs_' ) ) {
 	if ( $session ) {
 		$payment_state  = 'unconfirmed';
 		$payment_status = isset( $session['payment_status'] ) ? $session['payment_status'] : '';
+		$secret_key     = apparel_service_get_stripe_secret_key();
 
 		if ( 'paid' === $payment_status || 'no_payment_required' === $payment_status ) {
 			$payment_state = 'confirmed';
@@ -48,6 +50,10 @@ if ( $session_id && 0 === strpos( $session_id, 'cs_' ) ) {
 			}
 		} elseif ( 'unpaid' === $payment_status || 'processing' === $payment_status ) {
 			$payment_state = 'processing';
+		}
+
+		if ( $secret_key ) {
+			$line_items = apparel_service_get_checkout_line_items( $secret_key, $session_id );
 		}
 	} else {
 		$payment_state = 'invalid';
@@ -111,6 +117,21 @@ if ( $session && 'confirmed' === $payment_state ) {
 			__( 'Email: %s', 'apparel' ),
 			sanitize_email( $session['customer_details']['email'] )
 		);
+	}
+
+	if ( ! empty( $line_items ) ) {
+		foreach ( $line_items as $line_item ) {
+			$description = $line_item['description'] ?? '';
+			$quantity    = isset( $line_item['quantity'] ) ? absint( $line_item['quantity'] ) : 1;
+			if ( $description ) {
+				$details[] = sprintf(
+					/* translators: 1: item description, 2: item quantity */
+					__( 'Item: %1$s × %2$d', 'apparel' ),
+					sanitize_text_field( $description ),
+					$quantity
+				);
+			}
+		}
 	}
 
 	$metadata_labels = array( 'service_name', 'order_name', 'service' );

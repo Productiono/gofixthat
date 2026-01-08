@@ -490,7 +490,7 @@ function apparel_service_sanitize_variations( $variations_input ) {
  * @return array
  */
 function apparel_service_sync_variations_with_stripe( $variations, $existing_variations, $post_id ) {
-	$secret_key = get_option( 'stripe_secret_key' );
+	$secret_key = apparel_service_get_stripe_secret_key();
 	if ( ! $secret_key ) {
 		return $variations;
 	}
@@ -621,7 +621,7 @@ function apparel_service_sync_variations_with_stripe( $variations, $existing_var
  * @param string $payment_link_url Stripe payment link URL.
  */
 function apparel_service_maybe_update_payment_link_redirect( $payment_link_url ) {
-	$secret_key = get_option( 'stripe_secret_key' );
+	$secret_key = apparel_service_get_stripe_secret_key();
 	if ( ! $secret_key || ! $payment_link_url ) {
 		return;
 	}
@@ -662,7 +662,7 @@ function apparel_service_maybe_update_payment_link_redirect( $payment_link_url )
  * @return string
  */
 function apparel_service_get_checkout_success_url() {
-	$base_url = home_url( '/thank-you' );
+	$base_url = untrailingslashit( home_url( '/thank-you' ) );
 
 	return $base_url . '?session_id={CHECKOUT_SESSION_ID}';
 }
