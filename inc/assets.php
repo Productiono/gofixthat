@@ -124,7 +124,7 @@ JS;
 		// Add RTL support.
 		wp_style_add_data( 'mbf-styles', 'rtl', 'replace' );
 
-		if ( is_singular( 'service' ) || is_post_type_archive( 'service' ) ) {
+		if ( is_singular( 'service' ) || is_post_type_archive( 'service' ) || ( function_exists( 'apparel_is_service_preview' ) && apparel_is_service_preview() ) ) {
 			wp_enqueue_script( 'apparel-service' );
 			wp_enqueue_style( 'apparel-service' );
 		}

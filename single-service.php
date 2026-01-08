@@ -178,7 +178,8 @@ while ( have_posts() ) :
 
 					<div class="service-preview-actions">
 						<?php if ( $live_preview_url ) : ?>
-							<a class="service-button service-button-primary" href="<?php echo esc_url( $live_preview_url ); ?>" target="_blank" rel="noopener noreferrer">
+							<?php $preview_viewer_url = apparel_service_get_preview_viewer_url( $service_id, $live_preview_url ); ?>
+							<a class="service-button service-button-primary" href="<?php echo esc_url( $preview_viewer_url ); ?>" target="_blank" rel="noopener noreferrer">
 								<?php esc_html_e( 'Live Preview', 'apparel' ); ?>
 								<span class="service-button-icon" aria-hidden="true">
 									<svg viewBox="0 0 24 24" role="presentation" focusable="false">
