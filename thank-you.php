@@ -83,6 +83,40 @@ if ( $session_id && 0 === strpos( $session_id, 'cs_' ) ) {
 
 $support_url = home_url( '/contact' );
 
+if ( ! function_exists( 'apparel_service_get_download_link' ) ) {
+	/**
+	 * Get the download link for a service or its variation.
+	 *
+	 * @param int    $service_id   Service post ID.
+	 * @param string $variation_id Variation ID.
+	 * @return string
+	 */
+	function apparel_service_get_download_link( $service_id, $variation_id ) {
+		$service_id = absint( $service_id );
+		if ( ! $service_id ) {
+			return '';
+		}
+
+		if ( $variation_id ) {
+			$variations = get_post_meta( $service_id, '_service_variations', true );
+			if ( is_array( $variations ) ) {
+				foreach ( $variations as $variation ) {
+					if ( ! empty( $variation['variation_id'] ) && $variation['variation_id'] === $variation_id && ! empty( $variation['download_link'] ) ) {
+						return esc_url_raw( $variation['download_link'] );
+					}
+				}
+			}
+		}
+
+		$service_download_link = get_post_meta( $service_id, '_service_download_link', true );
+		if ( $service_download_link ) {
+			return esc_url_raw( $service_download_link );
+		}
+
+		return '';
+	}
+}
+
 switch ( $payment_state ) {
 	case 'confirmed':
 		$thank_you_heading = __( 'Payment confirmed ✅ Thank you!', 'apparel' );
@@ -123,6 +157,7 @@ switch ( $payment_state ) {
 }
 
 $details = array();
+$download_link = '';
 
 if ( $order_id && in_array( $payment_state, array( 'confirmed', 'refunded', 'processing' ), true ) ) {
 	$order_amount   = get_post_meta( $order_id, '_amount_total', true );
@@ -226,6 +261,23 @@ if ( $session && 'confirmed' === $payment_state ) {
 	}
 }
 
+if ( 'confirmed' === $payment_state ) {
+	$download_service_id   = 0;
+	$download_variation_id = '';
+
+	if ( $order_id ) {
+		$download_service_id   = absint( get_post_meta( $order_id, '_service_id', true ) );
+		$download_variation_id = sanitize_text_field( get_post_meta( $order_id, '_variation_id', true ) );
+	} elseif ( $session ) {
+		$download_service_id   = ! empty( $session['metadata']['service_id'] ) ? absint( $session['metadata']['service_id'] ) : 0;
+		$download_variation_id = ! empty( $session['metadata']['variation_id'] ) ? sanitize_text_field( $session['metadata']['variation_id'] ) : '';
+	}
+
+	if ( $download_service_id ) {
+		$download_link = apparel_service_get_download_link( $download_service_id, $download_variation_id );
+	}
+}
+
 ?>
 
 <div id="primary" class="mbf-content-area">
@@ -266,6 +318,11 @@ if ( $session && 'confirmed' === $payment_state ) {
 						<?php endif; ?>
 
 						<div class="mbf-thank-you__actions">
+							<?php if ( $download_link ) : ?>
+								<a class="mbf-button mbf-button--solid" href="<?php echo esc_url( $download_link ); ?>" target="_blank" rel="noopener noreferrer">
+									<?php esc_html_e( 'Download Now', 'apparel' ); ?>
+								</a>
+							<?php endif; ?>
 							<a class="mbf-button mbf-button--solid" href="<?php echo esc_url( home_url( '/' ) ); ?>">
 								<?php esc_html_e( 'Go to Home', 'apparel' ); ?>
 							</a>
