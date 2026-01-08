@@ -255,44 +255,6 @@ while ( have_posts() ) :
 					<?php endforeach; ?>
 				</div>
 
-				<?php if ( ! empty( $variations ) ) : ?>
-					<section class="service-variations">
-						<h2><?php esc_html_e( 'Variations', 'apparel' ); ?></h2>
-						<div class="service-variations-list">
-							<?php foreach ( $variations as $variation ) : ?>
-								<?php
-									$name       = isset( $variation['name'] ) ? $variation['name'] : '';
-									$price      = isset( $variation['price'] ) ? $variation['price'] : '';
-									$sale_price = isset( $variation['sale_price'] ) ? $variation['sale_price'] : '';
-									$var_id     = isset( $variation['variation_id'] ) ? $variation['variation_id'] : '';
-									$has_sale   = '' !== $sale_price && '' !== $price && (float) $sale_price < (float) $price;
-									?>
-									<div class="service-variation">
-										<div class="service-variation-info">
-											<h3><?php echo esc_html( $name ); ?></h3>
-											<div class="service-variation-price">
-												<?php if ( $has_sale ) : ?>
-													<span class="service-price-original"><?php echo esc_html( apparel_service_format_price( $price ) ); ?></span>
-													<span class="service-price-current"><?php echo esc_html( apparel_service_format_price( $sale_price ) ); ?></span>
-												<?php else : ?>
-													<span class="service-price-current"><?php echo esc_html( apparel_service_format_price( $price ) ); ?></span>
-												<?php endif; ?>
-											</div>
-										</div>
-								<?php
-									$variation_checkout = isset( $variation['stripe_payment_link'] ) ? $variation['stripe_payment_link'] : '';
-									$variation_price_id = isset( $variation['stripe_price_id'] ) ? $variation['stripe_price_id'] : '';
-									$button_class       = 'service-button service-button-ghost' . ( $var_id === $default_variation_id ? ' is-selected' : '' );
-									?>
-								<button class="<?php echo esc_attr( $button_class ); ?>" type="button" data-variation-select data-variation-id="<?php echo esc_attr( $var_id ); ?>" data-variation-price="<?php echo esc_attr( $price ); ?>" data-variation-sale="<?php echo esc_attr( $sale_price ); ?>" data-variation-checkout="<?php echo esc_url( $variation_checkout ); ?>" data-variation-price-id="<?php echo esc_attr( $variation_price_id ); ?>">
-									<?php esc_html_e( 'Select', 'apparel' ); ?>
-								</button>
-									</div>
-							<?php endforeach; ?>
-						</div>
-					</section>
-				<?php endif; ?>
-
 				<section class="service-tabs">
 					<div class="service-tab-list" role="tablist">
 						<button class="service-tab is-active" type="button" data-tab="details" role="tab" aria-selected="true"><?php esc_html_e( 'Item Details', 'apparel' ); ?></button>

@@ -23,8 +23,8 @@
 	const buyButton = document.querySelector('[data-service-buy]');
 	const stickyWrapper = document.querySelector('[data-service-sticky]');
 	const stickyButton = document.querySelector('[data-service-buy-sticky]');
-	const priceCurrent = document.querySelector('.service-price-current');
-	const priceOriginal = document.querySelector('.service-price-original');
+	const priceCurrent = pricingCard ? pricingCard.querySelector('.service-price-current') : null;
+	const priceOriginal = pricingCard ? pricingCard.querySelector('.service-price-original') : null;
 	const variationSelect = document.querySelector('[data-service-variation]');
 
 	const formatPrice = (value) => {
@@ -127,6 +127,7 @@
 				sale: selectedOption.dataset.variationSale || '',
 				id: selectedOption.value || '',
 				checkout: selectedOption.dataset.variationCheckout || '',
+				priceId: selectedOption.dataset.variationPriceId || '',
 			});
 		}
 		variationSelect.addEventListener('change', () => {
