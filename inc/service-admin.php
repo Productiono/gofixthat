@@ -112,6 +112,7 @@ function apparel_service_details_metabox( $post ) {
 	$service_price      = get_post_meta( $post->ID, '_service_price', true );
 	$service_sale_price = get_post_meta( $post->ID, '_service_sale_price', true );
 	$checkout_url       = get_post_meta( $post->ID, '_service_checkout_url', true );
+	$download_link      = get_post_meta( $post->ID, '_service_download_link', true );
 	?>
 	<p>
 		<label for="apparel-service-price"><strong><?php esc_html_e( 'Service Price', 'apparel' ); ?></strong></label>
@@ -124,6 +125,10 @@ function apparel_service_details_metabox( $post ) {
 	<p>
 		<label for="apparel-service-checkout-url"><strong><?php esc_html_e( 'Checkout Link', 'apparel' ); ?></strong></label>
 		<input type="url" id="apparel-service-checkout-url" name="apparel_service_checkout_url" class="widefat" value="<?php echo esc_url( $checkout_url ); ?>" placeholder="https://example.com/checkout" />
+	</p>
+	<p>
+		<label for="apparel-service-download-link"><strong><?php esc_html_e( 'Download Link', 'apparel' ); ?></strong></label>
+		<input type="url" id="apparel-service-download-link" name="apparel_service_download_link" class="widefat" value="<?php echo esc_url( $download_link ); ?>" placeholder="https://example.com/download" />
 	</p>
 	<?php
 }
@@ -234,6 +239,7 @@ function apparel_service_variations_metabox( $post ) {
 					<th><?php esc_html_e( 'Stripe Product ID', 'apparel' ); ?></th>
 					<th><?php esc_html_e( 'Stripe Price ID', 'apparel' ); ?></th>
 					<th><?php esc_html_e( 'Stripe Payment Link', 'apparel' ); ?></th>
+					<th><?php esc_html_e( 'Download Link', 'apparel' ); ?></th>
 					<th><?php esc_html_e( 'Active', 'apparel' ); ?></th>
 					<th><?php esc_html_e( 'Actions', 'apparel' ); ?></th>
 				</tr>
@@ -250,6 +256,7 @@ function apparel_service_variations_metabox( $post ) {
 					$stripe_product_id  = isset( $variation['stripe_product_id'] ) ? $variation['stripe_product_id'] : '';
 					$stripe_price_id    = isset( $variation['stripe_price_id'] ) ? $variation['stripe_price_id'] : '';
 					$stripe_payment_link = isset( $variation['stripe_payment_link'] ) ? $variation['stripe_payment_link'] : '';
+					$download_link      = isset( $variation['download_link'] ) ? $variation['download_link'] : '';
 					$active             = ! empty( $variation['active'] );
 					?>
 					<tr class="apparel-service-variation-row">
@@ -275,6 +282,9 @@ function apparel_service_variations_metabox( $post ) {
 						</td>
 						<td>
 							<input type="url" class="widefat" name="apparel_service_variations[<?php echo esc_attr( $index ); ?>][stripe_payment_link]" value="<?php echo esc_url( $stripe_payment_link ); ?>" />
+						</td>
+						<td>
+							<input type="url" class="widefat" name="apparel_service_variations[<?php echo esc_attr( $index ); ?>][download_link]" value="<?php echo esc_url( $download_link ); ?>" />
 						</td>
 						<td>
 							<label>
@@ -313,6 +323,9 @@ function apparel_service_variations_metabox( $post ) {
 			</td>
 			<td>
 				<input type="url" class="widefat" name="apparel_service_variations[{{data.index}}][stripe_payment_link]" value="" />
+			</td>
+			<td>
+				<input type="url" class="widefat" name="apparel_service_variations[{{data.index}}][download_link]" value="" />
 			</td>
 			<td>
 				<label>
@@ -375,6 +388,13 @@ function apparel_service_save_meta( $post_id, $post ) {
 		apparel_service_maybe_update_payment_link_redirect( $checkout_url );
 	} else {
 		delete_post_meta( $post_id, '_service_checkout_url' );
+	}
+
+	$download_link = isset( $_POST['apparel_service_download_link'] ) ? esc_url_raw( wp_unslash( $_POST['apparel_service_download_link'] ) ) : '';
+	if ( $download_link && filter_var( $download_link, FILTER_VALIDATE_URL ) ) {
+		update_post_meta( $post_id, '_service_download_link', $download_link );
+	} else {
+		delete_post_meta( $post_id, '_service_download_link' );
 	}
 
 	$support_title = isset( $_POST['apparel_service_support_title'] ) ? sanitize_text_field( wp_unslash( $_POST['apparel_service_support_title'] ) ) : '';
@@ -446,7 +466,7 @@ function apparel_service_sanitize_variations( $variations_input ) {
 	$default_currency = get_option( 'default_currency', '' );
 
 	foreach ( $variations_input as $variation ) {
-		$has_any_value = ! empty( $variation['name'] ) || ! empty( $variation['price'] ) || ! empty( $variation['sale_price'] ) || ! empty( $variation['price_amount'] ) || ! empty( $variation['stripe_product_id'] ) || ! empty( $variation['stripe_price_id'] ) || ! empty( $variation['stripe_payment_link'] );
+		$has_any_value = ! empty( $variation['name'] ) || ! empty( $variation['price'] ) || ! empty( $variation['sale_price'] ) || ! empty( $variation['price_amount'] ) || ! empty( $variation['stripe_product_id'] ) || ! empty( $variation['stripe_price_id'] ) || ! empty( $variation['stripe_payment_link'] ) || ! empty( $variation['download_link'] );
 		if ( ! $has_any_value ) {
 			continue;
 		}
@@ -472,6 +492,7 @@ function apparel_service_sanitize_variations( $variations_input ) {
 			'stripe_product_id'   => isset( $variation['stripe_product_id'] ) ? sanitize_text_field( $variation['stripe_product_id'] ) : '',
 			'stripe_price_id'     => isset( $variation['stripe_price_id'] ) ? sanitize_text_field( $variation['stripe_price_id'] ) : '',
 			'stripe_payment_link' => isset( $variation['stripe_payment_link'] ) ? esc_url_raw( $variation['stripe_payment_link'] ) : '',
+			'download_link'       => isset( $variation['download_link'] ) ? esc_url_raw( $variation['download_link'] ) : '',
 			'active'              => ! empty( $variation['active'] ) ? 1 : 0,
 		);
 
