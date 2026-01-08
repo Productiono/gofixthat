@@ -164,9 +164,10 @@ if ( ! function_exists( 'apparel_service_preview_frame_url' ) ) {
 	 *
 	 * @param int    $service_id Service ID.
 	 * @param string $token      Token string.
+	 * @param string $target_url Optional preview URL override.
 	 * @return string
 	 */
-	function apparel_service_preview_frame_url( $service_id, $token ) {
+	function apparel_service_preview_frame_url( $service_id, $token, $target_url = '' ) {
 		if ( empty( $token ) ) {
 			return '';
 		}
@@ -177,7 +178,48 @@ if ( ! function_exists( 'apparel_service_preview_frame_url' ) ) {
 			'service_preview_token' => $token,
 		);
 
+		if ( ! empty( $target_url ) ) {
+			$args['service_preview_url'] = esc_url_raw( $target_url );
+		}
+
 		return add_query_arg( $args, home_url( '/' ) );
+	}
+}
+
+if ( ! function_exists( 'apparel_service_preview_is_internal_url' ) ) {
+	/**
+	 * Check if a preview URL is within the same origin as the base preview URL.
+	 *
+	 * @param string $target_url Target URL.
+	 * @param string $base_url   Base preview URL.
+	 * @return bool
+	 */
+	function apparel_service_preview_is_internal_url( $target_url, $base_url ) {
+		$target_parts = wp_parse_url( $target_url );
+		$base_parts   = wp_parse_url( $base_url );
+
+		if ( empty( $target_parts['host'] ) ) {
+			return true;
+		}
+
+		if ( empty( $base_parts['host'] ) ) {
+			return false;
+		}
+
+		$target_host = strtolower( $target_parts['host'] );
+		$base_host   = strtolower( $base_parts['host'] );
+		$target_port = isset( $target_parts['port'] ) ? (int) $target_parts['port'] : null;
+		$base_port   = isset( $base_parts['port'] ) ? (int) $base_parts['port'] : null;
+
+		if ( $target_host !== $base_host ) {
+			return false;
+		}
+
+		if ( null !== $target_port || null !== $base_port ) {
+			return $target_port === $base_port;
+		}
+
+		return true;
 	}
 }
 
@@ -192,13 +234,23 @@ if ( ! function_exists( 'apparel_service_preview_handle_frame' ) ) {
 
 		$service_id = absint( get_query_var( 'service_id' ) );
 		$token      = (string) get_query_var( 'service_preview_token' );
-		$preview    = apparel_service_preview_consume_token( $token, $service_id );
+		$preview    = apparel_service_preview_get_token( $token );
 
-		if ( empty( $preview ) ) {
+		if ( ! $preview || (int) $preview['service_id'] !== $service_id ) {
 			wp_die( esc_html__( 'Preview link is invalid or expired.', 'apparel' ), esc_html__( 'Preview unavailable', 'apparel' ), array( 'response' => 403 ) );
 		}
 
-		wp_safe_redirect( $preview );
+		$preview_url = (string) $preview['preview_url'];
+		$target_url  = (string) get_query_var( 'service_preview_url' );
+
+		if ( ! empty( $target_url ) ) {
+			$target_url = esc_url_raw( $target_url );
+			if ( $target_url && apparel_service_preview_is_internal_url( $target_url, $preview_url ) ) {
+				$preview_url = $target_url;
+			}
+		}
+
+		wp_safe_redirect( $preview_url );
 		exit;
 	}
 }

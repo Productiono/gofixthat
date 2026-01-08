@@ -73,6 +73,18 @@ $pricing_data_attrs = array(
 );
 
 $frame_url = apparel_service_preview_frame_url( $service_id, $preview_token );
+$frame_base_url = apparel_service_preview_frame_url( $service_id, $preview_token );
+$preview_origin = '';
+
+if ( $preview_url ) {
+	$preview_parts = wp_parse_url( $preview_url );
+	if ( ! empty( $preview_parts['scheme'] ) && ! empty( $preview_parts['host'] ) ) {
+		$preview_origin = $preview_parts['scheme'] . '://' . $preview_parts['host'];
+		if ( ! empty( $preview_parts['port'] ) ) {
+			$preview_origin .= ':' . $preview_parts['port'];
+		}
+	}
+}
 
 wp_enqueue_style( 'apparel-service' );
 ?>
@@ -114,5 +126,60 @@ wp_enqueue_style( 'apparel-service' );
 		</footer>
 	</div>
 	<?php wp_footer(); ?>
+	<?php if ( $preview_url && $frame_base_url ) : ?>
+		<script>
+			(function() {
+				const iframe = document.querySelector('.service-preview-viewer__frame');
+				if (!iframe) {
+					return;
+				}
+
+				const frameBaseUrl = <?php echo wp_json_encode( $frame_base_url ); ?>;
+				const previewOrigin = <?php echo wp_json_encode( $preview_origin ); ?>;
+
+				if (!frameBaseUrl || !previewOrigin) {
+					return;
+				}
+
+				function rewriteLinks() {
+					let doc;
+					try {
+						doc = iframe.contentDocument || iframe.contentWindow.document;
+					} catch (error) {
+						return;
+					}
+
+					if (!doc) {
+						return;
+					}
+
+					const links = doc.querySelectorAll('a[href]');
+					links.forEach((link) => {
+						const href = link.getAttribute('href');
+						if (!href || href.startsWith('#') || href.startsWith('mailto:') || href.startsWith('tel:') || href.startsWith('javascript:')) {
+							return;
+						}
+
+						let resolved;
+						try {
+							resolved = new URL(link.href);
+						} catch (error) {
+							return;
+						}
+
+						if (resolved.origin !== previewOrigin) {
+							return;
+						}
+
+						const frameUrl = new URL(frameBaseUrl);
+						frameUrl.searchParams.set('service_preview_url', resolved.toString());
+						link.setAttribute('href', frameUrl.toString());
+					});
+				}
+
+				iframe.addEventListener('load', rewriteLinks);
+			})();
+		</script>
+	<?php endif; ?>
 </body>
 </html>
