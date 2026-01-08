@@ -250,7 +250,12 @@ if ( ! function_exists( 'apparel_service_preview_handle_frame' ) ) {
 			}
 		}
 
-		wp_safe_redirect( $preview_url );
+		$preview_url = esc_url_raw( $preview_url );
+		if ( apparel_service_preview_is_internal_url( $preview_url, home_url( '/' ) ) ) {
+			wp_safe_redirect( $preview_url );
+		} else {
+			wp_redirect( $preview_url );
+		}
 		exit;
 	}
 }
