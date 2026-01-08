@@ -243,3 +243,61 @@ hr,
 :where(.woocommerce) :where(input, select, textarea) {
   border-radius: var(--radius);
 }
+
+:where(.entry-content, .wp-block-post-content, .wp-site-blocks, main, .site-main, .content-area) {
+  color: var(--text);
+  font-family: var(--font-body);
+}
+
+:where(.entry-content, .wp-block-post-content, .wp-site-blocks, main, .site-main, .content-area) :where(h1, h2, h3, h4, h5, h6) {
+  margin: 0 0 calc(var(--space) * 2);
+  font-family: var(--font-heading);
+  color: var(--text-strong);
+}
+
+:where(.entry-content, .wp-block-post-content, .wp-site-blocks, main, .site-main, .content-area) :where(p) {
+  margin: 0 0 calc(var(--space) * 2);
+}
+
+:where(.entry-content, .wp-block-post-content, .wp-site-blocks, main, .site-main, .content-area) :where(a) {
+  color: var(--primary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+:where(.entry-content, .wp-block-post-content, .wp-site-blocks, main, .site-main, .content-area) :where(button, .button, .wp-element-button, .wp-block-button__link, input[type="submit"], input[type="button"], input[type="reset"]) {
+  appearance: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-emphasis);
+  color: var(--text-strong);
+  font-family: var(--font-body);
+  font-weight: 600;
+  line-height: 1.1;
+  padding: calc(var(--space) * 1.25) calc(var(--space) * 2.5);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+:where(.entry-content, .wp-block-post-content, .wp-site-blocks, main, .site-main, .content-area) :where(input, select, textarea) {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: calc(var(--space) * 1.25) calc(var(--space) * 1.5);
+  font-family: var(--font-body);
+  font-size: 14px;
+  background: var(--bg);
+  color: var(--text);
+}
+
+:where(.woocommerce) :where(.entry-content, .wp-block-post-content, .wp-site-blocks, main, .site-main, .content-area) :where(button, .button, .wp-element-button, .wp-block-button__link, input[type="submit"], input[type="button"], input[type="reset"]) {
+  border-radius: var(--radius);
+  background: var(--bg-emphasis);
+  color: var(--text-strong);
+}
+
+:where(.woocommerce) :where(.entry-content, .wp-block-post-content, .wp-site-blocks, main, .site-main, .content-area) :where(input, select, textarea) {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg);
+  color: var(--text);
+}

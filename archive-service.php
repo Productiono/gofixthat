@@ -23,7 +23,8 @@ if ( ! function_exists( 'apparel_service_format_price' ) ) {
 	}
 }
 ?>
-<div class="service-archive">
+<main id="primary" class="site-main content-area">
+	<div class="entry-content service-archive">
 	<header class="service-archive-header">
 		<h1><?php esc_html_e( 'Services', 'apparel' ); ?></h1>
 		<?php if ( get_the_archive_description() ) : ?>
@@ -86,7 +87,8 @@ if ( ! function_exists( 'apparel_service_format_price' ) ) {
 			<p><?php esc_html_e( 'No services found.', 'apparel' ); ?></p>
 		<?php endif; ?>
 	</div>
-</div>
+	</div>
+</main>
 
 <?php
 get_footer();

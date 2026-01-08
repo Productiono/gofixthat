@@ -14,7 +14,7 @@
 
 get_header(); ?>
 
-<div id="primary" class="mbf-content-area">
+<main id="primary" class="site-main content-area mbf-content-area">
 
 	<?php
 	/**
@@ -117,7 +117,7 @@ get_header(); ?>
 	 */
 	do_action( 'mbf_main_after' );
 	?>
-</div>
+</main>
 
 <?php get_sidebar(); ?>
 <?php get_footer(); ?>
