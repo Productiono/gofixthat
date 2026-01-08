@@ -342,7 +342,8 @@
 	margin: 8px 0 14px;
 }
 
-.service-quantity-control input {
+.service-quantity-control input,
+.service-quantity-control select {
 	width: 100%;
 	min-width: 120px;
 	border-radius: 6px;
@@ -772,7 +773,8 @@
 
 	.service-preview-actions,
 	.service-button,
-	.service-quantity-control input {
+	.service-quantity-control input,
+	.service-quantity-control select {
 		max-width: 100%;
 	}
 
