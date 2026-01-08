@@ -314,6 +314,9 @@
 		if (!gallery || !galleryItems.length) {
 			return;
 		}
+		if (gallery.parentElement !== document.body) {
+			document.body.appendChild(gallery);
+		}
 		gallery.classList.add('is-active');
 		gallery.setAttribute('aria-hidden', 'false');
 		lockGalleryScroll();
