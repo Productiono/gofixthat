@@ -27,6 +27,7 @@ $payment_status       = '';
 $payment_intent       = null;
 $payment_intent_state = '';
 $line_items           = array();
+$secret_key           = '';
 
 if ( $session_id && 0 === strpos( $session_id, 'cs_' ) ) {
 	$order_id = apparel_service_get_order_id_by_session_id( $session_id );
@@ -279,6 +280,28 @@ if ( 'confirmed' === $payment_state ) {
 	} elseif ( $session ) {
 		$download_service_id   = ! empty( $session['metadata']['service_id'] ) ? absint( $session['metadata']['service_id'] ) : 0;
 		$download_variation_id = ! empty( $session['metadata']['variation_id'] ) ? sanitize_text_field( $session['metadata']['variation_id'] ) : '';
+
+		if ( ! $download_service_id ) {
+			$service_match = array();
+			if ( $secret_key && ! empty( $session['payment_link'] ) && function_exists( 'apparel_service_find_service_by_payment_link' ) ) {
+				$service_match = apparel_service_find_service_by_payment_link(
+					sanitize_text_field( $session['payment_link'] ),
+					$secret_key
+				);
+			}
+
+			if ( empty( $service_match ) && ! empty( $line_items ) && function_exists( 'apparel_service_find_service_by_price_id' ) ) {
+				$price_id = $line_items[0]['price']['id'] ?? '';
+				if ( $price_id ) {
+					$service_match = apparel_service_find_service_by_price_id( sanitize_text_field( $price_id ) );
+				}
+			}
+
+			if ( ! empty( $service_match['service_id'] ) ) {
+				$download_service_id   = absint( $service_match['service_id'] );
+				$download_variation_id = ! empty( $service_match['variation_id'] ) ? sanitize_text_field( $service_match['variation_id'] ) : '';
+			}
+		}
 	}
 
 	if ( $download_service_id ) {
