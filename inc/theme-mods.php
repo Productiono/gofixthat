@@ -56,6 +56,11 @@ function mbf_register_theme_mods() {
 	require get_template_directory() . '/inc/theme-mods/page-settings.php';
 
 	/**
+	* Service Settings.
+	*/
+	require get_template_directory() . '/inc/theme-mods/service-settings.php';
+
+	/**
 	* Miscellaneous Settings.
 	*/
 	require get_template_directory() . '/inc/theme-mods/miscellaneous-settings.php';

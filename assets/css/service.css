@@ -602,6 +602,9 @@
 	align-items: center;
 	gap: 8px;
 	min-height: 92px;
+	appearance: none;
+	cursor: pointer;
+	font: inherit;
 	transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
@@ -612,6 +615,71 @@
 .service-support-tile.is-disabled {
 	cursor: default;
 	pointer-events: none;
+}
+
+.service-support-modal {
+	position: fixed;
+	inset: 0;
+	z-index: 30010;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: clamp(16px, 3vw, 32px);
+	opacity: 0;
+	visibility: hidden;
+	pointer-events: none;
+	transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+.service-support-modal.is-active {
+	opacity: 1;
+	visibility: visible;
+	pointer-events: auto;
+}
+
+.service-support-modal__overlay {
+	position: absolute;
+	inset: 0;
+	background: rgba(2, 6, 23, 0.6);
+}
+
+.service-support-modal__content {
+	position: relative;
+	z-index: 1;
+	width: min(680px, 100%);
+	max-height: calc(100vh - 32px);
+	overflow: auto;
+	background: #fff;
+	border-radius: 6px;
+	padding: 24px;
+	box-shadow: 0 20px 50px rgba(15, 23, 42, 0.25);
+}
+
+.service-support-modal__title {
+	font-size: 20px;
+	margin: 0 0 16px;
+}
+
+.service-support-modal__close {
+	position: absolute;
+	top: 12px;
+	right: 12px;
+	width: 36px;
+	height: 36px;
+	border: none;
+	border-radius: 50%;
+	background: #111827;
+	color: #fff;
+	font-size: 20px;
+	line-height: 1;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+}
+
+body.service-support-modal-open {
+	overflow: hidden;
 }
 
 .service-support-icon {
