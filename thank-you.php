@@ -123,6 +123,10 @@ if ( $session && 'confirmed' === $payment_state ) {
 		}
 	}
 }
+
+if ( $session && 'confirmed' === $payment_state && function_exists( 'apparel_service_process_checkout_session' ) ) {
+	apparel_service_process_checkout_session( $session );
+}
 ?>
 
 <div id="primary" class="mbf-content-area">

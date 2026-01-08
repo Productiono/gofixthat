@@ -81,9 +81,10 @@ class Apparel_Service_Orders_Table extends WP_List_Table {
 			'order_id'       => __( 'Order ID', 'apparel' ),
 			'date'           => __( 'Date', 'apparel' ),
 			'service'        => __( 'Service', 'apparel' ),
+			'variation'      => __( 'Variation', 'apparel' ),
 			'amount'         => __( 'Amount', 'apparel' ),
 			'status'         => __( 'Status', 'apparel' ),
-			'customer_email' => __( 'Customer Email', 'apparel' ),
+			'customer'       => __( 'Customer', 'apparel' ),
 			'stripe_id'      => __( 'Stripe Session/Payment ID', 'apparel' ),
 		);
 	}
@@ -202,10 +203,14 @@ class Apparel_Service_Orders_Table extends WP_List_Table {
 		$items = array();
 		foreach ( $query->posts as $post ) {
 			$service_id    = get_post_meta( $post->ID, '_service_id', true );
+			$variation_id  = get_post_meta( $post->ID, '_variation_id', true );
+			$variation_name = get_post_meta( $post->ID, '_variation_name', true );
 			$amount_total  = get_post_meta( $post->ID, '_amount_total', true );
 			$currency      = get_post_meta( $post->ID, '_currency', true );
 			$status        = get_post_meta( $post->ID, '_status', true );
-			$customer      = get_post_meta( $post->ID, '_customer_email', true );
+			$customer_email = get_post_meta( $post->ID, '_customer_email', true );
+			$customer_name  = get_post_meta( $post->ID, '_customer_name', true );
+			$customer_phone = get_post_meta( $post->ID, '_customer_phone', true );
 			$session_id    = get_post_meta( $post->ID, '_stripe_session_id', true );
 			$payment_intent = get_post_meta( $post->ID, '_stripe_payment_intent_id', true );
 
@@ -214,14 +219,23 @@ class Apparel_Service_Orders_Table extends WP_List_Table {
 				$amount_display = sprintf( '%s %s', number_format_i18n( (float) $amount_total, 2 ), strtoupper( $currency ) );
 			}
 
+			$customer_details = array_filter(
+				array(
+					$customer_name,
+					$customer_email,
+					$customer_phone,
+				)
+			);
+
 			$items[] = array(
 				'order_id'       => (int) $post->ID,
 				'date'           => esc_html( get_the_date( '', $post ) ),
 				'service_id'     => $service_id,
 				'service'        => '',
+				'variation'      => esc_html( $variation_name ? $variation_name : $variation_id ),
 				'amount'         => esc_html( $amount_display ),
 				'status'         => esc_html( ucfirst( (string) $status ) ),
-				'customer_email' => esc_html( $customer ),
+				'customer'       => esc_html( implode( ' / ', $customer_details ) ),
 				'stripe_id'      => esc_html( $session_id ? $session_id : $payment_intent ),
 			);
 		}
@@ -398,9 +412,9 @@ function apparel_service_process_checkout_session( $session ) {
 	}
 
 	$payment_status = isset( $session['payment_status'] ) ? $session['payment_status'] : '';
-	$status         = ( 'paid' === $payment_status ) ? 'paid' : 'failed';
+	$status         = in_array( $payment_status, array( 'paid', 'no_payment_required' ), true ) ? 'paid' : 'failed';
 
-	$secret_key = get_option( 'stripe_secret_key', '' );
+	$secret_key = apparel_service_get_stripe_secret_key();
 
 	$service_match = apparel_service_find_service_by_session( $session, $secret_key );
 	$service_id    = $service_match['service_id'] ?? 0;
@@ -410,11 +424,24 @@ function apparel_service_process_checkout_session( $session ) {
 	$amount_total = isset( $session['amount_total'] ) ? ( (float) $session['amount_total'] / 100 ) : '';
 	$currency     = isset( $session['currency'] ) ? strtolower( $session['currency'] ) : '';
 
-	$customer_email = '';
-	if ( ! empty( $session['customer_details']['email'] ) ) {
-		$customer_email = sanitize_email( $session['customer_details']['email'] );
+	$customer_details = isset( $session['customer_details'] ) && is_array( $session['customer_details'] ) ? $session['customer_details'] : array();
+	$customer_email   = '';
+	if ( ! empty( $customer_details['email'] ) ) {
+		$customer_email = sanitize_email( $customer_details['email'] );
 	} elseif ( ! empty( $session['customer_email'] ) ) {
 		$customer_email = sanitize_email( $session['customer_email'] );
+	}
+
+	$customer_name    = ! empty( $customer_details['name'] ) ? sanitize_text_field( $customer_details['name'] ) : '';
+	$customer_phone   = ! empty( $customer_details['phone'] ) ? sanitize_text_field( $customer_details['phone'] ) : '';
+	$customer_address = '';
+	if ( ! empty( $customer_details['address'] ) ) {
+		$customer_address = apparel_service_format_customer_address( $customer_details['address'] );
+	}
+
+	$variation_name = '';
+	if ( $service_id && $variation_id ) {
+		$variation_name = apparel_service_get_variation_name( $service_id, $variation_id );
 	}
 
 	$payment_link_id = isset( $session['payment_link'] ) ? sanitize_text_field( $session['payment_link'] ) : '';
@@ -429,6 +456,9 @@ function apparel_service_process_checkout_session( $session ) {
 		'amount_total'            => $amount_total,
 		'currency'                => $currency,
 		'customer_email'          => $customer_email,
+		'customer_name'           => $customer_name,
+		'customer_phone'          => $customer_phone,
+		'customer_address'        => $customer_address,
 		'stripe_session_id'       => sanitize_text_field( $session['id'] ),
 		'stripe_payment_intent_id' => isset( $session['payment_intent'] ) ? sanitize_text_field( $session['payment_intent'] ) : '',
 		'status'                  => $status,
@@ -436,6 +466,7 @@ function apparel_service_process_checkout_session( $session ) {
 		'checkout_link'           => $checkout_link,
 		'checkout_url'            => $checkout_url,
 		'variation_id'            => $variation_id,
+		'variation_name'          => $variation_name,
 		'quantity'                => $quantity,
 	);
 
@@ -630,6 +661,57 @@ function apparel_service_get_checkout_line_items( $secret_key, $session_id ) {
 }
 
 /**
+ * Get variation name by service and variation ID.
+ *
+ * @param int    $service_id   Service post ID.
+ * @param string $variation_id Variation ID.
+ * @return string
+ */
+function apparel_service_get_variation_name( $service_id, $variation_id ) {
+	if ( ! $service_id || ! $variation_id ) {
+		return '';
+	}
+
+	$variations = get_post_meta( $service_id, '_service_variations', true );
+	if ( ! is_array( $variations ) ) {
+		return '';
+	}
+
+	foreach ( $variations as $variation ) {
+		if ( ! empty( $variation['variation_id'] ) && $variation['variation_id'] === $variation_id ) {
+			return isset( $variation['name'] ) ? sanitize_text_field( $variation['name'] ) : '';
+		}
+	}
+
+	return '';
+}
+
+/**
+ * Format customer address for display.
+ *
+ * @param array $address Customer address data.
+ * @return string
+ */
+function apparel_service_format_customer_address( $address ) {
+	if ( ! is_array( $address ) ) {
+		return '';
+	}
+
+	$parts = array_filter(
+		array(
+			$address['line1'] ?? '',
+			$address['line2'] ?? '',
+			$address['city'] ?? '',
+			$address['state'] ?? '',
+			$address['postal_code'] ?? '',
+			$address['country'] ?? '',
+		)
+	);
+
+	return sanitize_text_field( implode( ', ', $parts ) );
+}
+
+/**
  * Create or update a service order.
  *
  * @param array $order_data Order data.
@@ -637,28 +719,48 @@ function apparel_service_get_checkout_line_items( $secret_key, $session_id ) {
  */
 function apparel_service_upsert_order( $order_data ) {
 	$session_id = $order_data['stripe_session_id'] ?? '';
-	if ( ! $session_id ) {
+	$payment_intent_id = $order_data['stripe_payment_intent_id'] ?? '';
+
+	if ( ! $session_id && ! $payment_intent_id ) {
 		return 0;
 	}
 
-	$existing = get_posts(
-		array(
-			'post_type'              => 'service_order',
-			'posts_per_page'         => 1,
-			'fields'                 => 'ids',
-			'meta_key'               => '_stripe_session_id',
-			'meta_value'             => $session_id,
-			'no_found_rows'          => true,
-			'update_post_meta_cache' => false,
-			'update_post_term_cache' => false,
-		)
-	);
+	$existing = array();
+	if ( $session_id ) {
+		$existing = get_posts(
+			array(
+				'post_type'              => 'service_order',
+				'posts_per_page'         => 1,
+				'fields'                 => 'ids',
+				'meta_key'               => '_stripe_session_id',
+				'meta_value'             => $session_id,
+				'no_found_rows'          => true,
+				'update_post_meta_cache' => false,
+				'update_post_term_cache' => false,
+			)
+		);
+	}
+
+	if ( empty( $existing ) && $payment_intent_id ) {
+		$existing = get_posts(
+			array(
+				'post_type'              => 'service_order',
+				'posts_per_page'         => 1,
+				'fields'                 => 'ids',
+				'meta_key'               => '_stripe_payment_intent_id',
+				'meta_value'             => $payment_intent_id,
+				'no_found_rows'          => true,
+				'update_post_meta_cache' => false,
+				'update_post_term_cache' => false,
+			)
+		);
+	}
 
 	$order_id = ! empty( $existing ) ? (int) $existing[0] : 0;
 	$post_data = array(
 		'post_type'   => 'service_order',
 		'post_status' => 'private',
-		'post_title'  => sprintf( __( 'Order %s', 'apparel' ), $session_id ),
+		'post_title'  => sprintf( __( 'Order %s', 'apparel' ), $session_id ? $session_id : $payment_intent_id ),
 	);
 
 	if ( ! $order_id ) {
@@ -680,6 +782,9 @@ function apparel_service_upsert_order( $order_data ) {
 	update_post_meta( $order_id, '_amount_total', $order_data['amount_total'] );
 	update_post_meta( $order_id, '_currency', sanitize_text_field( $order_data['currency'] ?? '' ) );
 	update_post_meta( $order_id, '_customer_email', sanitize_email( $order_data['customer_email'] ?? '' ) );
+	update_post_meta( $order_id, '_customer_name', sanitize_text_field( $order_data['customer_name'] ?? '' ) );
+	update_post_meta( $order_id, '_customer_phone', sanitize_text_field( $order_data['customer_phone'] ?? '' ) );
+	update_post_meta( $order_id, '_customer_address', sanitize_text_field( $order_data['customer_address'] ?? '' ) );
 	update_post_meta( $order_id, '_stripe_session_id', sanitize_text_field( $order_data['stripe_session_id'] ) );
 	update_post_meta( $order_id, '_stripe_payment_intent_id', sanitize_text_field( $order_data['stripe_payment_intent_id'] ?? '' ) );
 	update_post_meta( $order_id, '_status', sanitize_text_field( $order_data['status'] ?? '' ) );
@@ -687,6 +792,7 @@ function apparel_service_upsert_order( $order_data ) {
 	update_post_meta( $order_id, '_checkout_link', sanitize_text_field( $order_data['checkout_link'] ?? '' ) );
 	update_post_meta( $order_id, '_checkout_url', esc_url_raw( $order_data['checkout_url'] ?? '' ) );
 	update_post_meta( $order_id, '_variation_id', sanitize_text_field( $order_data['variation_id'] ?? '' ) );
+	update_post_meta( $order_id, '_variation_name', sanitize_text_field( $order_data['variation_name'] ?? '' ) );
 	update_post_meta( $order_id, '_quantity', absint( $order_data['quantity'] ?? 1 ) );
 
 	return $order_id;
