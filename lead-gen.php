@@ -21,6 +21,7 @@ $hero_cta_placeholder  = get_post_meta( $post_id, 'lead_gen_hero_cta_placeholder
 $hero_cta_button_label = get_post_meta( $post_id, 'lead_gen_hero_cta_button_label', true );
 $hero_cta_button_link  = get_post_meta( $post_id, 'lead_gen_hero_cta_button_link', true );
 $hero_cta_helper       = get_post_meta( $post_id, 'lead_gen_hero_cta_helper', true );
+$fluent_form_id        = absint( get_post_meta( $post_id, 'lead_gen_fluent_form_id', true ) );
 $logos                 = get_post_meta( $post_id, 'lead_gen_logos', true );
 $features              = get_post_meta( $post_id, 'lead_gen_features', true );
 $testimonial_quote     = get_post_meta( $post_id, 'lead_gen_testimonial_quote', true );
@@ -45,7 +46,22 @@ $footer_links = is_array( $footer_links ) ? $footer_links : array();
 
 $hero_headline = $hero_headline ? $hero_headline : get_the_title( $post_id );
 
-$has_settings = $hero_subheadline || $hero_cta_label || $hero_cta_placeholder || $hero_cta_button_label || $hero_cta_button_link || $hero_cta_helper || $logos || $features || $testimonial_quote || $testimonial_name || $testimonial_company || $cta_headline || $cta_subheadline || $cta_placeholder || $cta_button_label || $cta_button_link || $cta_helper || $faq_heading || $faqs || $footer_logo || $footer_text || $footer_links;
+$has_settings = $hero_subheadline || $hero_cta_label || $hero_cta_placeholder || $hero_cta_button_label || $hero_cta_button_link || $hero_cta_helper || $fluent_form_id || $logos || $features || $testimonial_quote || $testimonial_name || $testimonial_company || $cta_headline || $cta_subheadline || $cta_placeholder || $cta_button_label || $cta_button_link || $cta_helper || $faq_heading || $faqs || $footer_logo || $footer_text || $footer_links;
+
+$has_fluent_form = $fluent_form_id && function_exists( 'shortcode_exists' ) && shortcode_exists( 'fluentform' );
+$show_form_notice = ! $has_fluent_form && current_user_can( 'manage_options' );
+
+$render_fluent_form = function () use ( $fluent_form_id, $has_fluent_form, $show_form_notice ) {
+	if ( $has_fluent_form ) {
+		return do_shortcode( sprintf( '[fluentform id="%d"]', $fluent_form_id ) );
+	}
+
+	if ( $show_form_notice ) {
+		return '<p class="lead-gen-form__notice">' . esc_html__( 'Add a Fluent Form ID in the Lead Gen settings to show the email capture form.', 'apparel' ) . '</p>';
+	}
+
+	return '';
+};
 ?>
 
 <div class="lead-gen-page">
@@ -76,30 +92,25 @@ $has_settings = $hero_subheadline || $hero_cta_label || $hero_cta_placeholder ||
 				endwhile;
 				?>
 			<?php else : ?>
-				<div class="lead-gen-hero__card">
-					<?php if ( $hero_headline ) : ?>
-						<h1><?php echo esc_html( $hero_headline ); ?></h1>
-					<?php endif; ?>
-					<?php if ( $hero_subheadline ) : ?>
-						<p><?php echo esc_html( $hero_subheadline ); ?></p>
-					<?php endif; ?>
-					<?php if ( $hero_cta_label || $hero_cta_placeholder || $hero_cta_button_label ) : ?>
+				<div class="lead-gen-hero__stack">
+					<div class="lead-gen-hero__card">
+						<?php if ( $hero_headline ) : ?>
+							<h1><?php echo esc_html( $hero_headline ); ?></h1>
+						<?php endif; ?>
+						<?php if ( $hero_subheadline ) : ?>
+							<p><?php echo esc_html( $hero_subheadline ); ?></p>
+						<?php endif; ?>
+					</div>
+					<?php if ( $hero_cta_label || $hero_cta_helper || $has_fluent_form || $show_form_notice ) : ?>
 						<div class="lead-gen-hero__cta">
 							<?php if ( $hero_cta_label ) : ?>
 								<span><?php echo esc_html( $hero_cta_label ); ?></span>
 							<?php endif; ?>
-							<form class="lead-gen-form" action="<?php echo esc_url( $hero_cta_button_link ? $hero_cta_button_link : '#' ); ?>" method="get">
-								<label class="screen-reader-text" for="lead-gen-hero-email"><?php esc_html_e( 'Email address', 'apparel' ); ?></label>
-								<input
-									type="email"
-									id="lead-gen-hero-email"
-									name="email"
-									placeholder="<?php echo esc_attr( $hero_cta_placeholder ); ?>"
-								/>
-								<button type="submit">
-									<?php echo esc_html( $hero_cta_button_label ? $hero_cta_button_label : '→' ); ?>
-								</button>
-							</form>
+							<?php if ( $has_fluent_form || $show_form_notice ) : ?>
+								<div class="lead-gen-form-wrapper lead-gen-form-wrapper--dark">
+									<?php echo $render_fluent_form(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+								</div>
+							<?php endif; ?>
 							<?php if ( $hero_cta_helper ) : ?>
 								<small><?php echo esc_html( $hero_cta_helper ); ?></small>
 							<?php endif; ?>
@@ -221,17 +232,10 @@ $has_settings = $hero_subheadline || $hero_cta_label || $hero_cta_placeholder ||
 					<?php if ( $cta_subheadline ) : ?>
 						<p><?php echo esc_html( $cta_subheadline ); ?></p>
 					<?php endif; ?>
-					<?php if ( $cta_placeholder || $cta_button_label ) : ?>
-						<form class="lead-gen-form" action="<?php echo esc_url( $cta_button_link ? $cta_button_link : '#' ); ?>" method="get">
-							<label class="screen-reader-text" for="lead-gen-cta-email"><?php esc_html_e( 'Email address', 'apparel' ); ?></label>
-							<input
-								type="email"
-								id="lead-gen-cta-email"
-								name="email"
-								placeholder="<?php echo esc_attr( $cta_placeholder ); ?>"
-							/>
-							<button type="submit"><?php echo esc_html( $cta_button_label ? $cta_button_label : '→' ); ?></button>
-						</form>
+					<?php if ( $has_fluent_form || $show_form_notice ) : ?>
+						<div class="lead-gen-form-wrapper lead-gen-form-wrapper--light">
+							<?php echo $render_fluent_form(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+						</div>
 					<?php endif; ?>
 					<?php if ( $cta_helper ) : ?>
 						<small><?php echo esc_html( $cta_helper ); ?></small>
