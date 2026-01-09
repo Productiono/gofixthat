@@ -49,6 +49,7 @@ function apparel_render_lead_gen_meta_box( $post ) {
 	$hero_button      = get_post_meta( $post->ID, 'lead_gen_hero_cta_button_label', true );
 	$hero_link        = get_post_meta( $post->ID, 'lead_gen_hero_cta_button_link', true );
 	$hero_helper      = get_post_meta( $post->ID, 'lead_gen_hero_cta_helper', true );
+	$fluent_form_id   = get_post_meta( $post->ID, 'lead_gen_fluent_form_id', true );
 	$logos            = get_post_meta( $post->ID, 'lead_gen_logos', true );
 	$features         = get_post_meta( $post->ID, 'lead_gen_features', true );
 	$testimonial      = get_post_meta( $post->ID, 'lead_gen_testimonial_quote', true );
@@ -154,6 +155,19 @@ function apparel_render_lead_gen_meta_box( $post ) {
 				value="<?php echo esc_attr( $hero_helper ); ?>"
 			/>
 			<span class="description"><?php esc_html_e( 'Small note shown below the CTA.', 'apparel' ); ?></span>
+		</p>
+		<p>
+			<label for="lead-gen-fluent-form-id"><strong><?php esc_html_e( 'Fluent Form ID', 'apparel' ); ?></strong></label>
+			<input
+				type="number"
+				id="lead-gen-fluent-form-id"
+				name="lead_gen_fluent_form_id"
+				class="widefat"
+				min="1"
+				step="1"
+				value="<?php echo esc_attr( $fluent_form_id ); ?>"
+			/>
+			<span class="description"><?php esc_html_e( 'Single form ID used in both email capture areas.', 'apparel' ); ?></span>
 		</p>
 		<p>
 			<label for="lead-gen-video-url"><strong><?php esc_html_e( 'Background video URL', 'apparel' ); ?></strong></label>
@@ -535,6 +549,7 @@ function apparel_save_lead_gen_meta_box( $post_id ) {
 	$hero_button      = isset( $_POST['lead_gen_hero_cta_button_label'] ) ? sanitize_text_field( wp_unslash( $_POST['lead_gen_hero_cta_button_label'] ) ) : '';
 	$hero_link        = isset( $_POST['lead_gen_hero_cta_button_link'] ) ? esc_url_raw( wp_unslash( $_POST['lead_gen_hero_cta_button_link'] ) ) : '';
 	$hero_helper      = isset( $_POST['lead_gen_hero_cta_helper'] ) ? sanitize_text_field( wp_unslash( $_POST['lead_gen_hero_cta_helper'] ) ) : '';
+	$fluent_form_id   = isset( $_POST['lead_gen_fluent_form_id'] ) ? absint( wp_unslash( $_POST['lead_gen_fluent_form_id'] ) ) : 0;
 	$testimonial      = isset( $_POST['lead_gen_testimonial_quote'] ) ? sanitize_textarea_field( wp_unslash( $_POST['lead_gen_testimonial_quote'] ) ) : '';
 	$testimonial_name = isset( $_POST['lead_gen_testimonial_name'] ) ? sanitize_text_field( wp_unslash( $_POST['lead_gen_testimonial_name'] ) ) : '';
 	$testimonial_co   = isset( $_POST['lead_gen_testimonial_company'] ) ? sanitize_text_field( wp_unslash( $_POST['lead_gen_testimonial_company'] ) ) : '';
@@ -676,6 +691,12 @@ function apparel_save_lead_gen_meta_box( $post_id ) {
 		update_post_meta( $post_id, 'lead_gen_hero_cta_helper', $hero_helper );
 	} else {
 		delete_post_meta( $post_id, 'lead_gen_hero_cta_helper' );
+	}
+
+	if ( $fluent_form_id ) {
+		update_post_meta( $post_id, 'lead_gen_fluent_form_id', $fluent_form_id );
+	} else {
+		delete_post_meta( $post_id, 'lead_gen_fluent_form_id' );
 	}
 
 	if ( $logos ) {
