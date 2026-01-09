@@ -160,6 +160,17 @@
 	color: #ffffff;
 }
 
+@media (min-width: 641px) {
+	.lead-gen-form-card--dark.is-sticky-visible {
+		position: fixed;
+		bottom: 24px;
+		left: 50%;
+		transform: translateX(-50%);
+		width: min(520px, calc(100% - 48px));
+		z-index: 40;
+	}
+}
+
 .lead-gen-form-card__header {
 	display: flex;
 	flex-direction: column;
