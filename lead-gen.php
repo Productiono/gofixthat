@@ -126,6 +126,15 @@ $render_fluent_form = function () use ( $fluent_form_id, $has_fluent_form, $show
 ?>
 
 <style>
+	.lead-gen-feature__media {
+		height: 400px;
+		box-shadow: none;
+	}
+
+	.lead-gen-cta__panel {
+		box-shadow: none;
+	}
+
 	.lead-gen-hero__logo {
 		margin-bottom: 16px;
 	}
