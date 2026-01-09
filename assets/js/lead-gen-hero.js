@@ -175,15 +175,50 @@
 			return;
 		}
 		let observer = null;
+		let isStickyVisible = false;
+		const mobileQuery = window.matchMedia('(max-width: 640px)');
+		const originalParent = card.parentElement;
+		const originalNextSibling = card.nextElementSibling;
+
+		const restoreCardPosition = () => {
+			if (!originalParent || card.parentElement === originalParent) {
+				return;
+			}
+			if (originalNextSibling && originalNextSibling.parentElement === originalParent) {
+				originalParent.insertBefore(card, originalNextSibling);
+			} else {
+				originalParent.appendChild(card);
+			}
+		};
 
 		const setStickyVisible = (isVisible) => {
+			isStickyVisible = isVisible;
 			card.classList.toggle('is-sticky-visible', isVisible);
+			if (isVisible && mobileQuery.matches) {
+				if (card.parentElement !== document.body) {
+					document.body.appendChild(card);
+				}
+			} else {
+				restoreCardPosition();
+			}
 		};
 
 		const handleIntersection = (entries) => {
 			entries.forEach((entry) => {
 				setStickyVisible(!entry.isIntersecting);
 			});
+		};
+
+		const handleViewportChange = () => {
+			if (!isStickyVisible) {
+				restoreCardPosition();
+				return;
+			}
+			if (mobileQuery.matches && card.parentElement !== document.body) {
+				document.body.appendChild(card);
+			} else if (!mobileQuery.matches) {
+				restoreCardPosition();
+			}
 		};
 
 		const setupObserver = () => {
@@ -196,6 +231,11 @@
 			observer.observe(hero);
 		};
 		setupObserver();
+		if (typeof mobileQuery.addEventListener === 'function') {
+			mobileQuery.addEventListener('change', handleViewportChange);
+		} else if (typeof mobileQuery.addListener === 'function') {
+			mobileQuery.addListener(handleViewportChange);
+		}
 	};
 
 	document.addEventListener('DOMContentLoaded', initLeadGenCustomForms);
