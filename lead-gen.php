@@ -139,7 +139,53 @@ $render_fluent_form = function () use ( $fluent_form_id, $has_fluent_form, $show
 		margin-bottom: 16px;
 	}
 
+	.lead-gen-logos__inner--clone {
+		display: none;
+	}
+
 	@media (max-width: 640px) {
+		.lead-gen-logos {
+			overflow: hidden;
+		}
+
+		.lead-gen-logos__viewport {
+			overflow: hidden;
+		}
+
+		.lead-gen-logos__track {
+			display: flex;
+			width: max-content;
+			animation: lead-gen-logos-marquee 24s linear infinite;
+		}
+
+		.lead-gen-logos__inner {
+			display: flex;
+			align-items: center;
+			flex: 0 0 auto;
+			gap: clamp(20px, 6vw, 36px);
+			white-space: nowrap;
+		}
+
+		.lead-gen-logos__inner > * {
+			flex: 0 0 auto;
+			display: flex;
+			align-items: center;
+		}
+
+		.lead-gen-logos__inner--clone {
+			display: flex;
+		}
+
+		@keyframes lead-gen-logos-marquee {
+			from {
+				transform: translateX(-50%);
+			}
+
+			to {
+				transform: translateX(0);
+			}
+		}
+
 		.lead-gen-hero {
 			min-height: calc(100svh - var(--lead-gen-header-offset));
 			min-height: calc(100dvh - var(--lead-gen-header-offset));
@@ -305,36 +351,51 @@ $render_fluent_form = function () use ( $fluent_form_id, $has_fluent_form, $show
 	<?php if ( $has_settings ) : ?>
 		<?php if ( $logos ) : ?>
 			<section class="lead-gen-logos">
-				<div class="lead-gen-logos__inner">
-					<?php foreach ( $logos as $logo ) : ?>
-						<?php
-						$logo_image = $logo['image'] ?? '';
-						$logo_url   = $logo['url'] ?? '';
-						$logo_label = $logo['label'] ?? '';
-						$logo_html  = '';
-						if ( $logo_image ) {
-							$logo_html = sprintf(
-								'<img src="%1$s" alt="%2$s" loading="lazy" />',
-								esc_url( $logo_image ),
-								esc_attr( $logo_label )
-							);
-						} elseif ( $logo_label ) {
-							$logo_html = esc_html( $logo_label );
-						}
-						if ( ! $logo_html ) {
-							continue;
-						}
-						if ( $logo_url ) {
-							$logo_html = sprintf(
-								'<a href="%1$s" target="_blank" rel="noopener">%2$s</a>',
-								esc_url( $logo_url ),
-								$logo_html
-							);
-						}
-						echo $logo_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-						?>
-					<?php endforeach; ?>
-				</div>
+				<?php
+				$logo_items = array();
+				foreach ( $logos as $logo ) {
+					$logo_image = $logo['image'] ?? '';
+					$logo_url   = $logo['url'] ?? '';
+					$logo_label = $logo['label'] ?? '';
+					$logo_html  = '';
+					if ( $logo_image ) {
+						$logo_html = sprintf(
+							'<img src="%1$s" alt="%2$s" loading="lazy" />',
+							esc_url( $logo_image ),
+							esc_attr( $logo_label )
+						);
+					} elseif ( $logo_label ) {
+						$logo_html = esc_html( $logo_label );
+					}
+					if ( ! $logo_html ) {
+						continue;
+					}
+					if ( $logo_url ) {
+						$logo_html = sprintf(
+							'<a href="%1$s" target="_blank" rel="noopener">%2$s</a>',
+							esc_url( $logo_url ),
+							$logo_html
+						);
+					}
+					$logo_items[] = $logo_html;
+				}
+				?>
+				<?php if ( $logo_items ) : ?>
+					<div class="lead-gen-logos__viewport">
+						<div class="lead-gen-logos__track">
+							<div class="lead-gen-logos__inner">
+								<?php foreach ( $logo_items as $logo_item ) : ?>
+									<?php echo $logo_item; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+								<?php endforeach; ?>
+							</div>
+							<div class="lead-gen-logos__inner lead-gen-logos__inner--clone" aria-hidden="true">
+								<?php foreach ( $logo_items as $logo_item ) : ?>
+									<?php echo $logo_item; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+								<?php endforeach; ?>
+							</div>
+						</div>
+					</div>
+				<?php endif; ?>
 			</section>
 		<?php endif; ?>
 
