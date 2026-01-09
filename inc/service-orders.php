@@ -127,7 +127,11 @@ class Apparel_Service_Orders_Table extends WP_List_Table {
 	 */
 	public function column_service( $item ) {
 		if ( empty( $item['service_id'] ) ) {
-			return esc_html__( 'Unknown', 'apparel' );
+			$service_name = $item['service_name'] ?? '';
+			if ( ! $service_name ) {
+				$service_name = __( 'Stripe Checkout Item', 'apparel' );
+			}
+			return esc_html( $service_name );
 		}
 
 		$service_id = (int) $item['service_id'];
@@ -242,6 +246,7 @@ class Apparel_Service_Orders_Table extends WP_List_Table {
 		$items = array();
 		foreach ( $query->posts as $post ) {
 			$service_id    = get_post_meta( $post->ID, '_service_id', true );
+			$service_name  = get_post_meta( $post->ID, '_service_name', true );
 			$variation_id  = get_post_meta( $post->ID, '_variation_id', true );
 			$variation_name = get_post_meta( $post->ID, '_variation_name', true );
 			$amount_total  = get_post_meta( $post->ID, '_amount_total', true );
@@ -273,6 +278,7 @@ class Apparel_Service_Orders_Table extends WP_List_Table {
 				'order_id'       => (int) $post->ID,
 				'date'           => esc_html( get_the_date( '', $post ) ),
 				'service_id'     => $service_id,
+				'service_name'   => $service_name,
 				'service'        => '',
 				'variation'      => esc_html( $variation_name ? $variation_name : $variation_id ),
 				'amount'         => esc_html( $amount_display ),
@@ -397,6 +403,7 @@ add_action( 'add_meta_boxes_service_order', 'apparel_service_register_order_meta
  */
 function apparel_service_render_order_details_metabox( $post ) {
 	$service_id      = get_post_meta( $post->ID, '_service_id', true );
+	$service_name    = get_post_meta( $post->ID, '_service_name', true );
 	$variation_id    = get_post_meta( $post->ID, '_variation_id', true );
 	$variation_name  = get_post_meta( $post->ID, '_variation_name', true );
 	$amount_total    = get_post_meta( $post->ID, '_amount_total', true );
@@ -413,7 +420,7 @@ function apparel_service_render_order_details_metabox( $post ) {
 	$checkout_url    = get_post_meta( $post->ID, '_checkout_url', true );
 	$quantity        = get_post_meta( $post->ID, '_quantity', true );
 
-	$service_title = $service_id ? get_the_title( $service_id ) : __( 'Unknown', 'apparel' );
+	$service_title = $service_id ? get_the_title( $service_id ) : ( $service_name ? $service_name : __( 'Stripe Checkout Item', 'apparel' ) );
 	$service_link  = $service_id ? get_edit_post_link( $service_id, 'display' ) : '';
 
 	$amount_display = '';
@@ -840,6 +847,16 @@ function apparel_service_process_checkout_session( $session ) {
 		}
 	}
 
+	$service_name = '';
+	if ( ! $service_id ) {
+		$service_name = apparel_service_resolve_stripe_service_name(
+			$secret_key,
+			sanitize_text_field( $session['id'] ?? '' ),
+			$line_items,
+			sanitize_text_field( $session['payment_intent'] ?? '' )
+		);
+	}
+
 	$amount_total = isset( $session['amount_total'] ) ? ( (float) $session['amount_total'] / 100 ) : '';
 	$currency     = isset( $session['currency'] ) ? strtolower( $session['currency'] ) : '';
 
@@ -872,6 +889,7 @@ function apparel_service_process_checkout_session( $session ) {
 
 	$order_data = array(
 		'service_id'              => $service_id,
+		'service_name'            => $service_name,
 		'amount_total'            => $amount_total,
 		'currency'                => $currency,
 		'customer_email'          => $customer_email,
@@ -1330,13 +1348,25 @@ function apparel_service_get_payment_link_url( $secret_key, $payment_link_id ) {
  *
  * @param string $secret_key Stripe secret key.
  * @param string $session_id Checkout session ID.
+ * @param int    $limit      Maximum number of line items to return.
+ * @param bool   $expand_products Whether to expand product data.
  * @return array
  */
-function apparel_service_get_checkout_line_items( $secret_key, $session_id ) {
+function apparel_service_get_checkout_line_items( $secret_key, $session_id, $limit = 1, $expand_products = false ) {
+	$limit = $limit ? absint( $limit ) : 1;
+	if ( $limit < 1 ) {
+		$limit = 1;
+	}
+
+	$query = array( 'limit' => $limit );
+	if ( $expand_products ) {
+		$query['expand'] = array( 'data.price.product' );
+	}
+
 	$response = apparel_service_stripe_get_request(
 		$secret_key,
 		sprintf( 'https://api.stripe.com/v1/checkout/sessions/%s/line_items', rawurlencode( $session_id ) ),
-		array( 'limit' => 1 )
+		$query
 	);
 
 	if ( empty( $response['data'] ) || ! is_array( $response['data'] ) ) {
@@ -1344,6 +1374,133 @@ function apparel_service_get_checkout_line_items( $secret_key, $session_id ) {
 	}
 
 	return $response['data'];
+}
+
+/**
+ * Resolve a service name for a Stripe checkout session.
+ *
+ * @param string $secret_key Stripe secret key.
+ * @param string $session_id Checkout session ID.
+ * @param array  $line_items Known line items.
+ * @param string $payment_intent_id Payment intent ID.
+ * @return string
+ */
+function apparel_service_resolve_stripe_service_name( $secret_key, $session_id, $line_items = array(), $payment_intent_id = '' ) {
+	if ( $secret_key && $session_id ) {
+		$line_items = apparel_service_get_checkout_line_items( $secret_key, $session_id, 100, true );
+	}
+
+	$names = array();
+	if ( is_array( $line_items ) ) {
+		foreach ( $line_items as $line_item ) {
+			if ( ! is_array( $line_item ) ) {
+				continue;
+			}
+			$name = apparel_service_get_line_item_name( $line_item, $secret_key );
+			if ( $name ) {
+				$names[] = $name;
+			}
+		}
+	}
+
+	if ( ! empty( $names ) ) {
+		$names = array_values( array_unique( $names ) );
+		return implode( ' + ', $names );
+	}
+
+	if ( $secret_key && $payment_intent_id ) {
+		$description = apparel_service_get_payment_intent_description( $secret_key, $payment_intent_id );
+		if ( $description ) {
+			return $description;
+		}
+	}
+
+	return '';
+}
+
+/**
+ * Get a name for a Stripe line item.
+ *
+ * @param array  $line_item Line item data.
+ * @param string $secret_key Stripe secret key.
+ * @return string
+ */
+function apparel_service_get_line_item_name( $line_item, $secret_key ) {
+	$description = $line_item['description'] ?? '';
+	if ( $description ) {
+		return sanitize_text_field( $description );
+	}
+
+	$price = $line_item['price'] ?? array();
+	if ( is_array( $price ) ) {
+		$product = $price['product'] ?? '';
+		if ( is_array( $product ) && ! empty( $product['name'] ) ) {
+			return sanitize_text_field( $product['name'] );
+		}
+
+		if ( is_string( $product ) && $product && $secret_key ) {
+			$product_name = apparel_service_get_stripe_product_name( $secret_key, $product );
+			if ( $product_name ) {
+				return $product_name;
+			}
+		}
+	}
+
+	return '';
+}
+
+/**
+ * Get a Stripe product name by ID.
+ *
+ * @param string $secret_key Stripe secret key.
+ * @param string $product_id Stripe product ID.
+ * @return string
+ */
+function apparel_service_get_stripe_product_name( $secret_key, $product_id ) {
+	if ( ! $secret_key || ! $product_id ) {
+		return '';
+	}
+
+	$response = apparel_service_stripe_get_request(
+		$secret_key,
+		sprintf( 'https://api.stripe.com/v1/products/%s', rawurlencode( $product_id ) )
+	);
+
+	if ( empty( $response['name'] ) ) {
+		return '';
+	}
+
+	return sanitize_text_field( $response['name'] );
+}
+
+/**
+ * Get a payment intent description as a fallback.
+ *
+ * @param string $secret_key Stripe secret key.
+ * @param string $payment_intent_id Payment intent ID.
+ * @return string
+ */
+function apparel_service_get_payment_intent_description( $secret_key, $payment_intent_id ) {
+	if ( ! $secret_key || ! $payment_intent_id ) {
+		return '';
+	}
+
+	$response = apparel_service_stripe_get_request(
+		$secret_key,
+		sprintf( 'https://api.stripe.com/v1/payment_intents/%s', rawurlencode( $payment_intent_id ) ),
+		array( 'expand' => array( 'charges.data' ) )
+	);
+
+	if ( ! empty( $response['description'] ) ) {
+		return sanitize_text_field( $response['description'] );
+	}
+
+	$charge_description = $response['charges']['data'][0]['description'] ?? '';
+	if ( $charge_description ) {
+		return sanitize_text_field( $charge_description );
+	}
+
+	return '';
 }
 
 /**
@@ -1465,6 +1622,7 @@ function apparel_service_upsert_order( $order_data ) {
 	}
 
 	update_post_meta( $order_id, '_service_id', absint( $order_data['service_id'] ?? 0 ) );
+	update_post_meta( $order_id, '_service_name', sanitize_text_field( $order_data['service_name'] ?? '' ) );
 	update_post_meta( $order_id, '_amount_total', $order_data['amount_total'] );
 	update_post_meta( $order_id, '_currency', sanitize_text_field( $order_data['currency'] ?? '' ) );
 	update_post_meta( $order_id, '_customer_email', sanitize_email( $order_data['customer_email'] ?? '' ) );
