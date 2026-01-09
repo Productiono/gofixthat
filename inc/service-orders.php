@@ -1422,5 +1422,294 @@ function apparel_service_upsert_order( $order_data ) {
 	update_post_meta( $order_id, '_stripe_line_items', $order_data['line_items'] ?? array() );
 	update_post_meta( $order_id, '_stripe_custom_fields', $order_data['custom_fields'] ?? array() );
 
+	apparel_service_maybe_send_order_confirmation( $order_id, $order_data );
+
 	return $order_id;
+}
+
+/**
+ * Maybe send a service order confirmation email.
+ *
+ * @param int   $order_id Order ID.
+ * @param array $order_data Optional order data from checkout session.
+ * @return bool
+ */
+function apparel_service_maybe_send_order_confirmation( $order_id, $order_data = array() ) {
+	if ( ! $order_id ) {
+		return false;
+	}
+
+	$status = $order_data['status'] ?? get_post_meta( $order_id, '_status', true );
+	if ( 'paid' !== $status ) {
+		return false;
+	}
+
+	$already_sent = get_post_meta( $order_id, '_confirmation_sent', true );
+	if ( $already_sent ) {
+		return false;
+	}
+
+	$customer_email = $order_data['customer_email'] ?? get_post_meta( $order_id, '_customer_email', true );
+	if ( ! $customer_email || ! is_email( $customer_email ) ) {
+		return false;
+	}
+
+	$service_items = apparel_service_get_order_service_items( $order_id, $order_data );
+	if ( empty( $service_items ) ) {
+		return false;
+	}
+
+	$subject = sprintf(
+		/* translators: %s: site name */
+		__( 'Your service order is confirmed - %s', 'apparel' ),
+		wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES )
+	);
+
+	$message = apparel_service_build_order_confirmation_email( $order_id, $order_data, $service_items );
+	$headers = array( 'Content-Type: text/html; charset=UTF-8' );
+
+	$sent = wp_mail( $customer_email, $subject, $message, $headers );
+	if ( $sent ) {
+		update_post_meta( $order_id, '_confirmation_sent', current_time( 'mysql' ) );
+	}
+
+	return (bool) $sent;
+}
+
+/**
+ * Build service order confirmation email HTML.
+ *
+ * @param int   $order_id Order ID.
+ * @param array $order_data Order data.
+ * @param array $service_items Service items for the order.
+ * @return string
+ */
+function apparel_service_build_order_confirmation_email( $order_id, $order_data, $service_items ) {
+	$customer_name = $order_data['customer_name'] ?? get_post_meta( $order_id, '_customer_name', true );
+	$order_total   = $order_data['amount_total'] ?? get_post_meta( $order_id, '_amount_total', true );
+	$currency      = $order_data['currency'] ?? get_post_meta( $order_id, '_currency', true );
+	$created_at    = $order_data['created_at'] ?? get_post_meta( $order_id, '_created_at', true );
+	$created_at    = $created_at ? (int) $created_at : time();
+
+	$order_total_display = apparel_service_format_currency_amount( $order_total, $currency );
+	$site_name           = wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES );
+	$admin_email         = get_option( 'admin_email' );
+
+	ob_start();
+	?>
+	<!doctype html>
+	<html>
+		<head>
+			<meta charset="utf-8">
+			<title><?php echo esc_html( $site_name ); ?></title>
+		</head>
+		<body style="margin:0;padding:0;background-color:#f4f5f7;font-family:Arial, sans-serif;color:#1a1a1a;">
+			<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f5f7;padding:32px 0;">
+				<tr>
+					<td align="center">
+						<table role="presentation" width="600" cellpadding="0" cellspacing="0" style="background-color:#ffffff;border-radius:8px;overflow:hidden;">
+							<tr>
+								<td style="padding:32px 32px 16px;">
+									<h1 style="margin:0 0 12px;font-size:24px;line-height:1.4;color:#111;"><?php esc_html_e( 'Your service order is confirmed', 'apparel' ); ?></h1>
+									<p style="margin:0 0 16px;font-size:14px;color:#4a4a4a;"><?php esc_html_e( 'Thank you for your purchase. We are preparing your service and will be in touch with any next steps.', 'apparel' ); ?></p>
+									<p style="margin:0;font-size:14px;color:#4a4a4a;">
+										<?php
+										if ( $customer_name ) {
+											printf(
+												/* translators: %s: customer name */
+												esc_html__( 'Hello %s,', 'apparel' ),
+												esc_html( $customer_name )
+											);
+										} else {
+											esc_html_e( 'Hello,', 'apparel' );
+										}
+										?>
+									</p>
+								</td>
+							</tr>
+							<tr>
+								<td style="padding:0 32px 24px;">
+									<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;">
+										<tr>
+											<td style="padding:12px 0;border-bottom:1px solid #e8e8e8;font-size:14px;color:#4a4a4a;">
+												<strong><?php esc_html_e( 'Order Number', 'apparel' ); ?></strong>
+											</td>
+											<td align="right" style="padding:12px 0;border-bottom:1px solid #e8e8e8;font-size:14px;color:#4a4a4a;">
+												<?php echo esc_html( '#' . $order_id ); ?>
+											</td>
+										</tr>
+										<tr>
+											<td style="padding:12px 0;border-bottom:1px solid #e8e8e8;font-size:14px;color:#4a4a4a;">
+												<strong><?php esc_html_e( 'Order Date', 'apparel' ); ?></strong>
+											</td>
+											<td align="right" style="padding:12px 0;border-bottom:1px solid #e8e8e8;font-size:14px;color:#4a4a4a;">
+												<?php echo esc_html( date_i18n( get_option( 'date_format' ), $created_at ) ); ?>
+											</td>
+										</tr>
+										<tr>
+											<td style="padding:12px 0;font-size:14px;color:#4a4a4a;">
+												<strong><?php esc_html_e( 'Order Total', 'apparel' ); ?></strong>
+											</td>
+											<td align="right" style="padding:12px 0;font-size:14px;color:#4a4a4a;">
+												<?php echo esc_html( $order_total_display ); ?>
+											</td>
+										</tr>
+									</table>
+								</td>
+							</tr>
+							<tr>
+								<td style="padding:0 32px 24px;">
+									<h2 style="margin:0 0 12px;font-size:18px;color:#111;"><?php esc_html_e( 'Service Details', 'apparel' ); ?></h2>
+									<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;">
+										<tr>
+											<th align="left" style="padding:10px 0;border-bottom:1px solid #e8e8e8;font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:#6a6a6a;">
+												<?php esc_html_e( 'Service', 'apparel' ); ?>
+											</th>
+											<th align="center" style="padding:10px 0;border-bottom:1px solid #e8e8e8;font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:#6a6a6a;">
+												<?php esc_html_e( 'Qty', 'apparel' ); ?>
+											</th>
+											<th align="right" style="padding:10px 0;border-bottom:1px solid #e8e8e8;font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:#6a6a6a;">
+												<?php esc_html_e( 'Amount', 'apparel' ); ?>
+											</th>
+										</tr>
+										<?php foreach ( $service_items as $item ) : ?>
+											<tr>
+												<td style="padding:12px 0;border-bottom:1px solid #f0f0f0;font-size:14px;color:#1a1a1a;">
+													<?php echo esc_html( $item['title'] ); ?>
+													<?php if ( ! empty( $item['variation_name'] ) ) : ?>
+														<br><span style="font-size:12px;color:#6a6a6a;"><?php echo esc_html( $item['variation_name'] ); ?></span>
+													<?php endif; ?>
+												</td>
+												<td align="center" style="padding:12px 0;border-bottom:1px solid #f0f0f0;font-size:14px;color:#1a1a1a;">
+													<?php echo esc_html( (string) $item['quantity'] ); ?>
+												</td>
+												<td align="right" style="padding:12px 0;border-bottom:1px solid #f0f0f0;font-size:14px;color:#1a1a1a;">
+													<?php echo esc_html( $item['amount_display'] ); ?>
+												</td>
+											</tr>
+										<?php endforeach; ?>
+									</table>
+								</td>
+							</tr>
+							<tr>
+								<td style="padding:0 32px 32px;">
+									<p style="margin:0 0 8px;font-size:14px;color:#4a4a4a;"><?php esc_html_e( 'Need help or want to adjust your service? Reply to this email and we will take care of you.', 'apparel' ); ?></p>
+									<?php if ( $admin_email ) : ?>
+										<p style="margin:0;font-size:14px;color:#4a4a4a;">
+											<?php
+											printf(
+												/* translators: %s: support email */
+												esc_html__( 'Support: %s', 'apparel' ),
+												esc_html( $admin_email )
+											);
+											?>
+										</p>
+									<?php endif; ?>
+								</td>
+							</tr>
+							<tr>
+								<td style="padding:16px 32px;background-color:#f7f7f7;text-align:center;font-size:12px;color:#7a7a7a;">
+									<?php
+									printf(
+										/* translators: %s: site name */
+										esc_html__( 'Thank you for choosing %s.', 'apparel' ),
+										esc_html( $site_name )
+									);
+									?>
+								</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+			</table>
+		</body>
+	</html>
+	<?php
+	return (string) ob_get_clean();
+}
+
+/**
+ * Get service items associated with an order.
+ *
+ * @param int   $order_id Order ID.
+ * @param array $order_data Order data.
+ * @return array
+ */
+function apparel_service_get_order_service_items( $order_id, $order_data = array() ) {
+	$items = array();
+
+	$line_items = $order_data['line_items'] ?? get_post_meta( $order_id, '_stripe_line_items', true );
+	if ( is_array( $line_items ) ) {
+		foreach ( $line_items as $line_item ) {
+			if ( ! is_array( $line_item ) ) {
+				continue;
+			}
+			$price_id = $line_item['price_id'] ?? '';
+			if ( ! $price_id ) {
+				$price_id = $line_item['price']['id'] ?? '';
+			}
+			if ( ! $price_id ) {
+				continue;
+			}
+			$service_match = apparel_service_find_service_by_price_id( $price_id );
+			if ( empty( $service_match['service_id'] ) ) {
+				continue;
+			}
+
+			$service_id     = (int) $service_match['service_id'];
+			$variation_id   = $service_match['variation_id'] ?? '';
+			$variation_name = $variation_id ? apparel_service_get_variation_name( $service_id, $variation_id ) : '';
+			$quantity       = isset( $line_item['quantity'] ) ? absint( $line_item['quantity'] ) : 1;
+			$amount_total   = $line_item['amount_total'] ?? '';
+			$currency       = $line_item['currency'] ?? ( $order_data['currency'] ?? get_post_meta( $order_id, '_currency', true ) );
+			$amount_display = apparel_service_format_currency_amount( $amount_total, $currency );
+
+			$items[] = array(
+				'service_id'     => $service_id,
+				'title'          => get_the_title( $service_id ),
+				'variation_name' => $variation_name,
+				'quantity'       => $quantity,
+				'amount_display' => $amount_display,
+			);
+		}
+	}
+
+	if ( empty( $items ) ) {
+		$service_id    = $order_data['service_id'] ?? get_post_meta( $order_id, '_service_id', true );
+		$variation_name = $order_data['variation_name'] ?? get_post_meta( $order_id, '_variation_name', true );
+		$quantity       = $order_data['quantity'] ?? get_post_meta( $order_id, '_quantity', true );
+		if ( $service_id ) {
+			$items[] = array(
+				'service_id'     => (int) $service_id,
+				'title'          => get_the_title( $service_id ),
+				'variation_name' => $variation_name,
+				'quantity'       => $quantity ? absint( $quantity ) : 1,
+				'amount_display' => apparel_service_format_currency_amount(
+					$order_data['amount_total'] ?? get_post_meta( $order_id, '_amount_total', true ),
+					$order_data['currency'] ?? get_post_meta( $order_id, '_currency', true )
+				),
+			);
+		}
+	}
+
+	return $items;
+}
+
+/**
+ * Format a currency amount for display.
+ *
+ * @param float|string $amount Amount.
+ * @param string       $currency Currency code.
+ * @return string
+ */
+function apparel_service_format_currency_amount( $amount, $currency ) {
+	if ( '' === $amount || null === $amount ) {
+		return '';
+	}
+
+	return sprintf(
+		'%s %s',
+		number_format_i18n( (float) $amount, 2 ),
+		strtoupper( (string) $currency )
+	);
 }
