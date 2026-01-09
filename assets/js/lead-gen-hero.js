@@ -142,5 +142,32 @@
 		});
 	};
 
+	const initLeadGenFaq = () => {
+		document.querySelectorAll('[data-lead-gen-faq] .lead-gen-faq__item').forEach((item) => {
+			const trigger = item.querySelector('.lead-gen-faq__trigger');
+			const content = item.querySelector('.lead-gen-faq__content');
+			if (!trigger || !content) {
+				return;
+			}
+
+			const setExpanded = (expanded) => {
+				item.classList.toggle('is-open', expanded);
+				trigger.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+				if (expanded) {
+					content.style.maxHeight = `${content.scrollHeight}px`;
+				} else {
+					content.style.maxHeight = '0px';
+				}
+			};
+
+			trigger.addEventListener('click', () => {
+				setExpanded(!item.classList.contains('is-open'));
+			});
+
+			setExpanded(false);
+		});
+	};
+
 	document.addEventListener('DOMContentLoaded', initLeadGenCustomForms);
+	document.addEventListener('DOMContentLoaded', initLeadGenFaq);
 })();
