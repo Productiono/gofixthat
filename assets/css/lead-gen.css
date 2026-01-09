@@ -550,15 +550,15 @@
 }
 
 .lead-gen-footer__logo {
-	width: 30px;
-	height: 30px;
+	width: 100px;
+	height: 26px;
 	border-radius: 8px;
 	background: #111111;
 	color: #ffffff;
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	font-weight: 600;
+	font-weight: 700;
 }
 
 .lead-gen-footer__links {
