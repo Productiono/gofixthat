@@ -50,6 +50,7 @@ function apparel_render_lead_gen_meta_box( $post ) {
 	$hero_link        = get_post_meta( $post->ID, 'lead_gen_hero_cta_button_link', true );
 	$hero_helper      = get_post_meta( $post->ID, 'lead_gen_hero_cta_helper', true );
 	$hero_background  = get_post_meta( $post->ID, 'lead_gen_hero_background_image', true );
+	$hero_main_logo   = get_post_meta( $post->ID, 'lead_gen_main_landing_logo', true );
 	$hero_logo        = get_post_meta( $post->ID, 'lead_gen_hero_logo', true );
 	$fluent_form_id   = get_post_meta( $post->ID, 'lead_gen_fluent_form_id', true );
 	$logos            = get_post_meta( $post->ID, 'lead_gen_logos', true );
@@ -207,6 +208,17 @@ function apparel_render_lead_gen_meta_box( $post ) {
 				value="<?php echo esc_attr( $hero_background ); ?>"
 			/>
 			<span class="description"><?php esc_html_e( 'Collage/background image used behind the hero content.', 'apparel' ); ?></span>
+		</p>
+		<p>
+			<label for="lead-gen-main-landing-logo"><strong><?php esc_html_e( 'Main Landingpage Logo', 'apparel' ); ?></strong></label>
+			<input
+				type="text"
+				id="lead-gen-main-landing-logo"
+				name="lead_gen_main_landing_logo"
+				class="widefat"
+				value="<?php echo esc_attr( $hero_main_logo ); ?>"
+			/>
+			<span class="description"><?php esc_html_e( 'Logo URL or attachment ID shown above the hero content.', 'apparel' ); ?></span>
 		</p>
 		<p>
 			<label for="lead-gen-hero-logo"><strong><?php esc_html_e( 'Hero logo URL', 'apparel' ); ?></strong></label>
@@ -592,6 +604,7 @@ function apparel_save_lead_gen_meta_box( $post_id ) {
 	$hero_link        = isset( $_POST['lead_gen_hero_cta_button_link'] ) ? esc_url_raw( wp_unslash( $_POST['lead_gen_hero_cta_button_link'] ) ) : '';
 	$hero_helper      = isset( $_POST['lead_gen_hero_cta_helper'] ) ? sanitize_text_field( wp_unslash( $_POST['lead_gen_hero_cta_helper'] ) ) : '';
 	$hero_background  = isset( $_POST['lead_gen_hero_background_image'] ) ? esc_url_raw( wp_unslash( $_POST['lead_gen_hero_background_image'] ) ) : '';
+	$hero_main_logo   = isset( $_POST['lead_gen_main_landing_logo'] ) ? sanitize_text_field( wp_unslash( $_POST['lead_gen_main_landing_logo'] ) ) : '';
 	$hero_logo        = isset( $_POST['lead_gen_hero_logo'] ) ? esc_url_raw( wp_unslash( $_POST['lead_gen_hero_logo'] ) ) : '';
 	$fluent_form_id   = isset( $_POST['lead_gen_fluent_form_id'] ) ? absint( wp_unslash( $_POST['lead_gen_fluent_form_id'] ) ) : 0;
 	$testimonial      = isset( $_POST['lead_gen_testimonial_quote'] ) ? sanitize_textarea_field( wp_unslash( $_POST['lead_gen_testimonial_quote'] ) ) : '';
@@ -744,6 +757,12 @@ function apparel_save_lead_gen_meta_box( $post_id ) {
 		update_post_meta( $post_id, 'lead_gen_hero_background_image', $hero_background );
 	} else {
 		delete_post_meta( $post_id, 'lead_gen_hero_background_image' );
+	}
+
+	if ( $hero_main_logo ) {
+		update_post_meta( $post_id, 'lead_gen_main_landing_logo', $hero_main_logo );
+	} else {
+		delete_post_meta( $post_id, 'lead_gen_main_landing_logo' );
 	}
 
 	if ( $hero_logo ) {
