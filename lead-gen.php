@@ -13,6 +13,7 @@ $post_id = get_the_ID();
 $lead_gen_video        = get_post_meta( $post_id, 'lead_gen_video_url', true );
 $lead_gen_poster       = get_post_meta( $post_id, 'lead_gen_poster_url', true );
 $hero_background_image = get_post_meta( $post_id, 'lead_gen_hero_background_image', true );
+$hero_main_logo        = get_post_meta( $post_id, 'lead_gen_main_landing_logo', true );
 $hero_logo             = get_post_meta( $post_id, 'lead_gen_hero_logo', true );
 $default_video         = get_template_directory_uri() . '/assets/static/background-video.webm';
 $video_url             = $lead_gen_video ? $lead_gen_video : $default_video;
@@ -51,7 +52,7 @@ $footer_links = is_array( $footer_links ) ? $footer_links : array();
 
 $hero_headline = $hero_headline ? $hero_headline : get_the_title( $post_id );
 
-$has_settings = $hero_subheadline || $hero_cta_label || $hero_cta_placeholder || $hero_cta_button_label || $hero_cta_button_link || $hero_cta_helper || $hero_background_image || $hero_logo || $fluent_form_id || $logos || $features || $testimonial_quote || $testimonial_name || $testimonial_company || $cta_headline || $cta_subheadline || $cta_label || $cta_placeholder || $cta_button_label || $cta_button_link || $cta_helper || $cta_background || $cta_background_image || $faq_heading || $faqs || $footer_logo || $footer_text || $footer_links;
+$has_settings = $hero_subheadline || $hero_cta_label || $hero_cta_placeholder || $hero_cta_button_label || $hero_cta_button_link || $hero_cta_helper || $hero_background_image || $hero_main_logo || $hero_logo || $fluent_form_id || $logos || $features || $testimonial_quote || $testimonial_name || $testimonial_company || $cta_headline || $cta_subheadline || $cta_label || $cta_placeholder || $cta_button_label || $cta_button_link || $cta_helper || $cta_background || $cta_background_image || $faq_heading || $faqs || $footer_logo || $footer_text || $footer_links;
 
 $has_fluent_form = $fluent_form_id && function_exists( 'shortcode_exists' ) && shortcode_exists( 'fluentform' );
 $show_form_notice = ! $has_fluent_form && current_user_can( 'manage_options' );
@@ -59,15 +60,28 @@ $show_form_notice = ! $has_fluent_form && current_user_can( 'manage_options' );
 $hero_background = $hero_background_image ? $hero_background_image : $lead_gen_poster;
 $cta_background  = $cta_background ? $cta_background : 'linear-gradient(180deg, #3f0bb6 0%, #2a0788 100%)';
 $hero_logo_alt   = get_bloginfo( 'name' );
-$hero_logo_image = '';
+$hero_logo_source = $hero_main_logo ? $hero_main_logo : $hero_logo;
+$hero_logo_image  = '';
 $hero_logo_text  = '';
 
-if ( $hero_logo ) {
-	$hero_logo_image = sprintf(
-		'<img class="lead-gen-hero__logo-image" src="%1$s" alt="%2$s" loading="lazy" />',
-		esc_url( $hero_logo ),
-		esc_attr( $hero_logo_alt )
-	);
+if ( $hero_logo_source ) {
+	if ( is_numeric( $hero_logo_source ) ) {
+		$hero_logo_image = wp_get_attachment_image(
+			absint( $hero_logo_source ),
+			'full',
+			false,
+			array(
+				'class' => 'lead-gen-hero__logo-image',
+				'alt'   => $hero_logo_alt,
+			)
+		);
+	} else {
+		$hero_logo_image = sprintf(
+			'<img class="lead-gen-hero__logo-image" src="%1$s" alt="%2$s" loading="lazy" />',
+			esc_url( $hero_logo_source ),
+			esc_attr( $hero_logo_alt )
+		);
+	}
 } else {
 	$custom_logo_id = get_theme_mod( 'custom_logo' );
 	if ( $custom_logo_id ) {
@@ -112,20 +126,24 @@ $render_fluent_form = function () use ( $fluent_form_id, $has_fluent_form, $show
 ?>
 
 <style>
+	.lead-gen-hero__logo {
+		margin-bottom: 16px;
+	}
+
 	@media (max-width: 640px) {
 		.lead-gen-hero {
 			min-height: calc(100svh - var(--lead-gen-header-offset));
 			min-height: calc(100dvh - var(--lead-gen-header-offset));
-			padding: clamp(32px, 8svh, 64px) clamp(20px, 6vw, 28px) clamp(28px, 7svh, 56px);
-			align-items: center;
+			padding: clamp(20px, 5svh, 40px) clamp(20px, 6vw, 28px) clamp(28px, 7svh, 56px);
+			align-items: flex-start;
 		}
 
 		.lead-gen-hero__stack {
-			gap: clamp(16px, 3svh, 24px);
+			gap: clamp(14px, 3svh, 22px);
 		}
 
 		.lead-gen-hero__logo {
-			margin-bottom: 0;
+			margin-bottom: clamp(14px, 3svh, 20px);
 		}
 
 		.lead-gen-hero__logo-image {
