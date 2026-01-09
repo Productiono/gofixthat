@@ -171,11 +171,13 @@
 	const initLeadGenStickyForm = () => {
 		const hero = document.querySelector('.lead-gen-hero');
 		const card = document.querySelector('.lead-gen-hero .lead-gen-form-card--dark');
+		const cta = document.querySelector('.lead-gen-cta');
 		if (!hero || !card || !('IntersectionObserver' in window)) {
 			return;
 		}
 		let observer = null;
 		let isStickyVisible = false;
+		let isHeroVisible = true;
 		const mobileQuery = window.matchMedia('(max-width: 640px)');
 		const originalParent = card.parentElement;
 		const originalNextSibling = card.nextElementSibling;
@@ -203,9 +205,22 @@
 			}
 		};
 
+		const isCtaBelowViewport = () => {
+			if (!cta) {
+				return true;
+			}
+			const rect = cta.getBoundingClientRect();
+			return rect.top > window.innerHeight;
+		};
+
+		const updateStickyVisibility = () => {
+			setStickyVisible(!isHeroVisible && isCtaBelowViewport());
+		};
+
 		const handleIntersection = (entries) => {
 			entries.forEach((entry) => {
-				setStickyVisible(!entry.isIntersecting);
+				isHeroVisible = entry.isIntersecting;
+				updateStickyVisibility();
 			});
 		};
 
@@ -231,6 +246,20 @@
 			observer.observe(hero);
 		};
 		setupObserver();
+		let scrollTicking = false;
+		const handleScroll = () => {
+			if (scrollTicking) {
+				return;
+			}
+			scrollTicking = true;
+			window.requestAnimationFrame(() => {
+				updateStickyVisibility();
+				scrollTicking = false;
+			});
+		};
+		window.addEventListener('scroll', handleScroll, { passive: true });
+		window.addEventListener('resize', updateStickyVisibility);
+		updateStickyVisibility();
 		if (typeof mobileQuery.addEventListener === 'function') {
 			mobileQuery.addEventListener('change', handleViewportChange);
 		} else if (typeof mobileQuery.addListener === 'function') {
