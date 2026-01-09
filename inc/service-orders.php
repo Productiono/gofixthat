@@ -347,7 +347,7 @@ function apparel_service_render_orders_page() {
  * @return array
  */
 function apparel_service_order_statuses() {
-	return array( 'paid', 'failed', 'refunded' );
+	return array( 'paid', 'completed', 'cancelled', 'refunded', 'partially_refunded', 'failed' );
 }
 
 /**
@@ -551,7 +551,11 @@ function apparel_service_save_order_meta( $post_id, $post ) {
 
 	if ( isset( $_POST['apparel_service_order_status'] ) ) {
 		$status = sanitize_text_field( wp_unslash( $_POST['apparel_service_order_status'] ) );
+		$previous_status = get_post_meta( $post_id, '_status', true );
 		update_post_meta( $post_id, '_status', $status );
+		if ( $status && $status !== $previous_status ) {
+			apparel_service_maybe_send_order_status_email( $post_id, $status );
+		}
 	}
 
 	if ( isset( $_POST['apparel_service_order_notes'] ) ) {
@@ -625,10 +629,17 @@ function apparel_service_handle_stripe_webhook( WP_REST_Request $request ) {
 
 	if ( 'charge.refunded' === $event['type'] && ! empty( $event['data']['object'] ) ) {
 		$charge = $event['data']['object'];
+		$amount_refunded = isset( $charge['amount_refunded'] ) ? ( (float) $charge['amount_refunded'] / 100 ) : 0;
+		$amount_total    = isset( $charge['amount'] ) ? ( (float) $charge['amount'] / 100 ) : 0;
+		$status          = ( $amount_refunded && $amount_total && $amount_refunded < $amount_total ) ? 'partially_refunded' : 'refunded';
 		apparel_service_update_order_status(
-			'refunded',
+			$status,
 			'',
-			sanitize_text_field( $charge['payment_intent'] ?? '' )
+			sanitize_text_field( $charge['payment_intent'] ?? '' ),
+			array(
+				'amount_refunded' => $amount_refunded,
+				'currency'        => strtolower( sanitize_text_field( $charge['currency'] ?? '' ) ),
+			)
 		);
 	}
 
@@ -889,9 +900,10 @@ function apparel_service_process_checkout_session( $session ) {
  * @param string $status Status value.
  * @param string $session_id Checkout session ID.
  * @param string $payment_intent_id Payment intent ID.
+ * @param array  $context Optional context data.
  * @return int
  */
-function apparel_service_update_order_status( $status, $session_id = '', $payment_intent_id = '' ) {
+function apparel_service_update_order_status( $status, $session_id = '', $payment_intent_id = '', $context = array() ) {
 	if ( ! $status || ( ! $session_id && ! $payment_intent_id ) ) {
 		return 0;
 	}
@@ -937,6 +949,16 @@ function apparel_service_update_order_status( $status, $session_id = '', $paymen
 	if ( $payment_intent_id ) {
 		update_post_meta( $order_id, '_stripe_payment_intent_id', sanitize_text_field( $payment_intent_id ) );
 	}
+
+	if ( isset( $context['amount_refunded'] ) ) {
+		update_post_meta( $order_id, '_amount_refunded', (float) $context['amount_refunded'] );
+	}
+
+	if ( ! empty( $context['currency'] ) ) {
+		update_post_meta( $order_id, '_refund_currency', sanitize_text_field( $context['currency'] ) );
+	}
+
+	apparel_service_maybe_send_order_status_email( $order_id, $status );
 
 	return $order_id;
 }
@@ -1075,7 +1097,7 @@ function apparel_service_normalize_custom_fields( $custom_fields ) {
 		$normalized[] = array(
 			'key'   => ! empty( $field['key'] ) ? sanitize_text_field( $field['key'] ) : '',
 			'label' => sanitize_text_field( $label ),
-			'value' => sanitize_text_field( $value ),
+			'value' => sanitize_textarea_field( $value ),
 		);
 	}
 
@@ -1106,7 +1128,7 @@ function apparel_service_format_custom_fields_for_display( $custom_fields ) {
 			$label = $key;
 		}
 
-		if ( '' === $value && '' === $label ) {
+		if ( '' === $value ) {
 			continue;
 		}
 
@@ -1118,6 +1140,45 @@ function apparel_service_format_custom_fields_for_display( $custom_fields ) {
 	}
 
 	return $display;
+}
+
+/**
+ * Get custom fields formatted for email rendering.
+ *
+ * @param int   $order_id Order ID.
+ * @param array $order_data Optional order data.
+ * @return array
+ */
+function apparel_service_get_custom_fields_for_email( $order_id, $order_data = array() ) {
+	$custom_fields = $order_data['custom_fields'] ?? get_post_meta( $order_id, '_stripe_custom_fields', true );
+	if ( empty( $custom_fields ) || ! is_array( $custom_fields ) ) {
+		return array();
+	}
+
+	$fields = array();
+	foreach ( $custom_fields as $field ) {
+		if ( ! is_array( $field ) ) {
+			continue;
+		}
+
+		$label = $field['label'] ?? '';
+		$key   = $field['key'] ?? '';
+		$value = $field['value'] ?? '';
+
+		$label = '' !== $label ? $label : $key;
+		$value = is_string( $value ) ? $value : '';
+
+		if ( '' === trim( $value ) ) {
+			continue;
+		}
+
+		$fields[] = array(
+			'label' => $label,
+			'value' => $value,
+		);
+	}
+
+	return $fields;
 }
 
 /**
@@ -1422,7 +1483,11 @@ function apparel_service_upsert_order( $order_data ) {
 	update_post_meta( $order_id, '_stripe_line_items', $order_data['line_items'] ?? array() );
 	update_post_meta( $order_id, '_stripe_custom_fields', $order_data['custom_fields'] ?? array() );
 
-	apparel_service_maybe_send_order_confirmation( $order_id, $order_data );
+	$service_items = apparel_service_get_order_service_items( $order_id, $order_data );
+
+	apparel_service_maybe_send_order_confirmation( $order_id, $order_data, $service_items );
+	apparel_service_maybe_mark_order_completed( $order_id, $order_data, $service_items );
+	apparel_service_maybe_send_order_status_email( $order_id, $order_data['status'] ?? '', $order_data, $service_items );
 
 	return $order_id;
 }
@@ -1432,9 +1497,10 @@ function apparel_service_upsert_order( $order_data ) {
  *
  * @param int   $order_id Order ID.
  * @param array $order_data Optional order data from checkout session.
+ * @param array $service_items Optional service items for the order.
  * @return bool
  */
-function apparel_service_maybe_send_order_confirmation( $order_id, $order_data = array() ) {
+function apparel_service_maybe_send_order_confirmation( $order_id, $order_data = array(), $service_items = array() ) {
 	if ( ! $order_id ) {
 		return false;
 	}
@@ -1454,9 +1520,11 @@ function apparel_service_maybe_send_order_confirmation( $order_id, $order_data =
 		return false;
 	}
 
-	$service_items = apparel_service_get_order_service_items( $order_id, $order_data );
 	if ( empty( $service_items ) ) {
-		return false;
+		$service_items = apparel_service_get_order_service_items( $order_id, $order_data );
+		if ( empty( $service_items ) ) {
+			return false;
+		}
 	}
 
 	$subject = sprintf(
@@ -1465,10 +1533,10 @@ function apparel_service_maybe_send_order_confirmation( $order_id, $order_data =
 		wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES )
 	);
 
-	$message = apparel_service_build_order_confirmation_email( $order_id, $order_data, $service_items );
-	$headers = array( 'Content-Type: text/html; charset=UTF-8' );
+	$message_html = apparel_service_build_order_confirmation_email( $order_id, $order_data, $service_items );
+	$message_text = apparel_service_build_order_confirmation_email_text( $order_id, $order_data, $service_items );
 
-	$sent = wp_mail( $customer_email, $subject, $message, $headers );
+	$sent = apparel_service_send_order_email( $customer_email, $subject, $message_html, $message_text );
 	if ( $sent ) {
 		update_post_meta( $order_id, '_confirmation_sent', current_time( 'mysql' ) );
 	}
@@ -1485,15 +1553,450 @@ function apparel_service_maybe_send_order_confirmation( $order_id, $order_data =
  * @return string
  */
 function apparel_service_build_order_confirmation_email( $order_id, $order_data, $service_items ) {
+	$context = apparel_service_get_order_email_context( $order_id, $order_data, $service_items );
+
+	$args = array(
+		'heading'             => __( 'Your service order is confirmed', 'apparel' ),
+		'intro'               => __( 'Thank you for your purchase. We are preparing your service and will be in touch with any next steps.', 'apparel' ),
+		'order_id'            => $order_id,
+		'order_date_display'  => $context['order_date_display'],
+		'order_total_display' => $context['order_total_display'],
+		'service_items'       => $service_items,
+		'custom_fields'       => $context['custom_fields'],
+		'download_items'      => $context['download_items'],
+		'customer_name'       => $context['customer_name'],
+		'admin_email'         => $context['admin_email'],
+		'site_name'           => $context['site_name'],
+		'action_url'          => $context['checkout_url'],
+		'action_label'        => $context['checkout_url'] ? __( 'View Order', 'apparel' ) : '',
+		'show_downloads'      => true,
+	);
+
+	return apparel_service_render_service_order_email_html( $args );
+}
+
+/**
+ * Build service order confirmation plain-text email.
+ *
+ * @param int   $order_id Order ID.
+ * @param array $order_data Order data.
+ * @param array $service_items Service items for the order.
+ * @return string
+ */
+function apparel_service_build_order_confirmation_email_text( $order_id, $order_data, $service_items ) {
+	$context = apparel_service_get_order_email_context( $order_id, $order_data, $service_items );
+
+	$args = array(
+		'heading'             => __( 'Your service order is confirmed', 'apparel' ),
+		'intro'               => __( 'Thank you for your purchase. We are preparing your service and will be in touch with any next steps.', 'apparel' ),
+		'order_id'            => $order_id,
+		'order_date_display'  => $context['order_date_display'],
+		'order_total_display' => $context['order_total_display'],
+		'service_items'       => $service_items,
+		'custom_fields'       => $context['custom_fields'],
+		'download_items'      => $context['download_items'],
+		'customer_name'       => $context['customer_name'],
+		'admin_email'         => $context['admin_email'],
+		'site_name'           => $context['site_name'],
+		'action_url'          => $context['checkout_url'],
+		'action_label'        => $context['checkout_url'] ? __( 'View Order', 'apparel' ) : '',
+		'show_downloads'      => true,
+	);
+
+	return apparel_service_render_service_order_email_text( $args );
+}
+
+/**
+ * Maybe mark an order as completed if downloads are available.
+ *
+ * @param int   $order_id Order ID.
+ * @param array $order_data Optional order data.
+ * @param array $service_items Service items.
+ * @return bool
+ */
+function apparel_service_maybe_mark_order_completed( $order_id, $order_data = array(), $service_items = array() ) {
+	if ( ! $order_id ) {
+		return false;
+	}
+
+	$current_status = get_post_meta( $order_id, '_status', true );
+	if ( 'completed' === $current_status ) {
+		return false;
+	}
+
+	$status = $order_data['status'] ?? $current_status;
+	if ( 'paid' !== $status ) {
+		return false;
+	}
+
+	if ( empty( $service_items ) ) {
+		$service_items = apparel_service_get_order_service_items( $order_id, $order_data );
+	}
+
+	if ( empty( apparel_service_get_order_download_items( $service_items ) ) ) {
+		return false;
+	}
+
+	update_post_meta( $order_id, '_status', 'completed' );
+	apparel_service_maybe_send_order_status_email( $order_id, 'completed', $order_data, $service_items );
+
+	return true;
+}
+
+/**
+ * Build status-specific order email content.
+ *
+ * @param int    $order_id Order ID.
+ * @param array  $order_data Order data.
+ * @param array  $service_items Service items.
+ * @param string $status Status.
+ * @return array
+ */
+function apparel_service_build_order_status_email( $order_id, $order_data, $service_items, $status ) {
+	$context = apparel_service_get_order_email_context( $order_id, $order_data, $service_items );
+	$site_name = $context['site_name'];
+
+	$heading       = '';
+	$intro         = '';
+	$status_note   = '';
+	$show_download = false;
+
+	$refund_amount_display = '';
+	if ( $context['refund_amount'] ) {
+		$refund_currency = $context['refund_currency'] ? $context['refund_currency'] : ( $order_data['currency'] ?? get_post_meta( $order_id, '_currency', true ) );
+		$refund_amount_display = apparel_service_format_currency_amount( $context['refund_amount'], $refund_currency );
+	}
+
+	switch ( $status ) {
+		case 'completed':
+			$heading       = __( 'Your service order is complete', 'apparel' );
+			$intro         = __( 'We have completed your service. Thank you for choosing us.', 'apparel' );
+			$status_note   = __( 'If your service includes a download, you can access it below.', 'apparel' );
+			$show_download = true;
+			break;
+		case 'cancelled':
+			$heading     = __( 'Your service order was cancelled', 'apparel' );
+			$intro       = __( 'Your order has been cancelled as requested.', 'apparel' );
+			$status_note = __( 'If this was a mistake or you still need this service, please place a new order or contact support.', 'apparel' );
+			break;
+		case 'refunded':
+			$heading = __( 'Your service order was refunded', 'apparel' );
+			$intro   = __( 'We have processed your refund.', 'apparel' );
+			if ( $refund_amount_display ) {
+				$status_note = sprintf(
+					/* translators: %s: refund amount */
+					__( 'Refund amount: %s. It may take a few business days to appear on your statement.', 'apparel' ),
+					$refund_amount_display
+				);
+			} else {
+				$status_note = __( 'Your refund may take a few business days to appear on your statement.', 'apparel' );
+			}
+			break;
+		case 'partially_refunded':
+			$heading = __( 'Your service order was partially refunded', 'apparel' );
+			$intro   = __( 'We have processed a partial refund for your order.', 'apparel' );
+			if ( $refund_amount_display ) {
+				$status_note = sprintf(
+					/* translators: %s: refund amount */
+					__( 'Partial refund amount: %s. It may take a few business days to appear on your statement.', 'apparel' ),
+					$refund_amount_display
+				);
+			} else {
+				$status_note = __( 'Your partial refund may take a few business days to appear on your statement.', 'apparel' );
+			}
+			break;
+		case 'failed':
+			$heading     = __( 'Payment failed for your service order', 'apparel' );
+			$intro       = __( 'Unfortunately we could not process your payment.', 'apparel' );
+			$status_note = __( 'Please try again or contact support if you need help.', 'apparel' );
+			break;
+		default:
+			return array();
+	}
+
+	$subject = sprintf(
+		/* translators: %s: site name */
+		__( '%1$s - %2$s', 'apparel' ),
+		$heading,
+		$site_name
+	);
+
+	$args = array(
+		'heading'             => $heading,
+		'intro'               => $intro,
+		'status_note'         => $status_note,
+		'order_id'            => $order_id,
+		'order_date_display'  => $context['order_date_display'],
+		'order_total_display' => $context['order_total_display'],
+		'service_items'       => $service_items,
+		'custom_fields'       => $context['custom_fields'],
+		'download_items'      => $context['download_items'],
+		'customer_name'       => $context['customer_name'],
+		'admin_email'         => $context['admin_email'],
+		'site_name'           => $site_name,
+		'action_url'          => $context['checkout_url'],
+		'action_label'        => $context['checkout_url'] ? __( 'View Order', 'apparel' ) : '',
+		'show_downloads'      => $show_download,
+	);
+
+	return array(
+		'subject' => $subject,
+		'html'    => apparel_service_render_service_order_email_html( $args ),
+		'text'    => apparel_service_render_service_order_email_text( $args ),
+	);
+}
+
+/**
+ * Maybe send a status update email.
+ *
+ * @param int    $order_id Order ID.
+ * @param string $status Status.
+ * @param array  $order_data Optional order data.
+ * @param array  $service_items Optional service items.
+ * @return bool
+ */
+function apparel_service_maybe_send_order_status_email( $order_id, $status, $order_data = array(), $service_items = array() ) {
+	if ( ! $order_id || ! $status ) {
+		return false;
+	}
+
+	$allowed_statuses = array( 'completed', 'cancelled', 'refunded', 'partially_refunded', 'failed' );
+	if ( ! in_array( $status, $allowed_statuses, true ) ) {
+		return false;
+	}
+
+	$sent_meta_key = '_status_email_sent_' . sanitize_key( $status );
+	if ( get_post_meta( $order_id, $sent_meta_key, true ) ) {
+		return false;
+	}
+
+	$customer_email = $order_data['customer_email'] ?? get_post_meta( $order_id, '_customer_email', true );
+	if ( ! $customer_email || ! is_email( $customer_email ) ) {
+		return false;
+	}
+
+	if ( empty( $service_items ) ) {
+		$service_items = apparel_service_get_order_service_items( $order_id, $order_data );
+	}
+
+	if ( empty( $service_items ) ) {
+		return false;
+	}
+
+	$email = apparel_service_build_order_status_email( $order_id, $order_data, $service_items, $status );
+	if ( empty( $email ) || empty( $email['subject'] ) ) {
+		return false;
+	}
+
+	$sent = apparel_service_send_order_email( $customer_email, $email['subject'], $email['html'], $email['text'] );
+	if ( $sent ) {
+		update_post_meta( $order_id, $sent_meta_key, current_time( 'mysql' ) );
+	}
+
+	return (bool) $sent;
+}
+
+/**
+ * Get service items associated with an order.
+ *
+ * @param int   $order_id Order ID.
+ * @param array $order_data Order data.
+ * @return array
+ */
+function apparel_service_get_order_service_items( $order_id, $order_data = array() ) {
+	$items = array();
+
+	$line_items = $order_data['line_items'] ?? get_post_meta( $order_id, '_stripe_line_items', true );
+	if ( is_array( $line_items ) ) {
+		foreach ( $line_items as $line_item ) {
+			if ( ! is_array( $line_item ) ) {
+				continue;
+			}
+			$price_id = $line_item['price_id'] ?? '';
+			if ( ! $price_id ) {
+				$price_id = $line_item['price']['id'] ?? '';
+			}
+			if ( ! $price_id ) {
+				continue;
+			}
+			$service_match = apparel_service_find_service_by_price_id( $price_id );
+			if ( empty( $service_match['service_id'] ) ) {
+				continue;
+			}
+
+			$service_id     = (int) $service_match['service_id'];
+			$variation_id   = $service_match['variation_id'] ?? '';
+			$variation_name = $variation_id ? apparel_service_get_variation_name( $service_id, $variation_id ) : '';
+			$download_link  = apparel_service_get_service_download_link( $service_id, $variation_id );
+			$quantity       = isset( $line_item['quantity'] ) ? absint( $line_item['quantity'] ) : 1;
+			$amount_total   = $line_item['amount_total'] ?? '';
+			$currency       = $line_item['currency'] ?? ( $order_data['currency'] ?? get_post_meta( $order_id, '_currency', true ) );
+			$amount_display = apparel_service_format_currency_amount( $amount_total, $currency );
+
+			$items[] = array(
+				'service_id'     => $service_id,
+				'title'          => get_the_title( $service_id ),
+				'variation_name' => $variation_name,
+				'download_link'  => $download_link,
+				'quantity'       => $quantity,
+				'amount_display' => $amount_display,
+			);
+		}
+	}
+
+	if ( empty( $items ) ) {
+		$service_id    = $order_data['service_id'] ?? get_post_meta( $order_id, '_service_id', true );
+		$variation_name = $order_data['variation_name'] ?? get_post_meta( $order_id, '_variation_name', true );
+		$variation_id   = $order_data['variation_id'] ?? get_post_meta( $order_id, '_variation_id', true );
+		$download_link  = apparel_service_get_service_download_link( $service_id, $variation_id );
+		$quantity       = $order_data['quantity'] ?? get_post_meta( $order_id, '_quantity', true );
+		if ( $service_id ) {
+			$items[] = array(
+				'service_id'     => (int) $service_id,
+				'title'          => get_the_title( $service_id ),
+				'variation_name' => $variation_name,
+				'download_link'  => $download_link,
+				'quantity'       => $quantity ? absint( $quantity ) : 1,
+				'amount_display' => apparel_service_format_currency_amount(
+					$order_data['amount_total'] ?? get_post_meta( $order_id, '_amount_total', true ),
+					$order_data['currency'] ?? get_post_meta( $order_id, '_currency', true )
+				),
+			);
+		}
+	}
+
+	return $items;
+}
+
+/**
+ * Format a currency amount for display.
+ *
+ * @param float|string $amount Amount.
+ * @param string       $currency Currency code.
+ * @return string
+ */
+function apparel_service_format_currency_amount( $amount, $currency ) {
+	if ( '' === $amount || null === $amount ) {
+		return '';
+	}
+
+	return sprintf(
+		'%s %s',
+		number_format_i18n( (float) $amount, 2 ),
+		strtoupper( (string) $currency )
+	);
+}
+
+/**
+ * Get a download link for a service or variation.
+ *
+ * @param int    $service_id Service ID.
+ * @param string $variation_id Variation ID.
+ * @return string
+ */
+function apparel_service_get_service_download_link( $service_id, $variation_id = '' ) {
+	if ( ! $service_id ) {
+		return '';
+	}
+
+	if ( $variation_id ) {
+		$variations = get_post_meta( $service_id, '_service_variations', true );
+		if ( is_array( $variations ) ) {
+			foreach ( $variations as $variation ) {
+				if ( empty( $variation['variation_id'] ) || $variation['variation_id'] !== $variation_id ) {
+					continue;
+				}
+				if ( ! empty( $variation['download_link'] ) ) {
+					return $variation['download_link'];
+				}
+			}
+		}
+	}
+
+	$download_link = get_post_meta( $service_id, '_service_download_link', true );
+	return $download_link ? $download_link : '';
+}
+
+/**
+ * Extract downloadable items from service items.
+ *
+ * @param array $service_items Service items.
+ * @return array
+ */
+function apparel_service_get_order_download_items( $service_items ) {
+	$downloads = array();
+	foreach ( $service_items as $item ) {
+		if ( empty( $item['download_link'] ) ) {
+			continue;
+		}
+
+		$label = $item['title'];
+		if ( ! empty( $item['variation_name'] ) ) {
+			$label .= ' - ' . $item['variation_name'];
+		}
+
+		$downloads[] = array(
+			'label' => $label,
+			'url'   => $item['download_link'],
+		);
+	}
+
+	return $downloads;
+}
+
+/**
+ * Build order email context data.
+ *
+ * @param int   $order_id Order ID.
+ * @param array $order_data Order data.
+ * @param array $service_items Service items.
+ * @return array
+ */
+function apparel_service_get_order_email_context( $order_id, $order_data, $service_items ) {
 	$customer_name = $order_data['customer_name'] ?? get_post_meta( $order_id, '_customer_name', true );
 	$order_total   = $order_data['amount_total'] ?? get_post_meta( $order_id, '_amount_total', true );
 	$currency      = $order_data['currency'] ?? get_post_meta( $order_id, '_currency', true );
 	$created_at    = $order_data['created_at'] ?? get_post_meta( $order_id, '_created_at', true );
 	$created_at    = $created_at ? (int) $created_at : time();
 
-	$order_total_display = apparel_service_format_currency_amount( $order_total, $currency );
-	$site_name           = wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES );
-	$admin_email         = get_option( 'admin_email' );
+	$context = array(
+		'customer_name'        => $customer_name,
+		'order_total_display'  => apparel_service_format_currency_amount( $order_total, $currency ),
+		'order_date_display'   => date_i18n( get_option( 'date_format' ), $created_at ),
+		'admin_email'          => get_option( 'admin_email' ),
+		'site_name'            => wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES ),
+		'checkout_url'         => $order_data['checkout_url'] ?? get_post_meta( $order_id, '_checkout_url', true ),
+		'custom_fields'        => apparel_service_get_custom_fields_for_email( $order_id, $order_data ),
+		'download_items'       => apparel_service_get_order_download_items( $service_items ),
+		'refund_amount'        => get_post_meta( $order_id, '_amount_refunded', true ),
+		'refund_currency'      => get_post_meta( $order_id, '_refund_currency', true ),
+	);
+
+	return $context;
+}
+
+/**
+ * Render HTML service order email.
+ *
+ * @param array $args Email arguments.
+ * @return string
+ */
+function apparel_service_render_service_order_email_html( $args ) {
+	$heading             = $args['heading'] ?? '';
+	$intro               = $args['intro'] ?? '';
+	$status_note         = $args['status_note'] ?? '';
+	$order_id            = $args['order_id'] ?? 0;
+	$order_date_display  = $args['order_date_display'] ?? '';
+	$order_total_display = $args['order_total_display'] ?? '';
+	$service_items       = $args['service_items'] ?? array();
+	$custom_fields       = $args['custom_fields'] ?? array();
+	$download_items      = $args['download_items'] ?? array();
+	$customer_name       = $args['customer_name'] ?? '';
+	$admin_email         = $args['admin_email'] ?? '';
+	$site_name           = $args['site_name'] ?? '';
+	$action_url          = $args['action_url'] ?? '';
+	$action_label        = $args['action_label'] ?? '';
+	$show_downloads      = ! empty( $args['show_downloads'] );
 
 	ob_start();
 	?>
@@ -1510,8 +2013,10 @@ function apparel_service_build_order_confirmation_email( $order_id, $order_data,
 						<table role="presentation" width="600" cellpadding="0" cellspacing="0" style="background-color:#ffffff;border-radius:8px;overflow:hidden;">
 							<tr>
 								<td style="padding:32px 32px 16px;">
-									<h1 style="margin:0 0 12px;font-size:24px;line-height:1.4;color:#111;"><?php esc_html_e( 'Your service order is confirmed', 'apparel' ); ?></h1>
-									<p style="margin:0 0 16px;font-size:14px;color:#4a4a4a;"><?php esc_html_e( 'Thank you for your purchase. We are preparing your service and will be in touch with any next steps.', 'apparel' ); ?></p>
+									<h1 style="margin:0 0 12px;font-size:24px;line-height:1.4;color:#111;"><?php echo esc_html( $heading ); ?></h1>
+									<?php if ( $intro ) : ?>
+										<p style="margin:0 0 16px;font-size:14px;color:#4a4a4a;"><?php echo esc_html( $intro ); ?></p>
+									<?php endif; ?>
 									<p style="margin:0;font-size:14px;color:#4a4a4a;">
 										<?php
 										if ( $customer_name ) {
@@ -1543,17 +2048,19 @@ function apparel_service_build_order_confirmation_email( $order_id, $order_data,
 												<strong><?php esc_html_e( 'Order Date', 'apparel' ); ?></strong>
 											</td>
 											<td align="right" style="padding:12px 0;border-bottom:1px solid #e8e8e8;font-size:14px;color:#4a4a4a;">
-												<?php echo esc_html( date_i18n( get_option( 'date_format' ), $created_at ) ); ?>
+												<?php echo esc_html( $order_date_display ); ?>
 											</td>
 										</tr>
-										<tr>
-											<td style="padding:12px 0;font-size:14px;color:#4a4a4a;">
-												<strong><?php esc_html_e( 'Order Total', 'apparel' ); ?></strong>
-											</td>
-											<td align="right" style="padding:12px 0;font-size:14px;color:#4a4a4a;">
-												<?php echo esc_html( $order_total_display ); ?>
-											</td>
-										</tr>
+										<?php if ( $order_total_display ) : ?>
+											<tr>
+												<td style="padding:12px 0;font-size:14px;color:#4a4a4a;">
+													<strong><?php esc_html_e( 'Order Total', 'apparel' ); ?></strong>
+												</td>
+												<td align="right" style="padding:12px 0;font-size:14px;color:#4a4a4a;">
+													<?php echo esc_html( $order_total_display ); ?>
+												</td>
+											</tr>
+										<?php endif; ?>
 									</table>
 								</td>
 							</tr>
@@ -1591,6 +2098,58 @@ function apparel_service_build_order_confirmation_email( $order_id, $order_data,
 									</table>
 								</td>
 							</tr>
+							<?php if ( ! empty( $custom_fields ) ) : ?>
+								<tr>
+									<td style="padding:0 32px 24px;">
+										<h2 style="margin:0 0 12px;font-size:18px;color:#111;"><?php esc_html_e( 'You have provided the following:', 'apparel' ); ?></h2>
+										<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;">
+											<?php foreach ( $custom_fields as $field ) : ?>
+												<tr>
+													<td style="padding:8px 0;border-bottom:1px solid #f0f0f0;font-size:14px;color:#1a1a1a;vertical-align:top;width:40%;">
+														<strong><?php echo esc_html( $field['label'] ); ?></strong>
+													</td>
+													<td style="padding:8px 0;border-bottom:1px solid #f0f0f0;font-size:14px;color:#4a4a4a;">
+														<?php echo wp_kses_post( nl2br( esc_html( $field['value'] ) ) ); ?>
+													</td>
+												</tr>
+											<?php endforeach; ?>
+										</table>
+									</td>
+								</tr>
+							<?php endif; ?>
+							<?php if ( $show_downloads && ! empty( $download_items ) ) : ?>
+								<tr>
+									<td style="padding:0 32px 24px;">
+										<h2 style="margin:0 0 12px;font-size:18px;color:#111;"><?php esc_html_e( 'Downloads', 'apparel' ); ?></h2>
+										<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;">
+											<?php foreach ( $download_items as $download_item ) : ?>
+												<tr>
+													<td style="padding:8px 0;border-bottom:1px solid #f0f0f0;font-size:14px;color:#1a1a1a;">
+														<?php echo esc_html( $download_item['label'] ); ?>
+													</td>
+													<td align="right" style="padding:8px 0;border-bottom:1px solid #f0f0f0;">
+														<a href="<?php echo esc_url( $download_item['url'] ); ?>" style="background-color:#111;color:#ffffff;text-decoration:none;padding:8px 16px;border-radius:4px;font-size:14px;display:inline-block;"><?php esc_html_e( 'Download', 'apparel' ); ?></a>
+													</td>
+												</tr>
+											<?php endforeach; ?>
+										</table>
+									</td>
+								</tr>
+							<?php endif; ?>
+							<?php if ( $action_url && $action_label ) : ?>
+								<tr>
+									<td style="padding:0 32px 24px;text-align:center;">
+										<a href="<?php echo esc_url( $action_url ); ?>" style="background-color:#111;color:#ffffff;text-decoration:none;padding:12px 24px;border-radius:4px;font-size:14px;display:inline-block;"><?php echo esc_html( $action_label ); ?></a>
+									</td>
+								</tr>
+							<?php endif; ?>
+							<?php if ( $status_note ) : ?>
+								<tr>
+									<td style="padding:0 32px 24px;">
+										<p style="margin:0;font-size:14px;color:#4a4a4a;"><?php echo esc_html( $status_note ); ?></p>
+									</td>
+								</tr>
+							<?php endif; ?>
 							<tr>
 								<td style="padding:0 32px 32px;">
 									<p style="margin:0 0 8px;font-size:14px;color:#4a4a4a;"><?php esc_html_e( 'Need help or want to adjust your service? Reply to this email and we will take care of you.', 'apparel' ); ?></p>
@@ -1629,87 +2188,111 @@ function apparel_service_build_order_confirmation_email( $order_id, $order_data,
 }
 
 /**
- * Get service items associated with an order.
+ * Render plain-text service order email.
  *
- * @param int   $order_id Order ID.
- * @param array $order_data Order data.
- * @return array
+ * @param array $args Email arguments.
+ * @return string
  */
-function apparel_service_get_order_service_items( $order_id, $order_data = array() ) {
-	$items = array();
+function apparel_service_render_service_order_email_text( $args ) {
+	$heading             = $args['heading'] ?? '';
+	$intro               = $args['intro'] ?? '';
+	$status_note         = $args['status_note'] ?? '';
+	$order_id            = $args['order_id'] ?? 0;
+	$order_date_display  = $args['order_date_display'] ?? '';
+	$order_total_display = $args['order_total_display'] ?? '';
+	$service_items       = $args['service_items'] ?? array();
+	$custom_fields       = $args['custom_fields'] ?? array();
+	$download_items      = $args['download_items'] ?? array();
+	$customer_name       = $args['customer_name'] ?? '';
+	$admin_email         = $args['admin_email'] ?? '';
+	$site_name           = $args['site_name'] ?? '';
+	$action_url          = $args['action_url'] ?? '';
+	$action_label        = $args['action_label'] ?? '';
+	$show_downloads      = ! empty( $args['show_downloads'] );
 
-	$line_items = $order_data['line_items'] ?? get_post_meta( $order_id, '_stripe_line_items', true );
-	if ( is_array( $line_items ) ) {
-		foreach ( $line_items as $line_item ) {
-			if ( ! is_array( $line_item ) ) {
-				continue;
-			}
-			$price_id = $line_item['price_id'] ?? '';
-			if ( ! $price_id ) {
-				$price_id = $line_item['price']['id'] ?? '';
-			}
-			if ( ! $price_id ) {
-				continue;
-			}
-			$service_match = apparel_service_find_service_by_price_id( $price_id );
-			if ( empty( $service_match['service_id'] ) ) {
-				continue;
-			}
-
-			$service_id     = (int) $service_match['service_id'];
-			$variation_id   = $service_match['variation_id'] ?? '';
-			$variation_name = $variation_id ? apparel_service_get_variation_name( $service_id, $variation_id ) : '';
-			$quantity       = isset( $line_item['quantity'] ) ? absint( $line_item['quantity'] ) : 1;
-			$amount_total   = $line_item['amount_total'] ?? '';
-			$currency       = $line_item['currency'] ?? ( $order_data['currency'] ?? get_post_meta( $order_id, '_currency', true ) );
-			$amount_display = apparel_service_format_currency_amount( $amount_total, $currency );
-
-			$items[] = array(
-				'service_id'     => $service_id,
-				'title'          => get_the_title( $service_id ),
-				'variation_name' => $variation_name,
-				'quantity'       => $quantity,
-				'amount_display' => $amount_display,
-			);
+	$lines   = array();
+	$lines[] = $heading;
+	if ( $intro ) {
+		$lines[] = $intro;
+	}
+	$lines[] = $customer_name ? sprintf( __( 'Hello %s,', 'apparel' ), $customer_name ) : __( 'Hello,', 'apparel' );
+	$lines[] = '';
+	$lines[] = sprintf( __( 'Order Number: #%s', 'apparel' ), $order_id );
+	$lines[] = sprintf( __( 'Order Date: %s', 'apparel' ), $order_date_display );
+	if ( $order_total_display ) {
+		$lines[] = sprintf( __( 'Order Total: %s', 'apparel' ), $order_total_display );
+	}
+	$lines[] = '';
+	$lines[] = __( 'Services:', 'apparel' );
+	foreach ( $service_items as $item ) {
+		$lines[] = sprintf( '- %s (x%s)', $item['title'], $item['quantity'] );
+		if ( ! empty( $item['variation_name'] ) ) {
+			$lines[] = sprintf( '  %s', $item['variation_name'] );
+		}
+		if ( $item['amount_display'] ) {
+			$lines[] = sprintf( '  %s', $item['amount_display'] );
 		}
 	}
-
-	if ( empty( $items ) ) {
-		$service_id    = $order_data['service_id'] ?? get_post_meta( $order_id, '_service_id', true );
-		$variation_name = $order_data['variation_name'] ?? get_post_meta( $order_id, '_variation_name', true );
-		$quantity       = $order_data['quantity'] ?? get_post_meta( $order_id, '_quantity', true );
-		if ( $service_id ) {
-			$items[] = array(
-				'service_id'     => (int) $service_id,
-				'title'          => get_the_title( $service_id ),
-				'variation_name' => $variation_name,
-				'quantity'       => $quantity ? absint( $quantity ) : 1,
-				'amount_display' => apparel_service_format_currency_amount(
-					$order_data['amount_total'] ?? get_post_meta( $order_id, '_amount_total', true ),
-					$order_data['currency'] ?? get_post_meta( $order_id, '_currency', true )
-				),
-			);
+	if ( ! empty( $custom_fields ) ) {
+		$lines[] = '';
+		$lines[] = __( 'You have provided the following:', 'apparel' );
+		foreach ( $custom_fields as $field ) {
+			$value_lines = preg_split( '/\r\n|\r|\n/', (string) $field['value'] );
+			$first_line  = array_shift( $value_lines );
+			$lines[]     = sprintf( '- %s: %s', $field['label'], $first_line );
+			foreach ( $value_lines as $line ) {
+				$lines[] = '  ' . $line;
+			}
 		}
 	}
+	if ( $show_downloads && ! empty( $download_items ) ) {
+		$lines[] = '';
+		$lines[] = __( 'Downloads:', 'apparel' );
+		foreach ( $download_items as $download_item ) {
+			$lines[] = sprintf( '- %s: %s', $download_item['label'], $download_item['url'] );
+		}
+	}
+	if ( $action_url && $action_label ) {
+		$lines[] = '';
+		$lines[] = sprintf( '%s: %s', $action_label, $action_url );
+	}
+	if ( $status_note ) {
+		$lines[] = '';
+		$lines[] = $status_note;
+	}
+	$lines[] = '';
+	$lines[] = __( 'Need help or want to adjust your service? Reply to this email and we will take care of you.', 'apparel' );
+	if ( $admin_email ) {
+		$lines[] = sprintf( __( 'Support: %s', 'apparel' ), $admin_email );
+	}
+	$lines[] = '';
+	if ( $site_name ) {
+		$lines[] = sprintf( __( 'Thank you for choosing %s.', 'apparel' ), $site_name );
+	}
 
-	return $items;
+	return implode( "\n", $lines );
 }
 
 /**
- * Format a currency amount for display.
+ * Send a multipart email with plain-text fallback.
  *
- * @param float|string $amount Amount.
- * @param string       $currency Currency code.
- * @return string
+ * @param string $to Recipient email.
+ * @param string $subject Subject.
+ * @param string $html HTML message.
+ * @param string $text Plain text message.
+ * @return bool
  */
-function apparel_service_format_currency_amount( $amount, $currency ) {
-	if ( '' === $amount || null === $amount ) {
-		return '';
-	}
+function apparel_service_send_order_email( $to, $subject, $html, $text ) {
+	$boundary = 'apparel-order-' . wp_generate_password( 12, false );
+	$headers  = array( 'Content-Type: multipart/alternative; boundary="' . $boundary . '"' );
 
-	return sprintf(
-		'%s %s',
-		number_format_i18n( (float) $amount, 2 ),
-		strtoupper( (string) $currency )
-	);
+	$body  = '--' . $boundary . "\r\n";
+	$body .= "Content-Type: text/plain; charset=UTF-8\r\n\r\n";
+	$body .= $text . "\r\n";
+	$body .= '--' . $boundary . "\r\n";
+	$body .= "Content-Type: text/html; charset=UTF-8\r\n\r\n";
+	$body .= $html . "\r\n";
+	$body .= '--' . $boundary . "--";
+
+	return wp_mail( $to, $subject, $body, $headers );
 }
