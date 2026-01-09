@@ -174,8 +174,6 @@
 		if (!hero || !card || !('IntersectionObserver' in window)) {
 			return;
 		}
-
-		const mediaQuery = window.matchMedia('(min-width: 641px)');
 		let observer = null;
 
 		const setStickyVisible = (isVisible) => {
@@ -197,25 +195,7 @@
 			});
 			observer.observe(hero);
 		};
-
-		const handleBreakpoint = () => {
-			if (!mediaQuery.matches) {
-				setStickyVisible(false);
-				if (observer) {
-					observer.disconnect();
-				}
-				return;
-			}
-			setupObserver();
-		};
-
-		if (typeof mediaQuery.addEventListener === 'function') {
-			mediaQuery.addEventListener('change', handleBreakpoint);
-		} else if (typeof mediaQuery.addListener === 'function') {
-			mediaQuery.addListener(handleBreakpoint);
-		}
-
-		handleBreakpoint();
+		setupObserver();
 	};
 
 	document.addEventListener('DOMContentLoaded', initLeadGenCustomForms);
