@@ -40,8 +40,6 @@ while ( have_posts() ) :
 	$service_rating    = get_post_meta( $service_id, '_service_rating', true );
 	$service_reviews   = get_post_meta( $service_id, '_service_review_count', true );
 
-	$live_preview_url = $live_preview_url ? $live_preview_url : $checkout_url;
-
 	if ( ! is_array( $screenshot_ids ) ) {
 		$screenshot_ids = array_filter( array_map( 'absint', explode( ',', (string) $screenshot_ids ) ) );
 	}
