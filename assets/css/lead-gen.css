@@ -324,7 +324,6 @@
 	background: #f7f7f5;
 	border-radius: var(--lead-gen-radius);
 	padding: 26px 28px;
-	box-shadow: 0 14px 30px rgba(0, 0, 0, 0.08);
 	text-decoration: none;
 	color: inherit;
 }
