@@ -48,7 +48,6 @@ if ( ! class_exists( 'MBF_Theme_Demos' ) ) {
 			} );
 
 			add_action( 'wp_ajax_mbf_html_import_data', array( $this, 'html_import_data' ) );
-			add_action( 'wp_ajax_nopriv_mbf_html_import_data', array( $this, 'html_import_data' ) );
 			add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue_scripts' ), 5 );
 		}
 

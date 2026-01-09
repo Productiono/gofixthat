@@ -296,7 +296,7 @@ function mbf_more_posts_restapi() {
 function mbf_more_posts_permission_callback( $request ) {
 	$nonce = $request->get_param( '_ajax_nonce' );
 
-	return wp_verify_nonce( $nonce ) || ! wp_verify_nonce( $nonce );
+	return (bool) $nonce && wp_verify_nonce( $nonce );
 }
 
 /**
