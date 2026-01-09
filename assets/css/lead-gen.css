@@ -20,7 +20,7 @@
 	color: #0f0f0f;
 	background: #f6f6f4;
 	--lead-gen-container: min(1100px, 100% - 48px);
-	--lead-gen-radius: 28px;
+	--lead-gen-radius: 24px;
 	--lead-gen-shadow: 0 24px 60px rgba(15, 15, 15, 0.14);
 	--lead-gen-header-offset: 0px;
 }
@@ -73,7 +73,7 @@
 .lead-gen-hero__overlay {
 	position: absolute;
 	inset: 0;
-	background: linear-gradient(120deg, rgba(255, 255, 255, 0.88), rgba(246, 246, 244, 0.7));
+	background: linear-gradient(160deg, rgba(255, 255, 255, 0.22), rgba(246, 246, 244, 0.08));
 }
 
 .lead-gen-hero__content {
@@ -89,16 +89,37 @@
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	gap: 20px;
+	gap: 16px;
+}
+
+.lead-gen-hero__logo {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin-bottom: 4px;
+}
+
+.lead-gen-hero__logo-image {
+	width: clamp(120px, 32vw, 170px);
+	height: auto;
+	filter: drop-shadow(0 10px 22px rgba(0, 0, 0, 0.25));
+}
+
+.lead-gen-hero__logo-text {
+	font-size: clamp(18px, 4vw, 24px);
+	font-weight: 700;
+	letter-spacing: -0.02em;
+	color: #ffffff;
+	text-shadow: 0 8px 18px rgba(0, 0, 0, 0.35);
 }
 
 .lead-gen-hero__card {
 	max-width: 520px;
 	background: #ffffff;
 	border-radius: var(--lead-gen-radius);
-	padding: 30px 32px 28px;
+	padding: 26px 26px 24px;
 	text-align: left;
-	box-shadow: var(--lead-gen-shadow);
+	box-shadow: 0 24px 50px rgba(15, 15, 15, 0.16);
 }
 
 .lead-gen-hero__card h1 {
@@ -106,7 +127,7 @@
 	line-height: 1.15;
 	font-weight: 700;
 	color: #101010;
-	margin-bottom: 12px;
+	margin-bottom: 10px;
 }
 
 .lead-gen-hero__card p {
@@ -126,30 +147,35 @@
 	width: min(520px, 100%);
 	display: flex;
 	flex-direction: column;
-	gap: 12px;
+	gap: 10px;
 	text-align: left;
-\tposition: relative;
+	position: relative;
 }
 
 .lead-gen-form-card--dark {
-	background: #111111;
-	border-radius: 24px;
-	padding: 18px 20px 16px;
-	box-shadow: 0 18px 40px rgba(8, 8, 8, 0.35);
+	background: linear-gradient(180deg, #171717 0%, #0f0f0f 100%);
+	border-radius: 28px;
+	padding: 18px 18px 16px;
+	box-shadow: 0 18px 40px rgba(8, 8, 8, 0.3);
 	color: #ffffff;
 }
 
+.lead-gen-form-card__header {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+}
+
 .lead-gen-form-card__title {
-	font-size: 13px;
+	font-size: 16px;
 	font-weight: 600;
-	letter-spacing: 0.08em;
-	text-transform: uppercase;
+	letter-spacing: -0.01em;
 	color: inherit;
 }
 
 .lead-gen-form-card__disclaimer {
-	font-size: 11px;
-	color: rgba(255, 255, 255, 0.7);
+	font-size: 12px;
+	color: rgba(255, 255, 255, 0.72);
 }
 
 .lead-gen-form-card--light .lead-gen-form-card__disclaimer {
@@ -160,10 +186,16 @@
 	display: flex;
 	align-items: center;
 	gap: 10px;
-	padding: 6px 6px 6px 16px;
+	padding: 8px 8px 8px 16px;
 	border-radius: 999px;
 	background: #ffffff;
 	border: 1px solid #e7e7e7;
+}
+
+.lead-gen-form--dark {
+	background: #1b1b1b;
+	border: 1px solid #2b2b2b;
+	box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
 }
 
 .lead-gen-form input {
@@ -175,15 +207,24 @@
 	outline: none;
 }
 
+.lead-gen-form--dark input {
+	color: #f4f4f4;
+	font-size: 14px;
+}
+
 .lead-gen-form input::placeholder {
 	color: #9b9b9b;
+}
+
+.lead-gen-form--dark input::placeholder {
+	color: rgba(255, 255, 255, 0.5);
 }
 
 .lead-gen-form button {
 	border: none;
 	border-radius: 50%;
-	width: 42px;
-	height: 42px;
+	width: 40px;
+	height: 40px;
 	background: #151515;
 	color: #ffffff;
 	display: inline-flex;
@@ -194,6 +235,11 @@
 	transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
+.lead-gen-form--dark button {
+	background: #111111;
+	border: 1px solid #2f2f2f;
+}
+
 .lead-gen-form button:hover,
 .lead-gen-form button:focus {
 	transform: translateY(-1px);
@@ -202,6 +248,7 @@
 
 .lead-gen-form__error {
 	margin: 0;
+	padding-left: 6px;
 	font-size: 12px;
 	color: #ffb7b7;
 	display: none;
@@ -533,28 +580,30 @@
 
 @media (max-width: 600px) {
 	.lead-gen-hero {
-		padding: 120px 16px 70px;
+		padding: 48px 16px 60px;
+		align-items: flex-start;
 	}
 
 	.lead-gen-hero__card {
 		max-width: 100%;
-		padding: 26px 22px;
+		padding: 22px 22px 20px;
 	}
 
 	.lead-gen-hero__card h1 {
 		font-size: 26px;
 	}
 
-	.lead-gen-form {
-		flex-direction: column;
-		align-items: stretch;
-		padding: 10px;
-		border-radius: 18px;
+	.lead-gen-hero__stack {
+		gap: 14px;
 	}
 
-	.lead-gen-form button {
-		width: 100%;
-		border-radius: 999px;
+	.lead-gen-hero__logo-image {
+		width: 140px;
+	}
+
+	.lead-gen-form-card--dark {
+		border-radius: 24px;
+		padding: 16px 16px 14px;
 	}
 
 	.lead-gen-logos__inner {

@@ -6,13 +6,14 @@
  * @package Apparel
  */
 
-get_header();
+get_header( 'lead-gen' );
 
 $post_id = get_the_ID();
 
 $lead_gen_video        = get_post_meta( $post_id, 'lead_gen_video_url', true );
 $lead_gen_poster       = get_post_meta( $post_id, 'lead_gen_poster_url', true );
 $hero_background_image = get_post_meta( $post_id, 'lead_gen_hero_background_image', true );
+$hero_logo             = get_post_meta( $post_id, 'lead_gen_hero_logo', true );
 $default_video         = get_template_directory_uri() . '/assets/static/background-video.webm';
 $video_url             = $lead_gen_video ? $lead_gen_video : $default_video;
 $hero_headline         = get_post_meta( $post_id, 'lead_gen_hero_headline', true );
@@ -50,13 +51,41 @@ $footer_links = is_array( $footer_links ) ? $footer_links : array();
 
 $hero_headline = $hero_headline ? $hero_headline : get_the_title( $post_id );
 
-$has_settings = $hero_subheadline || $hero_cta_label || $hero_cta_placeholder || $hero_cta_button_label || $hero_cta_button_link || $hero_cta_helper || $hero_background_image || $fluent_form_id || $logos || $features || $testimonial_quote || $testimonial_name || $testimonial_company || $cta_headline || $cta_subheadline || $cta_label || $cta_placeholder || $cta_button_label || $cta_button_link || $cta_helper || $cta_background || $cta_background_image || $faq_heading || $faqs || $footer_logo || $footer_text || $footer_links;
+$has_settings = $hero_subheadline || $hero_cta_label || $hero_cta_placeholder || $hero_cta_button_label || $hero_cta_button_link || $hero_cta_helper || $hero_background_image || $hero_logo || $fluent_form_id || $logos || $features || $testimonial_quote || $testimonial_name || $testimonial_company || $cta_headline || $cta_subheadline || $cta_label || $cta_placeholder || $cta_button_label || $cta_button_link || $cta_helper || $cta_background || $cta_background_image || $faq_heading || $faqs || $footer_logo || $footer_text || $footer_links;
 
 $has_fluent_form = $fluent_form_id && function_exists( 'shortcode_exists' ) && shortcode_exists( 'fluentform' );
 $show_form_notice = ! $has_fluent_form && current_user_can( 'manage_options' );
 
 $hero_background = $hero_background_image ? $hero_background_image : $lead_gen_poster;
 $cta_background  = $cta_background ? $cta_background : 'linear-gradient(180deg, #3f0bb6 0%, #2a0788 100%)';
+$hero_logo_alt   = get_bloginfo( 'name' );
+$hero_logo_image = '';
+$hero_logo_text  = '';
+
+if ( $hero_logo ) {
+	$hero_logo_image = sprintf(
+		'<img class="lead-gen-hero__logo-image" src="%1$s" alt="%2$s" loading="lazy" />',
+		esc_url( $hero_logo ),
+		esc_attr( $hero_logo_alt )
+	);
+} else {
+	$custom_logo_id = get_theme_mod( 'custom_logo' );
+	if ( $custom_logo_id ) {
+		$hero_logo_image = wp_get_attachment_image(
+			$custom_logo_id,
+			'full',
+			false,
+			array(
+				'class' => 'lead-gen-hero__logo-image',
+				'alt'   => $hero_logo_alt,
+			)
+		);
+	}
+}
+
+if ( ! $hero_logo_image && $hero_logo_alt ) {
+	$hero_logo_text = $hero_logo_alt;
+}
 
 $cta_style = '';
 if ( $cta_background_image ) {
@@ -116,6 +145,15 @@ $render_fluent_form = function () use ( $fluent_form_id, $has_fluent_form, $show
 				?>
 			<?php else : ?>
 				<div class="lead-gen-hero__stack">
+					<?php if ( $hero_logo_image || $hero_logo_text ) : ?>
+						<div class="lead-gen-hero__logo">
+							<?php if ( $hero_logo_image ) : ?>
+								<?php echo $hero_logo_image; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+							<?php else : ?>
+								<span class="lead-gen-hero__logo-text"><?php echo esc_html( $hero_logo_text ); ?></span>
+							<?php endif; ?>
+						</div>
+					<?php endif; ?>
 					<div class="lead-gen-hero__card">
 						<?php if ( $hero_headline ) : ?>
 							<h1><?php echo esc_html( $hero_headline ); ?></h1>
@@ -127,11 +165,22 @@ $render_fluent_form = function () use ( $fluent_form_id, $has_fluent_form, $show
 					<?php if ( $hero_cta_label || $hero_cta_helper || $has_fluent_form || $show_form_notice ) : ?>
 						<div class="lead-gen-hero__cta">
 							<div class="lead-gen-form-card lead-gen-form-card--dark" data-lead-gen-form-wrapper>
-								<?php if ( $hero_cta_label ) : ?>
-									<span class="lead-gen-form-card__title"><?php echo esc_html( $hero_cta_label ); ?></span>
+								<?php if ( $has_fluent_form || $show_form_notice || $hero_cta_label || $hero_cta_helper ) : ?>
+									<div class="lead-gen-form-card__header">
+										<?php if ( $hero_cta_label ) : ?>
+											<span class="lead-gen-form-card__title"><?php echo esc_html( $hero_cta_label ); ?></span>
+										<?php else : ?>
+											<span class="lead-gen-form-card__title"><?php echo esc_html__( 'Start for free', 'apparel' ); ?></span>
+										<?php endif; ?>
+										<?php if ( $hero_cta_helper ) : ?>
+											<span class="lead-gen-form-card__disclaimer"><?php echo esc_html( $hero_cta_helper ); ?></span>
+										<?php else : ?>
+											<span class="lead-gen-form-card__disclaimer"><?php echo esc_html__( 'You agree to receive marketing emails.', 'apparel' ); ?></span>
+										<?php endif; ?>
+									</div>
 								<?php endif; ?>
 								<?php if ( $has_fluent_form ) : ?>
-									<form class="lead-gen-form" data-lead-gen-custom-form>
+									<form class="lead-gen-form lead-gen-form--dark" data-lead-gen-custom-form>
 										<label class="screen-reader-text" for="lead-gen-hero-email">
 											<?php echo esc_html( $hero_cta_placeholder ? $hero_cta_placeholder : __( 'Email address', 'apparel' ) ); ?>
 										</label>
@@ -148,9 +197,6 @@ $render_fluent_form = function () use ( $fluent_form_id, $has_fluent_form, $show
 										</button>
 									</form>
 									<p class="lead-gen-form__error" data-lead-gen-error></p>
-									<?php if ( $hero_cta_helper ) : ?>
-										<span class="lead-gen-form-card__disclaimer"><?php echo esc_html( $hero_cta_helper ); ?></span>
-									<?php endif; ?>
 									<div class="lead-gen-form__fluentform" data-lead-gen-fluent-form aria-hidden="true">
 										<?php echo $render_fluent_form(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 									</div>
