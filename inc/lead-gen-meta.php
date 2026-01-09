@@ -49,6 +49,7 @@ function apparel_render_lead_gen_meta_box( $post ) {
 	$hero_button      = get_post_meta( $post->ID, 'lead_gen_hero_cta_button_label', true );
 	$hero_link        = get_post_meta( $post->ID, 'lead_gen_hero_cta_button_link', true );
 	$hero_helper      = get_post_meta( $post->ID, 'lead_gen_hero_cta_helper', true );
+	$hero_background  = get_post_meta( $post->ID, 'lead_gen_hero_background_image', true );
 	$fluent_form_id   = get_post_meta( $post->ID, 'lead_gen_fluent_form_id', true );
 	$logos            = get_post_meta( $post->ID, 'lead_gen_logos', true );
 	$features         = get_post_meta( $post->ID, 'lead_gen_features', true );
@@ -57,10 +58,13 @@ function apparel_render_lead_gen_meta_box( $post ) {
 	$testimonial_co   = get_post_meta( $post->ID, 'lead_gen_testimonial_company', true );
 	$cta_headline     = get_post_meta( $post->ID, 'lead_gen_cta_headline', true );
 	$cta_subheadline  = get_post_meta( $post->ID, 'lead_gen_cta_subheadline', true );
+	$cta_label        = get_post_meta( $post->ID, 'lead_gen_cta_label', true );
 	$cta_placeholder  = get_post_meta( $post->ID, 'lead_gen_cta_placeholder', true );
 	$cta_button       = get_post_meta( $post->ID, 'lead_gen_cta_button_label', true );
 	$cta_link         = get_post_meta( $post->ID, 'lead_gen_cta_button_link', true );
 	$cta_helper       = get_post_meta( $post->ID, 'lead_gen_cta_helper', true );
+	$cta_background   = get_post_meta( $post->ID, 'lead_gen_cta_background', true );
+	$cta_bg_image     = get_post_meta( $post->ID, 'lead_gen_cta_background_image', true );
 	$faq_heading      = get_post_meta( $post->ID, 'lead_gen_faq_heading', true );
 	$faqs             = get_post_meta( $post->ID, 'lead_gen_faqs', true );
 	$footer_logo      = get_post_meta( $post->ID, 'lead_gen_footer_logo_text', true );
@@ -191,6 +195,17 @@ function apparel_render_lead_gen_meta_box( $post ) {
 				value="<?php echo esc_attr( $poster_url ); ?>"
 			/>
 			<span class="description"><?php esc_html_e( 'Recommended 1600×900.', 'apparel' ); ?></span>
+		</p>
+		<p>
+			<label for="lead-gen-hero-background"><strong><?php esc_html_e( 'Background image URL', 'apparel' ); ?></strong></label>
+			<input
+				type="url"
+				id="lead-gen-hero-background"
+				name="lead_gen_hero_background_image"
+				class="widefat"
+				value="<?php echo esc_attr( $hero_background ); ?>"
+			/>
+			<span class="description"><?php esc_html_e( 'Collage/background image used behind the hero content.', 'apparel' ); ?></span>
 		</p>
 
 		<hr />
@@ -337,6 +352,11 @@ function apparel_render_lead_gen_meta_box( $post ) {
 			<textarea id="lead-gen-cta-subheadline" name="lead_gen_cta_subheadline" class="widefat" rows="3"><?php echo esc_textarea( $cta_subheadline ); ?></textarea>
 		</p>
 		<p>
+			<label for="lead-gen-cta-label"><strong><?php esc_html_e( 'CTA label', 'apparel' ); ?></strong></label>
+			<input type="text" id="lead-gen-cta-label" name="lead_gen_cta_label" class="widefat" value="<?php echo esc_attr( $cta_label ); ?>" />
+			<span class="description"><?php esc_html_e( 'Short label above the CTA email field (optional).', 'apparel' ); ?></span>
+		</p>
+		<p>
 			<label for="lead-gen-cta-placeholder"><strong><?php esc_html_e( 'Email placeholder', 'apparel' ); ?></strong></label>
 			<input type="text" id="lead-gen-cta-placeholder" name="lead_gen_cta_placeholder" class="widefat" value="<?php echo esc_attr( $cta_placeholder ); ?>" />
 		</p>
@@ -351,6 +371,16 @@ function apparel_render_lead_gen_meta_box( $post ) {
 		<p>
 			<label for="lead-gen-cta-helper"><strong><?php esc_html_e( 'Helper text', 'apparel' ); ?></strong></label>
 			<input type="text" id="lead-gen-cta-helper" name="lead_gen_cta_helper" class="widefat" value="<?php echo esc_attr( $cta_helper ); ?>" />
+		</p>
+		<p>
+			<label for="lead-gen-cta-background"><strong><?php esc_html_e( 'CTA background (color/gradient)', 'apparel' ); ?></strong></label>
+			<input type="text" id="lead-gen-cta-background" name="lead_gen_cta_background" class="widefat" value="<?php echo esc_attr( $cta_background ); ?>" />
+			<span class="description"><?php esc_html_e( 'Example: linear-gradient(180deg, #3f0bb6 0%, #2a0788 100%).', 'apparel' ); ?></span>
+		</p>
+		<p>
+			<label for="lead-gen-cta-bg-image"><strong><?php esc_html_e( 'CTA background image URL', 'apparel' ); ?></strong></label>
+			<input type="url" id="lead-gen-cta-bg-image" name="lead_gen_cta_background_image" class="widefat" value="<?php echo esc_attr( $cta_bg_image ); ?>" />
+			<span class="description"><?php esc_html_e( 'Optional image layered behind the CTA gradient.', 'apparel' ); ?></span>
 		</p>
 
 		<hr />
@@ -549,16 +579,20 @@ function apparel_save_lead_gen_meta_box( $post_id ) {
 	$hero_button      = isset( $_POST['lead_gen_hero_cta_button_label'] ) ? sanitize_text_field( wp_unslash( $_POST['lead_gen_hero_cta_button_label'] ) ) : '';
 	$hero_link        = isset( $_POST['lead_gen_hero_cta_button_link'] ) ? esc_url_raw( wp_unslash( $_POST['lead_gen_hero_cta_button_link'] ) ) : '';
 	$hero_helper      = isset( $_POST['lead_gen_hero_cta_helper'] ) ? sanitize_text_field( wp_unslash( $_POST['lead_gen_hero_cta_helper'] ) ) : '';
+	$hero_background  = isset( $_POST['lead_gen_hero_background_image'] ) ? esc_url_raw( wp_unslash( $_POST['lead_gen_hero_background_image'] ) ) : '';
 	$fluent_form_id   = isset( $_POST['lead_gen_fluent_form_id'] ) ? absint( wp_unslash( $_POST['lead_gen_fluent_form_id'] ) ) : 0;
 	$testimonial      = isset( $_POST['lead_gen_testimonial_quote'] ) ? sanitize_textarea_field( wp_unslash( $_POST['lead_gen_testimonial_quote'] ) ) : '';
 	$testimonial_name = isset( $_POST['lead_gen_testimonial_name'] ) ? sanitize_text_field( wp_unslash( $_POST['lead_gen_testimonial_name'] ) ) : '';
 	$testimonial_co   = isset( $_POST['lead_gen_testimonial_company'] ) ? sanitize_text_field( wp_unslash( $_POST['lead_gen_testimonial_company'] ) ) : '';
 	$cta_headline     = isset( $_POST['lead_gen_cta_headline'] ) ? sanitize_text_field( wp_unslash( $_POST['lead_gen_cta_headline'] ) ) : '';
 	$cta_subheadline  = isset( $_POST['lead_gen_cta_subheadline'] ) ? sanitize_textarea_field( wp_unslash( $_POST['lead_gen_cta_subheadline'] ) ) : '';
+	$cta_label        = isset( $_POST['lead_gen_cta_label'] ) ? sanitize_text_field( wp_unslash( $_POST['lead_gen_cta_label'] ) ) : '';
 	$cta_placeholder  = isset( $_POST['lead_gen_cta_placeholder'] ) ? sanitize_text_field( wp_unslash( $_POST['lead_gen_cta_placeholder'] ) ) : '';
 	$cta_button       = isset( $_POST['lead_gen_cta_button_label'] ) ? sanitize_text_field( wp_unslash( $_POST['lead_gen_cta_button_label'] ) ) : '';
 	$cta_link         = isset( $_POST['lead_gen_cta_button_link'] ) ? esc_url_raw( wp_unslash( $_POST['lead_gen_cta_button_link'] ) ) : '';
 	$cta_helper       = isset( $_POST['lead_gen_cta_helper'] ) ? sanitize_text_field( wp_unslash( $_POST['lead_gen_cta_helper'] ) ) : '';
+	$cta_background   = isset( $_POST['lead_gen_cta_background'] ) ? sanitize_text_field( wp_unslash( $_POST['lead_gen_cta_background'] ) ) : '';
+	$cta_bg_image     = isset( $_POST['lead_gen_cta_background_image'] ) ? esc_url_raw( wp_unslash( $_POST['lead_gen_cta_background_image'] ) ) : '';
 	$faq_heading      = isset( $_POST['lead_gen_faq_heading'] ) ? sanitize_text_field( wp_unslash( $_POST['lead_gen_faq_heading'] ) ) : '';
 	$footer_logo      = isset( $_POST['lead_gen_footer_logo_text'] ) ? sanitize_text_field( wp_unslash( $_POST['lead_gen_footer_logo_text'] ) ) : '';
 	$footer_text      = isset( $_POST['lead_gen_footer_text'] ) ? sanitize_text_field( wp_unslash( $_POST['lead_gen_footer_text'] ) ) : '';
@@ -693,6 +727,12 @@ function apparel_save_lead_gen_meta_box( $post_id ) {
 		delete_post_meta( $post_id, 'lead_gen_hero_cta_helper' );
 	}
 
+	if ( $hero_background ) {
+		update_post_meta( $post_id, 'lead_gen_hero_background_image', $hero_background );
+	} else {
+		delete_post_meta( $post_id, 'lead_gen_hero_background_image' );
+	}
+
 	if ( $fluent_form_id ) {
 		update_post_meta( $post_id, 'lead_gen_fluent_form_id', $fluent_form_id );
 	} else {
@@ -741,6 +781,12 @@ function apparel_save_lead_gen_meta_box( $post_id ) {
 		delete_post_meta( $post_id, 'lead_gen_cta_subheadline' );
 	}
 
+	if ( $cta_label ) {
+		update_post_meta( $post_id, 'lead_gen_cta_label', $cta_label );
+	} else {
+		delete_post_meta( $post_id, 'lead_gen_cta_label' );
+	}
+
 	if ( $cta_placeholder ) {
 		update_post_meta( $post_id, 'lead_gen_cta_placeholder', $cta_placeholder );
 	} else {
@@ -763,6 +809,18 @@ function apparel_save_lead_gen_meta_box( $post_id ) {
 		update_post_meta( $post_id, 'lead_gen_cta_helper', $cta_helper );
 	} else {
 		delete_post_meta( $post_id, 'lead_gen_cta_helper' );
+	}
+
+	if ( $cta_background ) {
+		update_post_meta( $post_id, 'lead_gen_cta_background', $cta_background );
+	} else {
+		delete_post_meta( $post_id, 'lead_gen_cta_background' );
+	}
+
+	if ( $cta_bg_image ) {
+		update_post_meta( $post_id, 'lead_gen_cta_background_image', $cta_bg_image );
+	} else {
+		delete_post_meta( $post_id, 'lead_gen_cta_background_image' );
 	}
 
 	if ( $faq_heading ) {
