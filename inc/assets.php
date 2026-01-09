@@ -41,6 +41,7 @@ if ( ! function_exists( 'mbf_enqueue_scripts' ) ) {
 		wp_register_script( 'mbf-blog-toc', get_template_directory_uri() . '/assets/js/blog-toc.js', array(), $version, true );
 		wp_register_script( 'mbf-blog-popup', get_template_directory_uri() . '/assets/js/blog-popup.js', array( 'jquery' ), $version, true );
 		wp_register_script( 'apparel-service', get_template_directory_uri() . '/assets/js/service.js', array(), $version, true );
+		wp_register_script( 'apparel-lead-gen', get_template_directory_uri() . '/assets/js/lead-gen-hero.js', array(), $version, true );
 
 		// Localization array.
 		$localize = array(
@@ -132,6 +133,7 @@ JS;
 
 		if ( is_page_template( 'lead-gen.php' ) ) {
 			wp_enqueue_style( 'apparel-lead-gen' );
+			wp_enqueue_script( 'apparel-lead-gen' );
 		}
 
 		if ( is_singular( 'post' ) || is_category() ) {
