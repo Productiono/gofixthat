@@ -178,12 +178,16 @@ $render_fluent_form = function () use ( $fluent_form_id, $has_fluent_form, $show
 
 		@keyframes lead-gen-logos-marquee {
 			from {
-				transform: translateX(-50%);
+				transform: translateX(0);
 			}
 
 			to {
-				transform: translateX(0);
+				transform: translateX(-50%);
 			}
+		}
+
+		.lead-gen-content > *:last-child {
+			margin-bottom: 350px;
 		}
 
 		.lead-gen-hero {
