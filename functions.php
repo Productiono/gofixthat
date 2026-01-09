@@ -156,6 +156,7 @@ if ( ! class_exists( 'Apparel' ) ) {
 			require_once get_theme_file_path( '/inc/assets.php' );
 			require_once get_theme_file_path( '/inc/widgets-init.php' );
 			require_once get_theme_file_path( '/inc/theme-functions.php' );
+			require_once get_theme_file_path( '/inc/lead-gen-meta.php' );
 			require_once get_theme_file_path( '/inc/docs.php' );
 			require_once get_theme_file_path( '/inc/theme-demos.php' );
 			require_once get_theme_file_path( '/inc/theme-mods.php' );
