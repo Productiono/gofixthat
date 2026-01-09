@@ -22,7 +22,7 @@ function apparel_register_service_order_cpt() {
 		'labels'             => $labels,
 		'public'             => false,
 		'publicly_queryable' => false,
-		'show_ui'            => false,
+		'show_ui'            => true,
 		'show_in_menu'       => false,
 		'exclude_from_search' => true,
 		'show_in_nav_menus'  => false,
@@ -141,6 +141,44 @@ class Apparel_Service_Orders_Table extends WP_List_Table {
 	}
 
 	/**
+	 * Render order ID column with actions.
+	 *
+	 * @param array $item Item data.
+	 * @return string
+	 */
+	public function column_order_id( $item ) {
+		$order_id = isset( $item['order_id'] ) ? (int) $item['order_id'] : 0;
+		if ( ! $order_id ) {
+			return '';
+		}
+
+		$edit_link = get_edit_post_link( $order_id, 'display' );
+		$label     = sprintf( '#%d', $order_id );
+
+		$actions = array();
+		if ( $edit_link ) {
+			$actions['edit'] = sprintf(
+				'<a href="%s">%s</a>',
+				esc_url( $edit_link ),
+				esc_html__( 'View/Edit', 'apparel' )
+			);
+		}
+
+		$delete_link = get_delete_post_link( $order_id, '', true );
+		if ( $delete_link ) {
+			$actions['delete'] = sprintf(
+				'<a href="%s" class="submitdelete">%s</a>',
+				esc_url( $delete_link ),
+				esc_html__( 'Delete', 'apparel' )
+			);
+		}
+
+		$output = $edit_link ? sprintf( '<a href="%s">%s</a>', esc_url( $edit_link ), esc_html( $label ) ) : esc_html( $label );
+
+		return $output . $this->row_actions( $actions );
+	}
+
+	/**
 	 * Prepare table items.
 	 */
 	public function prepare_items() {
@@ -240,6 +278,7 @@ class Apparel_Service_Orders_Table extends WP_List_Table {
 			);
 		}
 
+		$this->_column_headers = array( $this->get_columns(), array(), $this->get_sortable_columns() );
 		$this->items = $items;
 
 		$this->set_pagination_args(
@@ -321,6 +360,185 @@ function apparel_service_register_stripe_webhook() {
 	);
 }
 add_action( 'rest_api_init', 'apparel_service_register_stripe_webhook' );
+
+/**
+ * Register admin meta boxes for service orders.
+ */
+function apparel_service_register_order_meta_boxes() {
+	add_meta_box(
+		'apparel-service-order-details',
+		__( 'Service Order Details', 'apparel' ),
+		'apparel_service_render_order_details_metabox',
+		'service_order',
+		'normal',
+		'high'
+	);
+
+	add_meta_box(
+		'apparel-service-order-notes',
+		__( 'Admin Notes', 'apparel' ),
+		'apparel_service_render_order_notes_metabox',
+		'service_order',
+		'normal',
+		'default'
+	);
+}
+add_action( 'add_meta_boxes_service_order', 'apparel_service_register_order_meta_boxes' );
+
+/**
+ * Render order details meta box.
+ *
+ * @param WP_Post $post Post object.
+ */
+function apparel_service_render_order_details_metabox( $post ) {
+	$service_id      = get_post_meta( $post->ID, '_service_id', true );
+	$variation_id    = get_post_meta( $post->ID, '_variation_id', true );
+	$variation_name  = get_post_meta( $post->ID, '_variation_name', true );
+	$amount_total    = get_post_meta( $post->ID, '_amount_total', true );
+	$currency        = get_post_meta( $post->ID, '_currency', true );
+	$status          = get_post_meta( $post->ID, '_status', true );
+	$customer_email  = get_post_meta( $post->ID, '_customer_email', true );
+	$customer_name   = get_post_meta( $post->ID, '_customer_name', true );
+	$customer_phone  = get_post_meta( $post->ID, '_customer_phone', true );
+	$customer_addr   = get_post_meta( $post->ID, '_customer_address', true );
+	$session_id      = get_post_meta( $post->ID, '_stripe_session_id', true );
+	$payment_intent  = get_post_meta( $post->ID, '_stripe_payment_intent_id', true );
+	$created_at      = get_post_meta( $post->ID, '_created_at', true );
+	$checkout_url    = get_post_meta( $post->ID, '_checkout_url', true );
+	$quantity        = get_post_meta( $post->ID, '_quantity', true );
+
+	$service_title = $service_id ? get_the_title( $service_id ) : __( 'Unknown', 'apparel' );
+	$service_link  = $service_id ? get_edit_post_link( $service_id, 'display' ) : '';
+
+	$amount_display = '';
+	if ( '' !== $amount_total ) {
+		$amount_display = sprintf( '%s %s', number_format_i18n( (float) $amount_total, 2 ), strtoupper( (string) $currency ) );
+	}
+
+	$created_display = $created_at ? date_i18n( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), (int) $created_at ) : '';
+
+	wp_nonce_field( 'apparel_service_order_update', 'apparel_service_order_nonce' );
+	?>
+	<table class="widefat striped">
+		<tbody>
+			<tr>
+				<th><?php esc_html_e( 'Service', 'apparel' ); ?></th>
+				<td>
+					<?php if ( $service_link ) : ?>
+						<a href="<?php echo esc_url( $service_link ); ?>"><?php echo esc_html( $service_title ); ?></a>
+					<?php else : ?>
+						<?php echo esc_html( $service_title ); ?>
+					<?php endif; ?>
+				</td>
+			</tr>
+			<tr>
+				<th><?php esc_html_e( 'Variation', 'apparel' ); ?></th>
+				<td><?php echo esc_html( $variation_name ? $variation_name : $variation_id ); ?></td>
+			</tr>
+			<tr>
+				<th><?php esc_html_e( 'Quantity', 'apparel' ); ?></th>
+				<td><?php echo esc_html( $quantity ? $quantity : 1 ); ?></td>
+			</tr>
+			<tr>
+				<th><?php esc_html_e( 'Amount', 'apparel' ); ?></th>
+				<td><?php echo esc_html( $amount_display ); ?></td>
+			</tr>
+			<tr>
+				<th><?php esc_html_e( 'Payment Status', 'apparel' ); ?></th>
+				<td>
+					<select name="apparel_service_order_status">
+						<?php foreach ( apparel_service_order_statuses() as $option ) : ?>
+							<option value="<?php echo esc_attr( $option ); ?>" <?php selected( $status, $option ); ?>>
+								<?php echo esc_html( ucfirst( $option ) ); ?>
+							</option>
+						<?php endforeach; ?>
+					</select>
+				</td>
+			</tr>
+			<tr>
+				<th><?php esc_html_e( 'Customer', 'apparel' ); ?></th>
+				<td>
+					<?php echo esc_html( $customer_name ); ?><br />
+					<?php if ( $customer_email ) : ?>
+						<a href="mailto:<?php echo esc_attr( $customer_email ); ?>"><?php echo esc_html( $customer_email ); ?></a><br />
+					<?php endif; ?>
+					<?php echo esc_html( $customer_phone ); ?><br />
+					<?php echo esc_html( $customer_addr ); ?>
+				</td>
+			</tr>
+			<tr>
+				<th><?php esc_html_e( 'Stripe Session ID', 'apparel' ); ?></th>
+				<td><?php echo esc_html( $session_id ); ?></td>
+			</tr>
+			<tr>
+				<th><?php esc_html_e( 'Stripe Payment Intent', 'apparel' ); ?></th>
+				<td><?php echo esc_html( $payment_intent ); ?></td>
+			</tr>
+			<tr>
+				<th><?php esc_html_e( 'Checkout URL', 'apparel' ); ?></th>
+				<td>
+					<?php if ( $checkout_url ) : ?>
+						<a href="<?php echo esc_url( $checkout_url ); ?>" target="_blank" rel="noopener noreferrer"><?php echo esc_html( $checkout_url ); ?></a>
+					<?php endif; ?>
+				</td>
+			</tr>
+			<tr>
+				<th><?php esc_html_e( 'Created At', 'apparel' ); ?></th>
+				<td><?php echo esc_html( $created_display ); ?></td>
+			</tr>
+		</tbody>
+	</table>
+	<?php
+}
+
+/**
+ * Render admin notes meta box.
+ *
+ * @param WP_Post $post Post object.
+ */
+function apparel_service_render_order_notes_metabox( $post ) {
+	$notes = get_post_meta( $post->ID, '_admin_notes', true );
+	?>
+	<p>
+		<textarea name="apparel_service_order_notes" rows="6" style="width:100%;"><?php echo esc_textarea( $notes ); ?></textarea>
+	</p>
+	<?php
+}
+
+/**
+ * Save order meta updates.
+ *
+ * @param int     $post_id Post ID.
+ * @param WP_Post $post Post object.
+ */
+function apparel_service_save_order_meta( $post_id, $post ) {
+	if ( wp_is_post_autosave( $post_id ) || wp_is_post_revision( $post_id ) ) {
+		return;
+	}
+
+	if ( ! isset( $_POST['apparel_service_order_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['apparel_service_order_nonce'] ) ), 'apparel_service_order_update' ) ) {
+		return;
+	}
+
+	if ( ! current_user_can( 'edit_post', $post_id ) ) {
+		return;
+	}
+
+	if ( 'service_order' !== $post->post_type ) {
+		return;
+	}
+
+	if ( isset( $_POST['apparel_service_order_status'] ) ) {
+		$status = sanitize_text_field( wp_unslash( $_POST['apparel_service_order_status'] ) );
+		update_post_meta( $post_id, '_status', $status );
+	}
+
+	if ( isset( $_POST['apparel_service_order_notes'] ) ) {
+		$notes = sanitize_textarea_field( wp_unslash( $_POST['apparel_service_order_notes'] ) );
+		update_post_meta( $post_id, '_admin_notes', $notes );
+	}
+}
+add_action( 'save_post_service_order', 'apparel_service_save_order_meta', 10, 2 );
 
 /**
  * Register Stripe checkout session creation endpoint.
