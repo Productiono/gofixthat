@@ -148,6 +148,7 @@ $render_fluent_form = function () use ( $fluent_form_id, $has_fluent_form, $show
 
 		.lead-gen-hero__logo-image {
 			width: clamp(140px, 36vw, 180px);
+			margin-bottom: 270px;
 		}
 
 		.lead-gen-hero__card {
