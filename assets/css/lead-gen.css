@@ -360,14 +360,14 @@
 }
 
 .lead-gen-feature h3 {
-	font-size: 18px;
+	font-size: 24px;
 	margin-bottom: 8px;
 	font-weight: 600;
 }
 
 .lead-gen-feature p {
-	font-size: 14px;
-	color: #5a5a5a;
+	font-size: 18px;
+	color: #9f9fa9;
 	line-height: 1.5;
 	margin: 0;
 }
