@@ -103,17 +103,38 @@ $render_fluent_form = function () use ( $fluent_form_id, $has_fluent_form, $show
 					</div>
 					<?php if ( $hero_cta_label || $hero_cta_helper || $has_fluent_form || $show_form_notice ) : ?>
 						<div class="lead-gen-hero__cta">
-							<?php if ( $hero_cta_label ) : ?>
-								<span><?php echo esc_html( $hero_cta_label ); ?></span>
-							<?php endif; ?>
-							<?php if ( $has_fluent_form || $show_form_notice ) : ?>
-								<div class="lead-gen-form-wrapper lead-gen-form-wrapper--dark">
+							<div class="lead-gen-hero__cta-card" data-lead-gen-form-wrapper>
+								<?php if ( $hero_cta_label ) : ?>
+									<span class="lead-gen-hero__cta-title"><?php echo esc_html( $hero_cta_label ); ?></span>
+								<?php endif; ?>
+								<?php if ( $hero_cta_helper ) : ?>
+									<span class="lead-gen-hero__cta-disclaimer"><?php echo esc_html( $hero_cta_helper ); ?></span>
+								<?php endif; ?>
+								<?php if ( $has_fluent_form ) : ?>
+									<form class="lead-gen-hero__cta-form" data-lead-gen-custom-form>
+										<label class="screen-reader-text" for="lead-gen-hero-email">
+											<?php echo esc_html( $hero_cta_placeholder ? $hero_cta_placeholder : __( 'Email address', 'apparel' ) ); ?>
+										</label>
+										<input
+											id="lead-gen-hero-email"
+											type="email"
+											name="lead_gen_email"
+											placeholder="<?php echo esc_attr( $hero_cta_placeholder ? $hero_cta_placeholder : __( 'Enter your email', 'apparel' ) ); ?>"
+											autocomplete="email"
+											required
+										/>
+										<button type="submit" aria-label="<?php echo esc_attr( $hero_cta_button_label ? $hero_cta_button_label : __( 'Submit', 'apparel' ) ); ?>">
+											<span aria-hidden="true">→</span>
+										</button>
+									</form>
+									<p class="lead-gen-hero__cta-error" data-lead-gen-error></p>
+									<div class="lead-gen-hero__fluentform" data-lead-gen-fluent-form aria-hidden="true">
+										<?php echo $render_fluent_form(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+									</div>
+								<?php elseif ( $show_form_notice ) : ?>
 									<?php echo $render_fluent_form(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-								</div>
-							<?php endif; ?>
-							<?php if ( $hero_cta_helper ) : ?>
-								<small><?php echo esc_html( $hero_cta_helper ); ?></small>
-							<?php endif; ?>
+								<?php endif; ?>
+							</div>
 						</div>
 					<?php endif; ?>
 				</div>
