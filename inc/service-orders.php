@@ -85,6 +85,7 @@ class Apparel_Service_Orders_Table extends WP_List_Table {
 			'amount'         => __( 'Amount', 'apparel' ),
 			'status'         => __( 'Status', 'apparel' ),
 			'customer'       => __( 'Customer', 'apparel' ),
+			'custom_fields'  => __( 'Custom Fields', 'apparel' ),
 			'stripe_id'      => __( 'Stripe Session/Payment ID', 'apparel' ),
 		);
 	}
@@ -251,6 +252,7 @@ class Apparel_Service_Orders_Table extends WP_List_Table {
 			$customer_phone = get_post_meta( $post->ID, '_customer_phone', true );
 			$session_id    = get_post_meta( $post->ID, '_stripe_session_id', true );
 			$payment_intent = get_post_meta( $post->ID, '_stripe_payment_intent_id', true );
+			$custom_fields = get_post_meta( $post->ID, '_stripe_custom_fields', true );
 
 			$amount_display = '';
 			if ( '' !== $amount_total ) {
@@ -265,6 +267,8 @@ class Apparel_Service_Orders_Table extends WP_List_Table {
 				)
 			);
 
+			$custom_fields_summary = apparel_service_get_custom_fields_summary( $custom_fields );
+
 			$items[] = array(
 				'order_id'       => (int) $post->ID,
 				'date'           => esc_html( get_the_date( '', $post ) ),
@@ -274,6 +278,7 @@ class Apparel_Service_Orders_Table extends WP_List_Table {
 				'amount'         => esc_html( $amount_display ),
 				'status'         => esc_html( ucfirst( (string) $status ) ),
 				'customer'       => esc_html( implode( ' / ', $customer_details ) ),
+				'custom_fields'  => esc_html( $custom_fields_summary ),
 				'stripe_id'      => esc_html( $session_id ? $session_id : $payment_intent ),
 			);
 		}
@@ -401,6 +406,7 @@ function apparel_service_render_order_details_metabox( $post ) {
 	$customer_name   = get_post_meta( $post->ID, '_customer_name', true );
 	$customer_phone  = get_post_meta( $post->ID, '_customer_phone', true );
 	$customer_addr   = get_post_meta( $post->ID, '_customer_address', true );
+	$custom_fields   = get_post_meta( $post->ID, '_stripe_custom_fields', true );
 	$session_id      = get_post_meta( $post->ID, '_stripe_session_id', true );
 	$payment_intent  = get_post_meta( $post->ID, '_stripe_payment_intent_id', true );
 	$created_at      = get_post_meta( $post->ID, '_created_at', true );
@@ -416,6 +422,7 @@ function apparel_service_render_order_details_metabox( $post ) {
 	}
 
 	$created_display = $created_at ? date_i18n( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), (int) $created_at ) : '';
+	$custom_fields_display = apparel_service_format_custom_fields_for_display( $custom_fields );
 
 	wp_nonce_field( 'apparel_service_order_update', 'apparel_service_order_nonce' );
 	?>
@@ -464,6 +471,20 @@ function apparel_service_render_order_details_metabox( $post ) {
 					<?php endif; ?>
 					<?php echo esc_html( $customer_phone ); ?><br />
 					<?php echo esc_html( $customer_addr ); ?>
+				</td>
+			</tr>
+			<tr>
+				<th><?php esc_html_e( 'Custom Fields', 'apparel' ); ?></th>
+				<td>
+					<?php if ( empty( $custom_fields_display ) ) : ?>
+						<?php esc_html_e( 'None', 'apparel' ); ?>
+					<?php else : ?>
+						<ul>
+							<?php foreach ( $custom_fields_display as $custom_field ) : ?>
+								<li><?php echo esc_html( $custom_field ); ?></li>
+							<?php endforeach; ?>
+						</ul>
+					<?php endif; ?>
 				</td>
 			</tr>
 			<tr>
@@ -785,6 +806,7 @@ function apparel_service_process_checkout_session( $session ) {
 	$service_id    = $service_match['service_id'] ?? 0;
 	$variation_id  = $service_match['variation_id'] ?? '';
 	$quantity      = $service_match['quantity'] ?? 1;
+	$custom_fields = apparel_service_extract_custom_fields( $session, $secret_key );
 
 	$line_item_summary = array();
 	if ( ! empty( $line_items ) ) {
@@ -855,6 +877,7 @@ function apparel_service_process_checkout_session( $session ) {
 		'variation_name'          => $variation_name,
 		'quantity'                => $quantity,
 		'line_items'              => $line_item_summary,
+		'custom_fields'           => $custom_fields,
 	);
 
 	apparel_service_upsert_order( $order_data );
@@ -981,6 +1004,135 @@ function apparel_service_find_service_by_session( $session, $secret_key, &$line_
 	}
 
 	return array();
+}
+
+/**
+ * Extract custom fields from a Stripe checkout session.
+ *
+ * @param array  $session    Checkout session data.
+ * @param string $secret_key Stripe secret key.
+ * @return array
+ */
+function apparel_service_extract_custom_fields( $session, $secret_key ) {
+	$custom_fields = array();
+	if ( ! empty( $session['custom_fields'] ) && is_array( $session['custom_fields'] ) ) {
+		$custom_fields = $session['custom_fields'];
+	}
+
+	if ( empty( $custom_fields ) && $secret_key && ! empty( $session['id'] ) ) {
+		$response = apparel_service_stripe_get_request(
+			$secret_key,
+			sprintf( 'https://api.stripe.com/v1/checkout/sessions/%s', rawurlencode( $session['id'] ) ),
+			array(
+				'expand' => array( 'custom_fields' ),
+			)
+		);
+		if ( ! empty( $response['custom_fields'] ) && is_array( $response['custom_fields'] ) ) {
+			$custom_fields = $response['custom_fields'];
+		}
+	}
+
+	return apparel_service_normalize_custom_fields( $custom_fields );
+}
+
+/**
+ * Normalize Stripe custom fields for storage.
+ *
+ * @param array $custom_fields Raw custom fields.
+ * @return array
+ */
+function apparel_service_normalize_custom_fields( $custom_fields ) {
+	if ( empty( $custom_fields ) || ! is_array( $custom_fields ) ) {
+		return array();
+	}
+
+	$normalized = array();
+	foreach ( $custom_fields as $field ) {
+		if ( ! is_array( $field ) ) {
+			continue;
+		}
+
+		$label = '';
+		if ( ! empty( $field['label']['custom'] ) ) {
+			$label = $field['label']['custom'];
+		} elseif ( ! empty( $field['label']['type'] ) && ! empty( $field['label']['i18n'] ) ) {
+			$label = $field['label']['i18n'];
+		} elseif ( ! empty( $field['label'] ) && is_string( $field['label'] ) ) {
+			$label = $field['label'];
+		}
+
+		$value = '';
+		if ( ! empty( $field['text']['value'] ) ) {
+			$value = $field['text']['value'];
+		} elseif ( isset( $field['numeric']['value'] ) ) {
+			$value = (string) $field['numeric']['value'];
+		} elseif ( ! empty( $field['dropdown']['value'] ) ) {
+			$value = $field['dropdown']['value'];
+		} elseif ( isset( $field['value'] ) ) {
+			$value = is_string( $field['value'] ) ? $field['value'] : wp_json_encode( $field['value'] );
+		}
+
+		$normalized[] = array(
+			'key'   => ! empty( $field['key'] ) ? sanitize_text_field( $field['key'] ) : '',
+			'label' => sanitize_text_field( $label ),
+			'value' => sanitize_text_field( $value ),
+		);
+	}
+
+	return $normalized;
+}
+
+/**
+ * Format custom fields for display.
+ *
+ * @param array $custom_fields Stored custom fields.
+ * @return array
+ */
+function apparel_service_format_custom_fields_for_display( $custom_fields ) {
+	if ( empty( $custom_fields ) || ! is_array( $custom_fields ) ) {
+		return array();
+	}
+
+	$display = array();
+	foreach ( $custom_fields as $field ) {
+		if ( ! is_array( $field ) ) {
+			continue;
+		}
+
+		$label = $field['label'] ?? '';
+		$key   = $field['key'] ?? '';
+		$value = $field['value'] ?? '';
+		if ( '' === $label ) {
+			$label = $key;
+		}
+
+		if ( '' === $value && '' === $label ) {
+			continue;
+		}
+
+		if ( '' !== $label ) {
+			$display[] = sprintf( '%s: %s', $label, $value );
+		} else {
+			$display[] = $value;
+		}
+	}
+
+	return $display;
+}
+
+/**
+ * Get a summary string for custom fields.
+ *
+ * @param array $custom_fields Stored custom fields.
+ * @return string
+ */
+function apparel_service_get_custom_fields_summary( $custom_fields ) {
+	$display = apparel_service_format_custom_fields_for_display( $custom_fields );
+	if ( empty( $display ) ) {
+		return '';
+	}
+
+	return implode( ' | ', $display );
 }
 
 /**
@@ -1268,6 +1420,7 @@ function apparel_service_upsert_order( $order_data ) {
 	update_post_meta( $order_id, '_variation_name', sanitize_text_field( $order_data['variation_name'] ?? '' ) );
 	update_post_meta( $order_id, '_quantity', absint( $order_data['quantity'] ?? 1 ) );
 	update_post_meta( $order_id, '_stripe_line_items', $order_data['line_items'] ?? array() );
+	update_post_meta( $order_id, '_stripe_custom_fields', $order_data['custom_fields'] ?? array() );
 
 	return $order_id;
 }
