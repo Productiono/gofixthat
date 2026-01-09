@@ -4357,8 +4357,8 @@ body.admin-bar {
 }
 
 .mbf-site-content {
-	margin-top: 4rem;
-	margin-bottom: 4rem;
+	margin-top: 1.5rem;
+	margin-bottom: 1.5rem;
 }
 @media (min-width: 768px) {
 	.mbf-site-content {
