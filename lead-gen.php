@@ -111,6 +111,69 @@ $render_fluent_form = function () use ( $fluent_form_id, $has_fluent_form, $show
 };
 ?>
 
+<style>
+	@media (max-width: 640px) {
+		.lead-gen-hero {
+			min-height: calc(100svh - var(--lead-gen-header-offset));
+			min-height: calc(100dvh - var(--lead-gen-header-offset));
+			padding: clamp(32px, 8svh, 64px) clamp(20px, 6vw, 28px) clamp(28px, 7svh, 56px);
+			align-items: center;
+		}
+
+		.lead-gen-hero__stack {
+			gap: clamp(16px, 3svh, 24px);
+		}
+
+		.lead-gen-hero__logo {
+			margin-bottom: 0;
+		}
+
+		.lead-gen-hero__logo-image {
+			width: clamp(140px, 36vw, 180px);
+		}
+
+		.lead-gen-hero__card {
+			padding: clamp(22px, 4.5vw, 30px);
+		}
+
+		.lead-gen-hero__card h1 {
+			font-size: clamp(26px, 7vw, 32px);
+		}
+
+		.lead-gen-hero__card p {
+			font-size: clamp(14px, 4vw, 16px);
+		}
+
+		.lead-gen-form-card--dark {
+			padding: clamp(16px, 4vw, 22px);
+			border-radius: clamp(22px, 6vw, 28px);
+		}
+
+		.lead-gen-form-card__title {
+			font-size: clamp(15px, 4vw, 17px);
+		}
+
+		.lead-gen-form-card__disclaimer {
+			font-size: clamp(12px, 3.4vw, 13px);
+		}
+
+		.lead-gen-form {
+			padding: 10px 10px 10px 16px;
+			gap: 12px;
+		}
+
+		.lead-gen-form input,
+		.lead-gen-form--dark input {
+			font-size: clamp(14px, 3.8vw, 16px);
+		}
+
+		.lead-gen-form button {
+			width: 42px;
+			height: 42px;
+		}
+	}
+</style>
+
 <div class="lead-gen-page">
 	<section class="lead-gen-hero">
 		<div class="lead-gen-hero__media" aria-hidden="true">
