@@ -1567,8 +1567,9 @@ function apparel_service_build_order_confirmation_email( $order_id, $order_data,
 		'customer_name'       => $context['customer_name'],
 		'admin_email'         => $context['admin_email'],
 		'site_name'           => $context['site_name'],
-		'action_url'          => $context['checkout_url'],
-		'action_label'        => $context['checkout_url'] ? __( 'View Order', 'apparel' ) : '',
+		'service_links'       => $context['service_links'],
+		'action_url'          => $context['primary_service_url'],
+		'action_label'        => $context['primary_service_url'] ? __( 'View Service', 'apparel' ) : '',
 		'show_downloads'      => true,
 	);
 
@@ -1598,8 +1599,9 @@ function apparel_service_build_order_confirmation_email_text( $order_id, $order_
 		'customer_name'       => $context['customer_name'],
 		'admin_email'         => $context['admin_email'],
 		'site_name'           => $context['site_name'],
-		'action_url'          => $context['checkout_url'],
-		'action_label'        => $context['checkout_url'] ? __( 'View Order', 'apparel' ) : '',
+		'service_links'       => $context['service_links'],
+		'action_url'          => $context['primary_service_url'],
+		'action_label'        => $context['primary_service_url'] ? __( 'View Service', 'apparel' ) : '',
 		'show_downloads'      => true,
 	);
 
@@ -1734,8 +1736,9 @@ function apparel_service_build_order_status_email( $order_id, $order_data, $serv
 		'customer_name'       => $context['customer_name'],
 		'admin_email'         => $context['admin_email'],
 		'site_name'           => $site_name,
-		'action_url'          => $context['checkout_url'],
-		'action_label'        => $context['checkout_url'] ? __( 'View Order', 'apparel' ) : '',
+		'service_links'       => $context['service_links'],
+		'action_url'          => $context['primary_service_url'],
+		'action_label'        => $context['primary_service_url'] ? __( 'View Service', 'apparel' ) : '',
 		'show_downloads'      => $show_download,
 	);
 
@@ -1958,6 +1961,27 @@ function apparel_service_get_order_email_context( $order_id, $order_data, $servi
 	$currency      = $order_data['currency'] ?? get_post_meta( $order_id, '_currency', true );
 	$created_at    = $order_data['created_at'] ?? get_post_meta( $order_id, '_created_at', true );
 	$created_at    = $created_at ? (int) $created_at : time();
+	$service_links = array();
+
+	foreach ( $service_items as $item ) {
+		$service_id = isset( $item['service_id'] ) ? (int) $item['service_id'] : 0;
+		if ( ! $service_id ) {
+			continue;
+		}
+
+		$permalink = get_permalink( $service_id );
+		if ( ! $permalink ) {
+			continue;
+		}
+
+		$service_links[ $service_id ] = array(
+			'title' => $item['title'] ?? get_the_title( $service_id ),
+			'url'   => $permalink,
+		);
+	}
+
+	$service_links       = array_values( $service_links );
+	$primary_service_url = $service_links[0]['url'] ?? '';
 
 	$context = array(
 		'customer_name'        => $customer_name,
@@ -1970,6 +1994,8 @@ function apparel_service_get_order_email_context( $order_id, $order_data, $servi
 		'download_items'       => apparel_service_get_order_download_items( $service_items ),
 		'refund_amount'        => get_post_meta( $order_id, '_amount_refunded', true ),
 		'refund_currency'      => get_post_meta( $order_id, '_refund_currency', true ),
+		'service_links'        => $service_links,
+		'primary_service_url'  => $primary_service_url,
 	);
 
 	return $context;
@@ -1991,6 +2017,7 @@ function apparel_service_render_service_order_email_html( $args ) {
 	$service_items       = $args['service_items'] ?? array();
 	$custom_fields       = $args['custom_fields'] ?? array();
 	$download_items      = $args['download_items'] ?? array();
+	$service_links       = $args['service_links'] ?? array();
 	$customer_name       = $args['customer_name'] ?? '';
 	$admin_email         = $args['admin_email'] ?? '';
 	$site_name           = $args['site_name'] ?? '';
@@ -2143,6 +2170,25 @@ function apparel_service_render_service_order_email_html( $args ) {
 									</td>
 								</tr>
 							<?php endif; ?>
+							<?php if ( count( $service_links ) > 1 ) : ?>
+								<tr>
+									<td style="padding:0 32px 24px;">
+										<h2 style="margin:0 0 12px;font-size:18px;color:#111;"><?php esc_html_e( 'Other Services', 'apparel' ); ?></h2>
+										<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;">
+											<?php foreach ( $service_links as $index => $service_link ) : ?>
+												<?php if ( 0 === $index ) : ?>
+													<?php continue; ?>
+												<?php endif; ?>
+												<tr>
+													<td style="padding:8px 0;border-bottom:1px solid #f0f0f0;font-size:14px;color:#1a1a1a;">
+														<a href="<?php echo esc_url( $service_link['url'] ); ?>" style="color:#111;text-decoration:underline;"><?php echo esc_html( $service_link['title'] ); ?></a>
+													</td>
+												</tr>
+											<?php endforeach; ?>
+										</table>
+									</td>
+								</tr>
+							<?php endif; ?>
 							<?php if ( $status_note ) : ?>
 								<tr>
 									<td style="padding:0 32px 24px;">
@@ -2203,6 +2249,7 @@ function apparel_service_render_service_order_email_text( $args ) {
 	$service_items       = $args['service_items'] ?? array();
 	$custom_fields       = $args['custom_fields'] ?? array();
 	$download_items      = $args['download_items'] ?? array();
+	$service_links       = $args['service_links'] ?? array();
 	$customer_name       = $args['customer_name'] ?? '';
 	$admin_email         = $args['admin_email'] ?? '';
 	$site_name           = $args['site_name'] ?? '';
@@ -2252,6 +2299,16 @@ function apparel_service_render_service_order_email_text( $args ) {
 			$lines[] = sprintf( '- %s: %s', $download_item['label'], $download_item['url'] );
 		}
 	}
+	if ( count( $service_links ) > 1 ) {
+		$lines[] = '';
+		$lines[] = __( 'Other Services:', 'apparel' );
+		foreach ( $service_links as $index => $service_link ) {
+			if ( 0 === $index ) {
+				continue;
+			}
+			$lines[] = sprintf( '- %s: %s', $service_link['title'], $service_link['url'] );
+		}
+	}
 	if ( $action_url && $action_label ) {
 		$lines[] = '';
 		$lines[] = sprintf( '%s: %s', $action_label, $action_url );
@@ -2283,16 +2340,20 @@ function apparel_service_render_service_order_email_text( $args ) {
  * @return bool
  */
 function apparel_service_send_order_email( $to, $subject, $html, $text ) {
-	$boundary = 'apparel-order-' . wp_generate_password( 12, false );
-	$headers  = array( 'Content-Type: multipart/alternative; boundary="' . $boundary . '"' );
+	$content_type_filter = static function() {
+		return 'text/html; charset=UTF-8';
+	};
+	$phpmailer_init = static function( $phpmailer ) use ( $text ) {
+		$phpmailer->AltBody = $text;
+	};
 
-	$body  = '--' . $boundary . "\r\n";
-	$body .= "Content-Type: text/plain; charset=UTF-8\r\n\r\n";
-	$body .= $text . "\r\n";
-	$body .= '--' . $boundary . "\r\n";
-	$body .= "Content-Type: text/html; charset=UTF-8\r\n\r\n";
-	$body .= $html . "\r\n";
-	$body .= '--' . $boundary . "--";
+	add_filter( 'wp_mail_content_type', $content_type_filter );
+	add_action( 'phpmailer_init', $phpmailer_init );
 
-	return wp_mail( $to, $subject, $body, $headers );
+	$sent = wp_mail( $to, $subject, $html );
+
+	remove_action( 'phpmailer_init', $phpmailer_init );
+	remove_filter( 'wp_mail_content_type', $content_type_filter );
+
+	return $sent;
 }
