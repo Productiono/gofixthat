@@ -167,7 +167,7 @@
 }
 
 .lead-gen-form-card__title {
-	font-size: 16px;
+	font-size: 20px;
 	font-weight: 600;
 	letter-spacing: -0.01em;
 	color: inherit;
@@ -209,7 +209,7 @@
 
 .lead-gen-form--dark input {
 	color: #f4f4f4;
-	font-size: 14px;
+	font-size: 20px;
 }
 
 .lead-gen-form input::placeholder {
