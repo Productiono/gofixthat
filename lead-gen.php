@@ -139,13 +139,6 @@ $render_fluent_form = function () use ( $fluent_form_id, $has_fluent_form, $show
 		margin-bottom: 16px;
 	}
 
-	@media (min-width: 641px) {
-		.lead-gen-form-card--dark {
-			position: sticky;
-			bottom: 24px;
-		}
-	}
-
 	@media (max-width: 640px) {
 		.lead-gen-hero {
 			min-height: calc(100svh - var(--lead-gen-header-offset));
