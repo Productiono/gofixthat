@@ -117,6 +117,7 @@ JS;
 		// Register theme styles.
 		wp_register_style( 'mbf-styles', mbf_style( get_template_directory_uri() . '/style.css' ), array(), $version );
 		wp_register_style( 'apparel-service', get_template_directory_uri() . '/assets/css/service.css', array(), $version );
+		wp_register_style( 'apparel-lead-gen', get_template_directory_uri() . '/assets/css/lead-gen.css', array(), $version );
 
 		// Enqueue theme styles.
 		wp_enqueue_style( 'mbf-styles' );
@@ -127,6 +128,10 @@ JS;
 		if ( is_singular( 'service' ) || is_post_type_archive( 'service' ) || ( function_exists( 'apparel_is_service_preview' ) && apparel_is_service_preview() ) ) {
 			wp_enqueue_script( 'apparel-service' );
 			wp_enqueue_style( 'apparel-service' );
+		}
+
+		if ( is_page_template( 'lead-gen.php' ) ) {
+			wp_enqueue_style( 'apparel-lead-gen' );
 		}
 
 		if ( is_singular( 'post' ) || is_category() ) {
