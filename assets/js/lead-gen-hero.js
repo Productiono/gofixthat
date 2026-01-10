@@ -116,6 +116,42 @@
 				attributeFilter: ['class', 'aria-invalid'],
 			});
 
+			const paymentLink = wrapper.dataset.leadGenPaymentLink || '';
+			const formId = wrapper.dataset.leadGenFormId || '';
+			let hasRedirected = false;
+
+			const shouldRedirect = (submittedFormId) => {
+				if (hasRedirected || !paymentLink) {
+					return false;
+				}
+				if (!formId || !submittedFormId) {
+					return true;
+				}
+				return String(submittedFormId) === String(formId);
+			};
+
+			const handleSuccess = (submittedFormId) => {
+				if (!shouldRedirect(submittedFormId)) {
+					return;
+				}
+				hasRedirected = true;
+				window.location.assign(paymentLink);
+			};
+
+			fluentForm.addEventListener('fluentform_submission_success', (event) => {
+				const detail = event.detail || {};
+				handleSuccess(detail.formId || detail.form_id || detail?.form?.id);
+			});
+
+			if (window.jQuery && typeof window.jQuery === 'function') {
+				window.jQuery(fluentForm).on('fluentform_submission_success', (event, response) => {
+					const submittedFormId =
+						(response && (response.form_id || response.formId)) ||
+						(event && event.detail && (event.detail.formId || event.detail.form_id));
+					handleSuccess(submittedFormId);
+				});
+			}
+
 			customForm.addEventListener('submit', (event) => {
 				event.preventDefault();
 				const customInput = customForm.querySelector('input[type="email"]');

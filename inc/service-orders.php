@@ -81,6 +81,7 @@ class Apparel_Service_Orders_Table extends WP_List_Table {
 			'order_id'       => __( 'Order ID', 'apparel' ),
 			'date'           => __( 'Date', 'apparel' ),
 			'service'        => __( 'Service', 'apparel' ),
+			'source_page'    => __( 'Source Page', 'apparel' ),
 			'variation'      => __( 'Variation', 'apparel' ),
 			'amount'         => __( 'Amount', 'apparel' ),
 			'status'         => __( 'Status', 'apparel' ),
@@ -138,6 +139,31 @@ class Apparel_Service_Orders_Table extends WP_List_Table {
 		$title      = get_the_title( $service_id );
 		$link       = get_edit_post_link( $service_id, 'display' );
 
+		if ( $link ) {
+			return sprintf( '<a href="%s">%s</a>', esc_url( $link ), esc_html( $title ) );
+		}
+
+		return esc_html( $title );
+	}
+
+	/**
+	 * Render column for source page.
+	 *
+	 * @param array $item Item data.
+	 * @return string
+	 */
+	public function column_source_page( $item ) {
+		$page_id = isset( $item['lead_gen_page_id'] ) ? (int) $item['lead_gen_page_id'] : 0;
+		if ( ! $page_id ) {
+			return '';
+		}
+
+		$title = get_the_title( $page_id );
+		if ( ! $title ) {
+			return '';
+		}
+
+		$link = get_edit_post_link( $page_id, 'display' );
 		if ( $link ) {
 			return sprintf( '<a href="%s">%s</a>', esc_url( $link ), esc_html( $title ) );
 		}
@@ -258,6 +284,7 @@ class Apparel_Service_Orders_Table extends WP_List_Table {
 			$session_id    = get_post_meta( $post->ID, '_stripe_session_id', true );
 			$payment_intent = get_post_meta( $post->ID, '_stripe_payment_intent_id', true );
 			$custom_fields = get_post_meta( $post->ID, '_stripe_custom_fields', true );
+			$lead_gen_page_id = get_post_meta( $post->ID, '_lead_gen_page_id', true );
 
 			$amount_display = '';
 			if ( '' !== $amount_total ) {
@@ -280,6 +307,8 @@ class Apparel_Service_Orders_Table extends WP_List_Table {
 				'service_id'     => $service_id,
 				'service_name'   => $service_name,
 				'service'        => '',
+				'lead_gen_page_id' => $lead_gen_page_id ? (int) $lead_gen_page_id : 0,
+				'source_page'    => '',
 				'variation'      => esc_html( $variation_name ? $variation_name : $variation_id ),
 				'amount'         => esc_html( $amount_display ),
 				'status'         => esc_html( ucfirst( (string) $status ) ),
@@ -419,9 +448,13 @@ function apparel_service_render_order_details_metabox( $post ) {
 	$created_at      = get_post_meta( $post->ID, '_created_at', true );
 	$checkout_url    = get_post_meta( $post->ID, '_checkout_url', true );
 	$quantity        = get_post_meta( $post->ID, '_quantity', true );
+	$lead_gen_page_id = get_post_meta( $post->ID, '_lead_gen_page_id', true );
+	$lead_gen_payment_link = get_post_meta( $post->ID, '_lead_gen_payment_link', true );
 
 	$service_title = $service_id ? get_the_title( $service_id ) : ( $service_name ? $service_name : __( 'Stripe Checkout Item', 'apparel' ) );
 	$service_link  = $service_id ? get_edit_post_link( $service_id, 'display' ) : '';
+	$lead_gen_page_title = $lead_gen_page_id ? get_the_title( $lead_gen_page_id ) : '';
+	$lead_gen_page_link  = $lead_gen_page_id ? get_edit_post_link( $lead_gen_page_id, 'display' ) : '';
 
 	$amount_display = '';
 	if ( '' !== $amount_total ) {
@@ -445,6 +478,18 @@ function apparel_service_render_order_details_metabox( $post ) {
 					<?php endif; ?>
 				</td>
 			</tr>
+			<?php if ( $lead_gen_page_id && $lead_gen_page_title ) : ?>
+				<tr>
+					<th><?php esc_html_e( 'Source Page', 'apparel' ); ?></th>
+					<td>
+						<?php if ( $lead_gen_page_link ) : ?>
+							<a href="<?php echo esc_url( $lead_gen_page_link ); ?>"><?php echo esc_html( $lead_gen_page_title ); ?></a>
+						<?php else : ?>
+							<?php echo esc_html( $lead_gen_page_title ); ?>
+						<?php endif; ?>
+					</td>
+				</tr>
+			<?php endif; ?>
 			<tr>
 				<th><?php esc_html_e( 'Variation', 'apparel' ); ?></th>
 				<td><?php echo esc_html( $variation_name ? $variation_name : $variation_id ); ?></td>
@@ -510,6 +555,14 @@ function apparel_service_render_order_details_metabox( $post ) {
 					<?php endif; ?>
 				</td>
 			</tr>
+			<?php if ( $lead_gen_payment_link ) : ?>
+				<tr>
+					<th><?php esc_html_e( 'Lead Gen Payment Link', 'apparel' ); ?></th>
+					<td>
+						<a href="<?php echo esc_url( $lead_gen_payment_link ); ?>" target="_blank" rel="noopener noreferrer"><?php echo esc_html( $lead_gen_payment_link ); ?></a>
+					</td>
+				</tr>
+			<?php endif; ?>
 			<tr>
 				<th><?php esc_html_e( 'Created At', 'apparel' ); ?></th>
 				<td><?php echo esc_html( $created_display ); ?></td>
@@ -886,6 +939,17 @@ function apparel_service_process_checkout_session( $session ) {
 	if ( $payment_link_id && $secret_key ) {
 		$checkout_url = apparel_service_get_payment_link_url( $secret_key, $payment_link_id );
 	}
+	$lead_gen_page_id    = 0;
+	$lead_gen_page_title = '';
+	if ( $checkout_url ) {
+		$lead_gen_page_id = apparel_lead_gen_find_page_by_payment_link_url( $checkout_url );
+		if ( $lead_gen_page_id ) {
+			$lead_gen_page_title = get_the_title( $lead_gen_page_id );
+			if ( ! $service_id && $lead_gen_page_title ) {
+				$service_name = $lead_gen_page_title;
+			}
+		}
+	}
 
 	$order_data = array(
 		'service_id'              => $service_id,
@@ -902,6 +966,9 @@ function apparel_service_process_checkout_session( $session ) {
 		'created_at'              => isset( $session['created'] ) ? (int) $session['created'] : time(),
 		'checkout_link'           => $checkout_link,
 		'checkout_url'            => $checkout_url,
+		'lead_gen_page_id'        => $lead_gen_page_id,
+		'lead_gen_page_title'     => $lead_gen_page_title,
+		'lead_gen_payment_link'   => $checkout_url,
 		'variation_id'            => $variation_id,
 		'variation_name'          => $variation_name,
 		'quantity'                => $quantity,
@@ -1283,6 +1350,39 @@ function apparel_service_find_service_by_payment_link( $payment_link_id, $secret
 }
 
 /**
+ * Find Lead Gen page by Stripe payment link URL.
+ *
+ * @param string $payment_link_url Stripe payment link URL.
+ * @return int
+ */
+function apparel_lead_gen_find_page_by_payment_link_url( $payment_link_url ) {
+	if ( ! $payment_link_url ) {
+		return 0;
+	}
+
+	$payment_link_url = untrailingslashit( $payment_link_url );
+
+	$page_ids = get_posts(
+		array(
+			'post_type'              => 'page',
+			'posts_per_page'         => 1,
+			'fields'                 => 'ids',
+			'meta_key'               => 'lead_gen_stripe_payment_link',
+			'meta_value'             => $payment_link_url,
+			'no_found_rows'          => true,
+			'update_post_meta_cache' => false,
+			'update_post_term_cache' => false,
+		)
+	);
+
+	if ( ! empty( $page_ids ) ) {
+		return (int) $page_ids[0];
+	}
+
+	return 0;
+}
+
+/**
  * Find service by Stripe price ID.
  *
  * @param string $price_id Stripe price ID.
@@ -1635,6 +1735,9 @@ function apparel_service_upsert_order( $order_data ) {
 	update_post_meta( $order_id, '_created_at', absint( $order_data['created_at'] ?? time() ) );
 	update_post_meta( $order_id, '_checkout_link', sanitize_text_field( $order_data['checkout_link'] ?? '' ) );
 	update_post_meta( $order_id, '_checkout_url', esc_url_raw( $order_data['checkout_url'] ?? '' ) );
+	update_post_meta( $order_id, '_lead_gen_page_id', absint( $order_data['lead_gen_page_id'] ?? 0 ) );
+	update_post_meta( $order_id, '_lead_gen_page_title', sanitize_text_field( $order_data['lead_gen_page_title'] ?? '' ) );
+	update_post_meta( $order_id, '_lead_gen_payment_link', esc_url_raw( $order_data['lead_gen_payment_link'] ?? '' ) );
 	update_post_meta( $order_id, '_variation_id', sanitize_text_field( $order_data['variation_id'] ?? '' ) );
 	update_post_meta( $order_id, '_variation_name', sanitize_text_field( $order_data['variation_name'] ?? '' ) );
 	update_post_meta( $order_id, '_quantity', absint( $order_data['quantity'] ?? 1 ) );
