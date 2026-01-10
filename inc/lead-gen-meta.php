@@ -16,7 +16,9 @@ function apparel_register_lead_gen_meta_box( $post_type, $post ) {
 		return;
 	}
 
-	if ( 'lead-gen.php' !== get_page_template_slug( $post ) ) {
+	$allowed_templates = array( 'lead-gen.php', 'form-submission.php' );
+
+	if ( ! in_array( get_page_template_slug( $post ), $allowed_templates, true ) ) {
 		return;
 	}
 
@@ -602,7 +604,9 @@ function apparel_save_lead_gen_meta_box( $post_id ) {
 		return;
 	}
 
-	if ( 'lead-gen.php' !== get_page_template_slug( $post_id ) ) {
+	$allowed_templates = array( 'lead-gen.php', 'form-submission.php' );
+
+	if ( ! in_array( get_page_template_slug( $post_id ), $allowed_templates, true ) ) {
 		return;
 	}
 
