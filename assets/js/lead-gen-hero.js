@@ -138,9 +138,18 @@
 				window.location.assign(paymentLink);
 			};
 
+			const getSubmittedFormId = (event) => {
+				if (!event) {
+					return null;
+				}
+				if (event.detail) {
+					return event.detail.formId || event.detail.form_id || event.detail?.form?.id;
+				}
+				return event.formId || event.form_id || event?.form?.id || null;
+			};
+
 			fluentForm.addEventListener('fluentform_submission_success', (event) => {
-				const detail = event.detail || {};
-				handleSuccess(detail.formId || detail.form_id || detail?.form?.id);
+				handleSuccess(getSubmittedFormId(event));
 			});
 
 			if (window.jQuery && typeof window.jQuery === 'function') {
@@ -150,7 +159,17 @@
 						(event && event.detail && (event.detail.formId || event.detail.form_id));
 					handleSuccess(submittedFormId);
 				});
+
+				window.jQuery(document).on('fluentform_submission_success', (event, response) => {
+					const submittedFormId =
+						(response && (response.form_id || response.formId)) || getSubmittedFormId(event);
+					handleSuccess(submittedFormId);
+				});
 			}
+
+			document.addEventListener('fluentform_submission_success', (event) => {
+				handleSuccess(getSubmittedFormId(event));
+			});
 
 			customForm.addEventListener('submit', (event) => {
 				event.preventDefault();
