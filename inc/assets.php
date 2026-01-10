@@ -131,7 +131,7 @@ JS;
 			wp_enqueue_style( 'apparel-service' );
 		}
 
-		if ( is_page_template( array( 'lead-gen.php', 'form-submission.php' ) ) ) {
+		if ( is_page_template( array( 'lead-gen.php' ) ) ) {
 			wp_enqueue_style( 'apparel-lead-gen' );
 			wp_enqueue_script( 'apparel-lead-gen' );
 		}
