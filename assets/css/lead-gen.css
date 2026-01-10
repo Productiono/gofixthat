@@ -1,16 +1,22 @@
 .page-template-lead-gen-php .mbf-header,
+.page-template-form-submission-php .mbf-header,
 .page-template-lead-gen-php .mbf-footer,
-.page-template-lead-gen-php .mbf-footer-topbar {
+.page-template-form-submission-php .mbf-footer,
+.page-template-lead-gen-php .mbf-footer-topbar,
+.page-template-form-submission-php .mbf-footer-topbar {
 	display: none;
 }
 
-.page-template-lead-gen-php .mbf-container {
+.page-template-lead-gen-php .mbf-container,
+.page-template-form-submission-php .mbf-container {
 	max-width: 100%;
 	padding: 0;
 }
 
 .page-template-lead-gen-php .mbf-site-primary,
-.page-template-lead-gen-php .mbf-site-content {
+.page-template-form-submission-php .mbf-site-primary,
+.page-template-lead-gen-php .mbf-site-content,
+.page-template-form-submission-php .mbf-site-content {
 	padding: 0;
 	margin: 0;
 }
