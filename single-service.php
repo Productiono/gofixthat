@@ -66,6 +66,10 @@ while ( have_posts() ) :
 		$variations = array();
 	}
 
+	if ( $checkout_url && function_exists( 'apparel_service_maybe_update_payment_link_redirect' ) ) {
+		apparel_service_maybe_update_payment_link_redirect( $checkout_url );
+	}
+
 	$variation_options     = array();
 	$default_variation     = null;
 	$default_variation_id  = '';
@@ -81,6 +85,9 @@ while ( have_posts() ) :
 		$sale_price         = isset( $variation['sale_price'] ) ? $variation['sale_price'] : '';
 		$checkout_link      = isset( $variation['stripe_payment_link'] ) ? $variation['stripe_payment_link'] : '';
 		$price_id           = isset( $variation['stripe_price_id'] ) ? $variation['stripe_price_id'] : '';
+		if ( $checkout_link && function_exists( 'apparel_service_maybe_update_payment_link_redirect' ) ) {
+			apparel_service_maybe_update_payment_link_redirect( $checkout_link );
+		}
 		$effective_price    = ( '' !== $sale_price && '' !== $price && (float) $sale_price < (float) $price ) ? $sale_price : $price;
 		$effective_value    = is_numeric( $effective_price ) ? (float) $effective_price : PHP_FLOAT_MAX;
 		$variation_options[] = array(
