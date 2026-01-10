@@ -945,7 +945,8 @@ function apparel_lead_gen_get_thank_you_url( $page_id ) {
 	if ( ! empty( $thank_you_pages ) ) {
 		$thank_you_url = get_permalink( $thank_you_pages[0] );
 		if ( $thank_you_url ) {
-			return add_query_arg( 'session_id', '{CHECKOUT_SESSION_ID}', $thank_you_url );
+			$separator = ( false === strpos( $thank_you_url, '?' ) ) ? '?' : '&';
+			return $thank_you_url . $separator . 'session_id={CHECKOUT_SESSION_ID}';
 		}
 	}
 
