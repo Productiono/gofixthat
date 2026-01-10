@@ -6,9 +6,13 @@
  * @package Apparel
  */
 
-get_header( 'lead-gen' );
+get_header();
 
-$post_id = get_the_ID();
+// Remove default title outputs for this template.
+remove_action( 'mbf_main_before', 'mbf_entry_header', 10 );
+remove_action( 'mbf_main_before', 'mbf_page_header', 100 );
+
+$post_id = get_queried_object_id();
 
 $button_label = get_post_meta( $post_id, 'form_submission_button_label', true );
 $button_url   = get_post_meta( $post_id, 'form_submission_button_url', true );
@@ -27,46 +31,71 @@ if ( ! $next_content ) {
 	$next_content = __( 'Our team will review your submission and follow up shortly.', 'apparel' );
 }
 
-$hero_background = 'linear-gradient(135deg, #3f0bb6 0%, #2a0788 100%)';
-$heading         = get_the_title( $post_id );
-$heading         = $heading ? $heading : __( 'Thank you for your submission', 'apparel' );
+$heading = get_the_title( $post_id );
+$heading = $heading ? $heading : __( 'Thank you for your submission', 'apparel' );
 ?>
 
-<div class="lead-gen-page">
-	<section class="lead-gen-hero">
-		<div class="lead-gen-hero__media" aria-hidden="true">
-			<div class="lead-gen-hero__image" style="background-image: <?php echo esc_attr( $hero_background ); ?>;"></div>
-			<div class="lead-gen-hero__overlay"></div>
-		</div>
-		<div class="lead-gen-hero__content">
-			<div class="lead-gen-hero__stack">
-				<div class="lead-gen-hero__card">
-					<h1><?php echo esc_html( $heading ); ?></h1>
-					<?php while ( have_posts() ) : the_post(); ?>
-						<?php the_content(); ?>
-					<?php endwhile; ?>
-				</div>
-				<?php if ( $button_url ) : ?>
-					<div class="lead-gen-hero__cta">
-						<a class="mbf-button mbf-button--solid" href="<?php echo esc_url( $button_url ); ?>">
-							<?php echo esc_html( $button_label ); ?>
-						</a>
-					</div>
-				<?php endif; ?>
-			</div>
-		</div>
-	</section>
+<div id="primary" class="mbf-content-area">
+	<?php
+	/**
+	 * The mbf_main_before hook.
+	 *
+	 * @since 1.0.0
+	 */
+	do_action( 'mbf_main_before' );
+	?>
 
-	<?php if ( $next_title || $next_content ) : ?>
-		<section class="lead-gen-cta">
-			<div class="lead-gen-cta__panel" style="background: <?php echo esc_attr( $hero_background ); ?>;">
-				<h2><?php echo esc_html( $next_title ); ?></h2>
-				<?php if ( $next_content ) : ?>
-					<?php echo wp_kses_post( wpautop( $next_content ) ); ?>
-				<?php endif; ?>
+	<?php while ( have_posts() ) : the_post(); ?>
+		<section class="mbf-thank-you" aria-labelledby="mbf-thank-you-heading">
+			<div class="mbf-container">
+				<div class="mbf-thank-you__card">
+					<div class="mbf-thank-you__inner">
+						<span class="mbf-thank-you__icon" aria-hidden="true">
+							<svg viewBox="0 0 24 24" role="presentation" focusable="false">
+								<path d="M12 2a10 10 0 1 0 10 10A10.011 10.011 0 0 0 12 2Zm0 18a8 8 0 1 1 8-8 8.009 8.009 0 0 1-8 8Zm4.207-11.207a1 1 0 0 1 0 1.414l-5 5a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L10.5 13.086l4.293-4.293a1 1 0 0 1 1.414 0Z" />
+							</svg>
+						</span>
+
+						<h1 id="mbf-thank-you-heading" class="mbf-thank-you__headline">
+							<?php echo esc_html( $heading ); ?>
+						</h1>
+
+						<div class="mbf-thank-you__message">
+							<?php the_content(); ?>
+						</div>
+
+						<?php if ( $button_url ) : ?>
+							<div class="mbf-thank-you__actions">
+								<a class="mbf-button mbf-button--solid" href="<?php echo esc_url( $button_url ); ?>">
+									<?php echo esc_html( $button_label ); ?>
+								</a>
+							</div>
+						<?php endif; ?>
+
+						<?php if ( $next_title || $next_content ) : ?>
+							<h2 class="mbf-thank-you__headline">
+								<?php echo esc_html( $next_title ); ?>
+							</h2>
+							<?php if ( $next_content ) : ?>
+								<div class="mbf-thank-you__message">
+									<?php echo wp_kses_post( wpautop( $next_content ) ); ?>
+								</div>
+							<?php endif; ?>
+						<?php endif; ?>
+					</div>
+				</div>
 			</div>
 		</section>
-	<?php endif; ?>
+	<?php endwhile; ?>
+
+	<?php
+	/**
+	 * The mbf_main_after hook.
+	 *
+	 * @since 1.0.0
+	 */
+	do_action( 'mbf_main_after' );
+	?>
 </div>
 
 <?php
