@@ -37,18 +37,11 @@ $default_price        = $service_price;
 $default_sale         = $service_sale;
 $default_checkout_url = $checkout_url;
 
-if ( $checkout_url && function_exists( 'apparel_service_maybe_update_payment_link_redirect' ) ) {
-	apparel_service_maybe_update_payment_link_redirect( $checkout_url );
-}
-
 foreach ( $variation_data as $variation ) {
 	$price          = isset( $variation['price'] ) ? $variation['price'] : '';
 	$sale_price     = isset( $variation['sale_price'] ) ? $variation['sale_price'] : '';
 	$checkout_link  = isset( $variation['stripe_payment_link'] ) ? $variation['stripe_payment_link'] : '';
 	$price_id       = isset( $variation['stripe_price_id'] ) ? $variation['stripe_price_id'] : '';
-	if ( $checkout_link && function_exists( 'apparel_service_maybe_update_payment_link_redirect' ) ) {
-		apparel_service_maybe_update_payment_link_redirect( $checkout_link );
-	}
 	$effective      = ( '' !== $sale_price && '' !== $price && (float) $sale_price < (float) $price ) ? $sale_price : $price;
 	$effective_value = is_numeric( $effective ) ? (float) $effective : PHP_FLOAT_MAX;
 	if ( null === $default_variation || $effective_value < $default_variation['effective'] ) {
