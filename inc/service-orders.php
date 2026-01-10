@@ -945,9 +945,6 @@ function apparel_service_process_checkout_session( $session ) {
 		$lead_gen_page_id = apparel_lead_gen_find_page_by_payment_link_url( $checkout_url );
 		if ( $lead_gen_page_id ) {
 			$lead_gen_page_title = get_the_title( $lead_gen_page_id );
-			if ( ! $service_id && $lead_gen_page_title ) {
-				$service_name = $lead_gen_page_title;
-			}
 		}
 	}
 
