@@ -641,7 +641,7 @@ function apparel_service_sync_variations_with_stripe( $variations, $existing_var
  *
  * @param string $payment_link_url Stripe payment link URL.
  */
-function apparel_service_maybe_update_payment_link_redirect( $payment_link_url ) {
+function apparel_service_maybe_update_payment_link_redirect( $payment_link_url, $success_url = '' ) {
 	$secret_key = apparel_service_get_stripe_secret_key();
 	if ( ! $secret_key || ! $payment_link_url ) {
 		return;
@@ -657,7 +657,10 @@ function apparel_service_maybe_update_payment_link_redirect( $payment_link_url )
 		return;
 	}
 
-	$thank_you_url = apparel_service_get_checkout_success_url();
+	$thank_you_url = $success_url ? $success_url : apparel_service_get_checkout_success_url();
+	if ( ! $thank_you_url ) {
+		return;
+	}
 
 	$after_completion = $payment_link['after_completion'] ?? array();
 	$redirect_url     = $after_completion['redirect']['url'] ?? '';

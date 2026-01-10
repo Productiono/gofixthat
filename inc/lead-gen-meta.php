@@ -795,6 +795,11 @@ function apparel_save_lead_gen_meta_box( $post_id ) {
 		delete_post_meta( $post_id, 'lead_gen_stripe_payment_link' );
 	}
 
+	if ( $stripe_payment_link && function_exists( 'apparel_service_maybe_update_payment_link_redirect' ) ) {
+		$thank_you_url = apparel_lead_gen_get_thank_you_url( $post_id );
+		apparel_service_maybe_update_payment_link_redirect( $stripe_payment_link, $thank_you_url );
+	}
+
 	if ( $logos ) {
 		update_post_meta( $post_id, 'lead_gen_logos', $logos );
 	} else {
@@ -910,3 +915,43 @@ function apparel_save_lead_gen_meta_box( $post_id ) {
 	}
 }
 add_action( 'save_post_page', 'apparel_save_lead_gen_meta_box' );
+
+/**
+ * Get the thank-you URL for a Lead Gen page.
+ *
+ * @param int $page_id Lead Gen page ID.
+ * @return string
+ */
+function apparel_lead_gen_get_thank_you_url( $page_id ) {
+	$page_id = absint( $page_id );
+	if ( ! $page_id ) {
+		return '';
+	}
+
+	$thank_you_pages = get_posts(
+		array(
+			'post_type'              => 'page',
+			'posts_per_page'         => 1,
+			'fields'                 => 'ids',
+			'post_parent'            => $page_id,
+			'meta_key'               => '_wp_page_template',
+			'meta_value'             => 'thank-you.php',
+			'no_found_rows'          => true,
+			'update_post_meta_cache' => false,
+			'update_post_term_cache' => false,
+		)
+	);
+
+	if ( ! empty( $thank_you_pages ) ) {
+		$thank_you_url = get_permalink( $thank_you_pages[0] );
+		if ( $thank_you_url ) {
+			return add_query_arg( 'session_id', '{CHECKOUT_SESSION_ID}', $thank_you_url );
+		}
+	}
+
+	if ( function_exists( 'apparel_service_get_checkout_success_url' ) ) {
+		return apparel_service_get_checkout_success_url();
+	}
+
+	return '';
+}
