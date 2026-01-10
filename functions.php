@@ -205,11 +205,11 @@ if ( ! class_exists( 'Apparel' ) ) {
 	// Initialize.
 	new Apparel();
 }
-// Disable the block editor for posts, pages, and docs post type.
+// Disable the block editor for posts and docs post type.
 add_filter(
 	'use_block_editor_for_post_type',
 	function( $use_block_editor, $post_type ) {
-		$classic_types = array( 'post', 'page', 'docs' );
+		$classic_types = array( 'post', 'docs' );
 
 		if ( in_array( $post_type, $classic_types, true ) ) {
 			return false;
@@ -225,13 +225,38 @@ add_filter(
 add_filter(
 	'gutenberg_can_edit_post_type',
 	function( $can_edit, $post_type ) {
-		$classic_types = array( 'post', 'page', 'docs' );
+		$classic_types = array( 'post', 'docs' );
 
 		if ( in_array( $post_type, $classic_types, true ) ) {
 			return false;
 		}
 
 		return $can_edit;
+	},
+	10,
+	2
+);
+
+// Allow the block editor only for Lead Gen style page templates.
+add_filter(
+	'use_block_editor_for_post',
+	function( $use_block_editor, $post ) {
+		if ( ! $post instanceof WP_Post ) {
+			return $use_block_editor;
+		}
+
+		if ( 'page' !== $post->post_type ) {
+			return $use_block_editor;
+		}
+
+		$allowed_templates = array( 'lead-gen.php', 'form-submission.php' );
+		$template          = get_page_template_slug( $post );
+
+		if ( in_array( $template, $allowed_templates, true ) ) {
+			return true;
+		}
+
+		return false;
 	},
 	10,
 	2
