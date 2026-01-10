@@ -280,11 +280,22 @@ $render_fluent_form = function () use ( $fluent_form_id, $has_fluent_form, $show
 		<div class="lead-gen-hero__content lead-gen-content">
 			<?php if ( ! $has_settings ) : ?>
 				<?php
-					while ( have_posts() ) :
-						the_post();
-						the_content();
-					endwhile;
+				while ( have_posts() ) :
+					the_post();
+					$raw_content = trim( wp_strip_all_tags( get_the_content() ) );
+					$has_editor_content = '' !== $raw_content;
 					?>
+					<div class="lead-gen-hero__stack">
+						<div class="lead-gen-hero__card">
+							<h1><?php echo esc_html( get_the_title() ); ?></h1>
+							<?php if ( $has_editor_content ) : ?>
+								<?php the_content(); ?>
+							<?php else : ?>
+								<p><?php echo esc_html__( 'Thank you! Your form was submitted successfully.', 'apparel' ); ?></p>
+							<?php endif; ?>
+						</div>
+					</div>
+				<?php endwhile; ?>
 			<?php else : ?>
 				<div class="lead-gen-hero__stack">
 					<?php if ( $hero_logo_image || $hero_logo_text ) : ?>
