@@ -25,6 +25,7 @@ $hero_cta_button_label = get_post_meta( $post_id, 'lead_gen_hero_cta_button_labe
 $hero_cta_button_link  = get_post_meta( $post_id, 'lead_gen_hero_cta_button_link', true );
 $hero_cta_helper       = get_post_meta( $post_id, 'lead_gen_hero_cta_helper', true );
 $fluent_form_id        = absint( get_post_meta( $post_id, 'lead_gen_fluent_form_id', true ) );
+$stripe_payment_link   = get_post_meta( $post_id, 'lead_gen_stripe_payment_link', true );
 $logos                 = get_post_meta( $post_id, 'lead_gen_logos', true );
 $features              = get_post_meta( $post_id, 'lead_gen_features', true );
 $testimonial_quote     = get_post_meta( $post_id, 'lead_gen_testimonial_quote', true );
@@ -305,7 +306,12 @@ $render_fluent_form = function () use ( $fluent_form_id, $has_fluent_form, $show
 					</div>
 					<?php if ( $hero_cta_label || $hero_cta_helper || $has_fluent_form || $show_form_notice ) : ?>
 						<div class="lead-gen-hero__cta">
-							<div class="lead-gen-form-card lead-gen-form-card--dark" data-lead-gen-form-wrapper>
+							<div
+								class="lead-gen-form-card lead-gen-form-card--dark"
+								data-lead-gen-form-wrapper
+								data-lead-gen-payment-link="<?php echo esc_url( $stripe_payment_link ); ?>"
+								data-lead-gen-form-id="<?php echo esc_attr( $fluent_form_id ); ?>"
+							>
 								<?php if ( $has_fluent_form || $show_form_notice || $hero_cta_label || $hero_cta_helper ) : ?>
 									<div class="lead-gen-form-card__header">
 										<?php if ( $hero_cta_label ) : ?>
@@ -482,7 +488,12 @@ $render_fluent_form = function () use ( $fluent_form_id, $has_fluent_form, $show
 						<span class="lead-gen-form-card__title"><?php echo esc_html( $cta_label ); ?></span>
 					<?php endif; ?>
 					<?php if ( $has_fluent_form ) : ?>
-						<div class="lead-gen-form-card lead-gen-form-card--light" data-lead-gen-form-wrapper>
+						<div
+							class="lead-gen-form-card lead-gen-form-card--light"
+							data-lead-gen-form-wrapper
+							data-lead-gen-payment-link="<?php echo esc_url( $stripe_payment_link ); ?>"
+							data-lead-gen-form-id="<?php echo esc_attr( $fluent_form_id ); ?>"
+						>
 							<form class="lead-gen-form lead-gen-form--light" data-lead-gen-custom-form>
 								<label class="screen-reader-text" for="lead-gen-cta-email">
 									<?php echo esc_html( $cta_placeholder ? $cta_placeholder : __( 'Email address', 'apparel' ) ); ?>
